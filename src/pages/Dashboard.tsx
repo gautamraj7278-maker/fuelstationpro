@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Droplet, Wallet, AlertTriangle, Fuel, ArrowUpRight, Boxes } from 'lucide-react';
 import { Card, CardHeader } from '../components/ui/Card';
 import { BarChart, LineChart, DonutChart } from '../components/Charts';
@@ -33,10 +33,37 @@ export default function Dashboard() {
   if (error) return <ErrorState message={error} onRetry={load} />;
 
   const totalSalesAmt = sales.reduce((s, x) => s + Number(x.total_amount || 0), 0);
-  const totalVol = sales.reduce((s, x) => s + Number(x.sale_volume || 0), 0);
   const totalCredit = credit.filter((c) => c.status !== 'Paid').reduce((s, x) => s + Number(x.amount || 0), 0);
-  const totalStock = tanks.reduce((s, t) => s + Number(t.current_volume || 0), 0);
   const totalLossGain = sales.reduce((s, x) => s + Number(x.loss_gain || 0), 0);
+
+  const volumeByProduct: Record<string, number> = {};
+  sales.forEach((s) => {
+    const key = s.product_name || 'Other';
+    volumeByProduct[key] = (volumeByProduct[key] || 0) + Number(s.sale_volume || 0);
+  });
+
+  const stockByProduct: Record<string, number> = {};
+  tanks.forEach((t) => {
+    const key = t.product_name || 'Other';
+    stockByProduct[key] = (stockByProduct[key] || 0) + Number(t.current_volume || 0);
+  });
+
+  const renderProductLines = (values: Record<string, number>, emptyLabel: string) => {
+    const entries = Object.entries(values).sort(([a], [b]) => a.localeCompare(b));
+    if (!entries.length) {
+      return <div className="text-2xl font-bold text-slate-800">{emptyLabel}</div>;
+    }
+    return (
+      <div className="space-y-1.5">
+        {entries.map(([label, value]) => (
+          <div key={label} className="flex items-baseline justify-between gap-3">
+            <span className="text-sm font-medium text-slate-500 truncate">{label}</span>
+            <span className="text-lg font-bold text-slate-800 whitespace-nowrap">{fmtNum(value, 0)} L</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   // sales by date (last 7 distinct)
   const byDate: Record<string, number> = {};
@@ -53,11 +80,11 @@ export default function Dashboard() {
   sales.forEach((s) => { byShift[s.shift_name || 'Shift'] = (byShift[s.shift_name || 'Shift'] || 0) + Number(s.sale_volume || 0); });
   const shiftBars = Object.entries(byShift).map(([label, value]) => ({ label, value: Math.round(value) }));
 
-  const kpis = [
-    { label: 'Total Sales', value: totalSalesAmt ? fmtMoney(totalSalesAmt) : '₹0.00', icon: Wallet, color: 'blue' },
-    { label: 'Volume Dispensed', value: totalVol ? fmtNum(totalVol, 0) + ' L' : '0 L', icon: Droplet, color: 'emerald' },
-    { label: 'Current Stock', value: fmtNum(totalStock, 0) + ' L', icon: Boxes, color: 'violet' },
-    { label: 'Outstanding Credit', value: totalCredit ? fmtMoney(totalCredit) : '₹0.00', icon: AlertTriangle, color: 'amber' },
+  const kpis: { label: string; value: ReactNode; icon: typeof Wallet; color: string }[] = [
+    { label: 'Total Sales', value: <div className="text-2xl font-bold text-slate-800">{totalSalesAmt ? fmtMoney(totalSalesAmt) : '₹0.00'}</div>, icon: Wallet, color: 'blue' },
+    { label: 'Volume Dispensed', value: renderProductLines(volumeByProduct, 'No sales'), icon: Droplet, color: 'emerald' },
+    { label: 'Current Stock', value: renderProductLines(stockByProduct, 'No stock'), icon: Boxes, color: 'violet' },
+    { label: 'Outstanding Credit', value: <div className="text-2xl font-bold text-slate-800">{totalCredit ? fmtMoney(totalCredit) : '₹0.00'}</div>, icon: AlertTriangle, color: 'amber' },
   ];
   const colorMap: Record<string, string> = { blue: 'from-blue-500 to-blue-600', emerald: 'from-emerald-500 to-emerald-600', violet: 'from-violet-500 to-violet-600', amber: 'from-amber-500 to-amber-600' };
 
@@ -77,7 +104,7 @@ export default function Dashboard() {
             <div className="flex items-start justify-between">
               <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colorMap[k.color]} flex items-center justify-center shadow-sm`}><k.icon className="w-5 h-5 text-white" /></div>
             </div>
-            <div className="mt-3"><div className="text-2xl font-bold text-slate-800">{k.value}</div><div className="text-xs text-slate-400 mt-0.5">{k.label}</div></div>
+            <div className="mt-3">{k.value}<div className="text-xs text-slate-400 mt-1">{k.label}</div></div>
           </Card>
         ))}
       </div>
