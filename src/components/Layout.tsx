@@ -35,7 +35,6 @@ const groups: NavGroup[] = [
   ]},
   { label: 'Reports', icon: BarChart3, items: [ { to: '/reports', label: 'Advanced Reports', icon: BarChart3 } ] },
   { label: 'Bulk Upload', icon: Upload, items: [
-    { to: '/bulk/sales', label: 'Sales Upload', icon: Upload },
     { to: '/bulk/daily-sales', label: 'Daily Sales Upload', icon: Upload },
     { to: '/bulk/tank-data', label: 'Tank Data Upload', icon: Upload },
     { to: '/bulk/calibration', label: 'Calibration Upload', icon: Upload },

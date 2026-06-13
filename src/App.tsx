@@ -23,7 +23,6 @@ import LossGain from './pages/ops/LossGain';
 import CreditSales from './pages/finance/CreditSales';
 import Finance from './pages/finance/Finance';
 import Reports from './pages/Reports';
-import SalesUpload from './pages/bulk/SalesUpload';
 import TankDataUpload from './pages/bulk/TankDataUpload';
 import InventoryUpload from './pages/bulk/InventoryUpload';
 import DailySalesUpload from './pages/bulk/DailySalesUpload';
@@ -64,7 +63,6 @@ export default function App() {
           <Route path="/finance/credit-sales" element={<P><CreditSales /></P>} />
           <Route path="/finance/management" element={<P><Finance /></P>} />
           <Route path="/reports" element={<P><Reports /></P>} />
-          <Route path="/bulk/sales" element={<P><SalesUpload /></P>} />
           <Route path="/bulk/tank-data" element={<P><TankDataUpload /></P>} />
           <Route path="/bulk/inventory" element={<P><InventoryUpload /></P>} />
           <Route path="/bulk/daily-sales" element={<P><DailySalesUpload /></P>} />

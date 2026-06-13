@@ -953,7 +953,7 @@ function sumByKey(rows, keyField, valueField) {
   return map;
 }
 
-async function createDailySalesEntry(payload) {
+async function createDailySalesEntry(payload, opts = {}) {
   const body = payload || {};
   const saleDate = requireText(body.sale_date, 'Sale date');
   const shiftName = requireText(body.shift_name, 'Shift');
@@ -1035,9 +1035,11 @@ async function createDailySalesEntry(payload) {
   }
 
   const activeNozzleNames = activeNozzles.map((n) => n.name);
-  const missingNozzles = activeNozzleNames.filter((name) => !nozzleNames.includes(name));
-  if (missingNozzles.length > 0) {
-    throw new Error(`Enter closing reading for all active nozzles of ${dispenserName}: ${missingNozzles.join(', ')}`);
+  if (!opts.skipCoverageCheck) {
+    const missingNozzles = activeNozzleNames.filter((name) => !nozzleNames.includes(name));
+    if (missingNozzles.length > 0) {
+      throw new Error(`Enter closing reading for all active nozzles of ${dispenserName}: ${missingNozzles.join(', ')}`);
+    }
   }
   const invalidNozzles = nozzleNames.filter((name) => !activeNozzleNames.includes(name));
   if (invalidNozzles.length > 0) {
@@ -1508,13 +1510,16 @@ async function handleDailySalesImport(req, res) {
       if (g.cash_amount == null) g.cash_amount = 0;
       if (g.online_amount == null) g.online_amount = 0;
       if (g.credit_amount == null) g.credit_amount = 0;
-      const entryId = await createDailySalesEntry(g);
+      const entryId = await createDailySalesEntry(g, { skipCoverageCheck: true });
       ok++;
       results.push({ entry_id: entryId, sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
     } catch (e) {
       fail++;
       results.push({ error: String(e?.message || e), sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
     }
+  }
+  if (ok === 0 && groups.size > 0) {
+    return res.status(400).json({ groups: groups.size, ok, fail, results, message: 'All groups failed. No data was saved.' });
   }
   return res.status(200).json({ groups: groups.size, ok, fail, results });
 }
@@ -1534,7 +1539,8 @@ async function handleDipReadingCreate(req, res) {
       results.push({ error: String(e?.message || e) });
     }
   }
-  return res.status(201).json({ ok, fail, results });
+  const status = ok === 0 && rows.length > 0 ? 400 : 201;
+  return res.status(status).json({ ok, fail, results });
 }
 
 async function syncTankCurrentVolumeToLatestClosing(tankName) {
@@ -1740,7 +1746,8 @@ async function handleCalibrationImport(req, res) {
     }
   }
 
-  return res.status(200).json({ tanks: byTank.size, ok, fail, results });
+  const calStatus = ok === 0 && byTank.size > 0 ? 400 : 200;
+  return res.status(calStatus).json({ tanks: byTank.size, ok, fail, results });
 }
 
 async function handleBufferTransfer(req, res) {
@@ -1863,5 +1870,6 @@ async function handleTankerUnloadingImport(req, res) {
     }
   }
 
-  return res.status(200).json({ groups: groups.size, ok, fail, results });
+  const tuStatus = ok === 0 && groups.size > 0 ? 400 : 200;
+  return res.status(tuStatus).json({ groups: groups.size, ok, fail, results });
 }

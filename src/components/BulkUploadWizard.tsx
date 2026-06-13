@@ -25,7 +25,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   const [parsed, setParsed] = useState<Record<string, string>[]>([]);
   const [errors, setErrors] = useState<{ row: number; msg: string }[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState<{ ok: number; fail: number } | null>(null);
+  const [result, setResult] = useState<{ ok: number; fail: number; errors?: string[] } | null>(null);
   const [fileName, setFileName] = useState('');
 
   const downloadTemplate = () => {
@@ -61,6 +61,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   const commit = async () => {
     setUploading(true);
     let ok = 0, fail = 0;
+    const errors: string[] = [];
     const payload = parsed.map((r) => {
       const o: Record<string, any> = {};
       fields.forEach((f) => {
@@ -71,20 +72,32 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       return o;
     });
     try {
-      await apiPost(endpoint, payload);
-      ok = payload.length;
+      const res = await apiPost<any>(endpoint, payload);
+      if (typeof res.ok === 'number') ok = res.ok;
+      else ok = payload.length;
+      if (typeof res.fail === 'number') fail = res.fail;
+      if (Array.isArray(res.results)) {
+        for (const r of res.results) {
+          if (r.error) errors.push(String(r.error));
+        }
+      }
     } catch (e: any) {
       const msg = String(e?.message || '');
       const isClientError = /failed: 4\d\d/.test(msg);
       if (isClientError) {
         for (const row of payload) {
-          try { await apiPost(endpoint, [row]); ok++; } catch { fail++; }
+          try {
+            const res = await apiPost<any>(endpoint, [row]);
+            if (typeof res.ok === 'number') ok += res.ok;
+            else ok++;
+          } catch { fail++; }
         }
       } else {
         fail = payload.length;
+        errors.push(msg);
       }
     }
-    setResult({ ok, fail }); setUploading(false); setStep(3);
+    setResult({ ok, fail, errors: errors.length > 0 ? errors : undefined }); setUploading(false); setStep(3);
   };
 
   const reset = () => { setStep(1); setParsed([]); setErrors([]); setResult(null); setFileName(''); };
@@ -172,9 +185,22 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
 
       {step === 3 && result && (
         <Card className="p-8 text-center">
-          <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+          {result.fail > 0 ? (
+            <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+          ) : (
+            <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+          )}
           <h3 className="text-lg font-semibold text-slate-800">Upload complete</h3>
           <p className="text-sm text-slate-500 mt-1">{result.ok} records imported successfully{result.fail > 0 ? `, ${result.fail} failed` : ''}.</p>
+          {result.errors && result.errors.length > 0 && (
+            <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-left max-h-48 overflow-y-auto">
+              <p className="text-xs font-medium text-amber-700 mb-1">Errors:</p>
+              <ul className="text-xs text-amber-700 space-y-0.5">
+                {result.errors.slice(0, 10).map((err, i) => <li key={i}>{err}</li>)}
+                {result.errors.length > 10 && <li className="text-slate-400">...and {result.errors.length - 10} more</li>}
+              </ul>
+            </div>
+          )}
           <button onClick={reset} className="mt-5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">Upload Another File</button>
         </Card>
       )}
