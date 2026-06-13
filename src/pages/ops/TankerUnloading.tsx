@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, X, Truck, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, X, Truck, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Field, Input, Select } from '../../components/ui/Field';
-import Modal from '../../components/ui/Modal';
+import Modal, { ConfirmModal } from '../../components/ui/Modal';
 import { Loading, ErrorState } from '../../components/ui/States';
-import { apiGet, apiPost, fmtDate, fmtNum } from '../../lib/api';
+import { apiDelete, apiGet, apiPost, apiPut, fmtDate, fmtNum } from '../../lib/api';
 import { interpolateVolume } from '../../lib/interp';
 
 export default function TankerUnloading() {
@@ -18,6 +18,8 @@ export default function TankerUnloading() {
 
   const [open, setOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [form, setForm] = useState<any>({
     unload_date: new Date().toISOString().slice(0, 10),
     tanker_number: '',
@@ -84,6 +86,7 @@ export default function TankerUnloading() {
   }, [compartments, tanks, calCache]);
 
   const openCreate = () => {
+    setEditingId(null);
     setForm({
       unload_date: new Date().toISOString().slice(0, 10),
       tanker_number: '',
@@ -95,6 +98,35 @@ export default function TankerUnloading() {
     setCompartments([{ product_name: '', tank_name: '', tanker_qty: '', dip_before_mm: '', dip_after_mm: '' }]);
     setFormErr('');
     setOpen(true);
+  };
+
+  const openEdit = async (batch: any) => {
+    setEditingId(Number(batch.id));
+    setForm({
+      unload_date: batch.unload_date || new Date().toISOString().slice(0, 10),
+      tanker_number: batch.tanker_number || '',
+      supplier_name: batch.supplier_name || '',
+      waybill_no: batch.waybill_no || '',
+      invoice_no: batch.invoice_no || '',
+      temperature: batch.temperature == null ? '' : String(batch.temperature),
+    });
+    const nextCompartments = (batch.tanker_unloading_lines || []).map((line: any) => ({
+      product_name: line.product_name || '',
+      tank_name: line.tank_name || '',
+      tanker_qty: String(line.tanker_qty ?? ''),
+      dip_before_mm: String(line.dip_before_mm ?? ''),
+      dip_after_mm: String(line.dip_after_mm ?? ''),
+    }));
+    setCompartments(nextCompartments.length > 0 ? nextCompartments : [{ product_name: '', tank_name: '', tanker_qty: '', dip_before_mm: '', dip_after_mm: '' }]);
+    await Promise.all(nextCompartments.map((line: any) => line.tank_name ? getPoints(line.tank_name) : Promise.resolve([])));
+    setFormErr('');
+    setOpen(true);
+  };
+
+  const closeModal = () => {
+    setOpen(false);
+    setEditingId(null);
+    setFormErr('');
   };
 
   const addCompartment = () => {
@@ -132,7 +164,7 @@ export default function TankerUnloading() {
     }
     setSaving(true);
     try {
-      await apiPost('/api/tanker-unloading', {
+      const payload = {
         unload_date: form.unload_date,
         tanker_number: form.tanker_number,
         supplier_name: form.supplier_name || null,
@@ -146,13 +178,26 @@ export default function TankerUnloading() {
           dip_before_mm: Number(c.dip_before_mm || 0),
           dip_after_mm: Number(c.dip_after_mm || 0),
         })),
-      });
-      setOpen(false);
+      };
+      if (editingId) await apiPut('/api/tanker-unloading', { id: editingId, ...payload });
+      else await apiPost('/api/tanker-unloading', payload);
+      closeModal();
       await load();
     } catch (e: any) {
       setFormErr(e.message || 'Failed to save unloading');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteBatch = async (batch: any) => {
+    try {
+      await apiDelete('/api/tanker-unloading', { id: batch.id });
+      setDeleteTarget(null);
+      if (expandedId === batch.id) setExpandedId(null);
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete unloading');
     }
   };
 
@@ -197,6 +242,17 @@ export default function TankerUnloading() {
               </button>
               {isExpanded && (
                 <div className="px-5 pb-4 border-t border-slate-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
+                    <div className="text-xs text-slate-500">Use edit or delete only to correct a mistaken unloading entry. Tank receipt impact will be recalculated automatically.</div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => openEdit(b)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 text-slate-700 hover:bg-slate-50">
+                        <Pencil className="w-4 h-4" /> Edit
+                      </button>
+                      <button onClick={() => setDeleteTarget(b)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-rose-200 text-rose-700 hover:bg-rose-50">
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 text-sm">
                     <div><span className="text-slate-500">Waybill:</span> <strong className="text-slate-700">{b.waybill_no || '—'}</strong></div>
                     <div><span className="text-slate-500">Invoice:</span> <strong className="text-slate-700">{b.invoice_no || '—'}</strong></div>
@@ -255,7 +311,7 @@ export default function TankerUnloading() {
         )}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Record Tanker Unloading" wide>
+      <Modal open={open} onClose={closeModal} title={editingId ? 'Edit Tanker Unloading' : 'Record Tanker Unloading'} wide>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Field label="Date" required>
@@ -353,11 +409,18 @@ export default function TankerUnloading() {
 
           {formErr && <p className="text-sm text-rose-600">{formErr}</p>}
           <div className="flex justify-end gap-2">
-            <button onClick={() => setOpen(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
-            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : 'Save Unloading'}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : editingId ? 'Save Changes' : 'Save Unloading'}</button>
           </div>
         </div>
       </Modal>
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteBatch(deleteTarget)}
+        title="Delete Tanker Unloading"
+        message={deleteTarget ? `Delete tanker unloading ${deleteTarget.tanker_number} dated ${fmtDate(deleteTarget.unload_date)}? Tank receipt impact will be reversed automatically.` : ''}
+      />
     </div>
   );
 }

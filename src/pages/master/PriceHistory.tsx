@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardHeader } from '../../components/ui/Card';
-import Modal from '../../components/ui/Modal';
+import Modal, { ConfirmModal } from '../../components/ui/Modal';
 import { Field, Input, Select, Textarea } from '../../components/ui/Field';
 import { Loading, ErrorState } from '../../components/ui/States';
 import { Badge } from '../../components/ui/Badge';
-import { apiGet, apiPost, fmtMoney, fmtDate, fmtNum } from '../../lib/api';
+import { apiDelete, apiGet, apiPost, apiPut, fmtMoney, fmtDate, fmtNum } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function PriceHistory() {
@@ -17,6 +17,8 @@ export default function PriceHistory() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState('');
+  const [editing, setEditing] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [form, setForm] = useState({
     product_name: '',
     effective_date: new Date().toISOString().slice(0, 10),
@@ -87,7 +89,7 @@ export default function PriceHistory() {
   const resolvedOldPrice = useMemo(() => {
     if (!form.product_name || !form.effective_date) return 0;
     const applicable = [...history]
-      .filter((row) => row.product_name === form.product_name && String(row.effective_date || '') <= form.effective_date)
+      .filter((row) => row.product_name === form.product_name && Number(row.id || 0) !== Number(editing?.id || 0) && String(row.effective_date || '') <= form.effective_date)
       .sort((a, b) => {
         const byDate = String(b.effective_date || '').localeCompare(String(a.effective_date || ''));
         if (byDate !== 0) return byDate;
@@ -103,6 +105,7 @@ export default function PriceHistory() {
     : null;
 
   const openCreate = () => {
+    setEditing(null);
     setForm({
       product_name: '',
       effective_date: new Date().toISOString().slice(0, 10),
@@ -111,6 +114,24 @@ export default function PriceHistory() {
     });
     setFormErr('');
     setOpen(true);
+  };
+
+  const openEdit = (row: any) => {
+    setEditing(row);
+    setForm({
+      product_name: row.product_name || '',
+      effective_date: row.effective_date || new Date().toISOString().slice(0, 10),
+      new_price: String(row.new_price ?? ''),
+      remarks: row.remarks || '',
+    });
+    setFormErr('');
+    setOpen(true);
+  };
+
+  const closeModal = () => {
+    setOpen(false);
+    setEditing(null);
+    setFormErr('');
   };
 
   const save = async () => {
@@ -125,19 +146,31 @@ export default function PriceHistory() {
     }
     setSaving(true);
     try {
-      await apiPost('/api/price-history', {
+      const payload = {
         product_name: form.product_name,
         effective_date: form.effective_date,
         new_price: Number(form.new_price),
         changed_by: user?.email || null,
         remarks: form.remarks || null,
-      });
-      setOpen(false);
+      };
+      if (editing) await apiPut('/api/price-history', { id: editing.id, ...payload });
+      else await apiPost('/api/price-history', payload);
+      closeModal();
       await load();
     } catch (e: any) {
       setFormErr(e.message || 'Failed to update price');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const remove = async (row: any) => {
+    try {
+      await apiDelete('/api/price-history', { id: row.id });
+      setDeleteTarget(null);
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete price update');
     }
   };
 
@@ -208,6 +241,7 @@ export default function PriceHistory() {
                 <th className="px-5 py-3">Remarks</th>
                 <th className="px-5 py-3">Changed By</th>
                 <th className="px-5 py-3">Status</th>
+                <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -231,16 +265,22 @@ export default function PriceHistory() {
                     <td className="px-5 py-3">
                       {isFuture ? <Badge color="amber">Scheduled</Badge> : isCurrent ? <Badge color="green">Current</Badge> : <Badge color="slate">History</Badge>}
                     </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <button onClick={() => openEdit(row)} className="p-1.5 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteTarget(row)} className="p-1.5 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
-              {sortedHistory.length === 0 && <tr><td colSpan={8} className="px-5 py-10 text-center text-slate-400">No price changes recorded yet</td></tr>}
+              {sortedHistory.length === 0 && <tr><td colSpan={9} className="px-5 py-10 text-center text-slate-400">No price changes recorded yet</td></tr>}
             </tbody>
           </table>
         </div>
       </Card>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Update Product Price">
+      <Modal open={open} onClose={closeModal} title={editing ? 'Edit Product Price Update' : 'Update Product Price'}>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Product" required>
@@ -281,11 +321,18 @@ export default function PriceHistory() {
 
           {formErr && <p className="text-sm text-rose-600">{formErr}</p>}
           <div className="flex justify-end gap-2">
-            <button onClick={() => setOpen(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
-            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : 'Save Price Update'}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : editing ? 'Save Changes' : 'Save Price Update'}</button>
           </div>
         </div>
       </Modal>
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && remove(deleteTarget)}
+        title="Delete Price Update"
+        message={deleteTarget ? `Delete the price update for ${deleteTarget.product_name} effective from ${fmtDate(deleteTarget.effective_date)}? Current effective price will be recalculated automatically.` : ''}
+      />
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Ruler } from 'lucide-react';
+import { Plus, Ruler, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
-import Modal from '../../components/ui/Modal';
+import Modal, { ConfirmModal } from '../../components/ui/Modal';
 import { Field, Input, Select } from '../../components/ui/Field';
 import { Loading, ErrorState } from '../../components/ui/States';
-import { apiGet, apiPost, fmtNum, fmtDate } from '../../lib/api';
+import { apiDelete, apiGet, apiPost, apiPut, fmtNum, fmtDate } from '../../lib/api';
 import { interpolateVolume } from '../../lib/interp';
 
 type ReadingType = 'opening' | 'closing' | 'unloading_before' | 'unloading_after';
@@ -20,6 +20,8 @@ export default function DipReadings() {
   const [open, setOpen] = useState(false);
   const [formErr, setFormErr] = useState('');
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [form, setForm] = useState<{ reading_date: string; tank_name: string; dip_mm: string; reading_type: ReadingType }>({
     reading_date: new Date().toISOString().slice(0, 10),
     tank_name: '',
@@ -77,9 +79,31 @@ export default function DipReadings() {
   }, [readingsForDate]);
 
   const openCreate = () => {
+    setEditingId(null);
     setForm({ reading_date: businessDate, tank_name: '', dip_mm: '', reading_type: 'closing' });
     setFormErr('');
     setOpen(true);
+  };
+
+  const openEdit = async (reading: any) => {
+    setEditingId(Number(reading.id));
+    setForm({
+      reading_date: reading.reading_date || businessDate,
+      tank_name: reading.tank_name || '',
+      dip_mm: String(reading.dip_mm ?? ''),
+      reading_type: reading.reading_type as ReadingType,
+    });
+    if (reading.tank_name) {
+      try { await loadPointsForTankName(reading.tank_name); } catch {}
+    }
+    setFormErr('');
+    setOpen(true);
+  };
+
+  const closeModal = () => {
+    setOpen(false);
+    setEditingId(null);
+    setFormErr('');
   };
 
   const save = async () => {
@@ -90,19 +114,31 @@ export default function DipReadings() {
     }
     setSaving(true);
     try {
-      await apiPost('/api/dip-readings', {
+      const payload = {
         reading_date: form.reading_date,
         tank_name: form.tank_name,
         dip_mm: Number(form.dip_mm),
         reading_type: form.reading_type,
-      });
+      };
+      if (editingId) await apiPut('/api/dip-readings', { id: editingId, ...payload });
+      else await apiPost('/api/dip-readings', payload);
       setBusinessDate(form.reading_date);
-      setOpen(false);
+      closeModal();
       await load();
     } catch (e: any) {
       setFormErr(e.message || 'Failed to save dip reading');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteReading = async (reading: any) => {
+    try {
+      await apiDelete('/api/dip-readings', { id: reading.id });
+      setDeleteTarget(null);
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete dip reading');
     }
   };
 
@@ -153,6 +189,7 @@ export default function DipReadings() {
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3 text-right">Dip (mm)</th>
                 <th className="px-4 py-3 text-right">Volume (L)</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -163,17 +200,23 @@ export default function DipReadings() {
                   <td className="px-4 py-3 text-slate-600">{String(r.reading_type || '').replace('_', ' ')}</td>
                   <td className="px-4 py-3 text-right text-slate-600">{fmtNum(r.dip_mm, 1)}</td>
                   <td className="px-4 py-3 text-right font-semibold text-emerald-700">{fmtNum(r.volume_liters, 1)} L</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="inline-flex items-center gap-1">
+                      <button onClick={() => openEdit(r)} className="p-1.5 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteTarget(r)} className="p-1.5 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {readingsForDate.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400">No dip readings recorded yet</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-400">No dip readings recorded yet</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </Card>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Record Tank Dip / Closing Stock">
+      <Modal open={open} onClose={closeModal} title={editingId ? 'Edit Tank Dip / Closing Stock' : 'Record Tank Dip / Closing Stock'}>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Date" required>
@@ -220,11 +263,18 @@ export default function DipReadings() {
           </Card>
           {formErr && <p className="text-sm text-rose-600">{formErr}</p>}
           <div className="flex justify-end gap-2">
-            <button onClick={() => setOpen(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
-            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : 'Save'}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : editingId ? 'Save Changes' : 'Save'}</button>
           </div>
         </div>
       </Modal>
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteReading(deleteTarget)}
+        title="Delete Dip Reading"
+        message={deleteTarget ? `Delete the ${String(deleteTarget.reading_type || '').replace('_', ' ')} dip for ${deleteTarget.tank_name} on ${fmtDate(deleteTarget.reading_date)}?` : ''}
+      />
     </div>
   );
 }

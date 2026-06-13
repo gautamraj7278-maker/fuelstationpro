@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
-import Modal from '../../components/ui/Modal';
+import Modal, { ConfirmModal } from '../../components/ui/Modal';
 import { Field, Input, Select } from '../../components/ui/Field';
 import { Loading, ErrorState } from '../../components/ui/States';
 import { Badge } from '../../components/ui/Badge';
-import { apiGet, apiPost, fmtMoney, fmtNum, fmtDate } from '../../lib/api';
+import { apiDelete, apiGet, apiPost, apiPut, fmtMoney, fmtNum, fmtDate } from '../../lib/api';
 
 type EntryRow = {
   nozzle_name: string;
+  opening_reading?: string;
   closing_reading: string;
   testing_volume: string;
   remarks: string;
@@ -29,6 +30,8 @@ export default function Sales() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [formErr, setFormErr] = useState('');
   const [saving, setSaving] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
 
   const [form, setForm] = useState<any>({
     sale_date: new Date().toISOString().slice(0, 10),
@@ -98,8 +101,8 @@ export default function Sales() {
   );
 
   const assignedEntriesForShift = useMemo(
-    () => entries.filter((e) => e.sale_date === form.sale_date && e.shift_name === form.shift_name),
-    [entries, form.sale_date, form.shift_name],
+    () => entries.filter((e) => e.id !== editingEntryId && e.sale_date === form.sale_date && e.shift_name === form.shift_name),
+    [entries, editingEntryId, form.sale_date, form.shift_name],
   );
   const assignedOperatorNames = useMemo(
     () => new Set(assignedEntriesForShift.map((e) => e.operator_name)),
@@ -123,10 +126,26 @@ export default function Sales() {
       .filter((n) => n.dispenser_name === dispenserName && (n.status === 'Active' || n.status == null))
       .map((n) => {
         const existing = entryRows.find((row) => row.nozzle_name === n.name);
-        return existing || { nozzle_name: n.name, closing_reading: '', testing_volume: '', remarks: '' };
+        return existing || { nozzle_name: n.name, opening_reading: '', closing_reading: '', testing_volume: '', remarks: '' };
       });
     setEntryRows(rows);
   };
+
+  const editableEntryIds = useMemo(() => {
+    const latestByDispenser = new Map<string, number>();
+    const sorted = [...entries].sort((a, b) => {
+      const byDate = String(b.sale_date || '').localeCompare(String(a.sale_date || ''));
+      if (byDate !== 0) return byDate;
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
+    sorted.forEach((entry) => {
+      const dispenserName = String(entry.dispenser_name || '');
+      if (dispenserName && !latestByDispenser.has(dispenserName)) {
+        latestByDispenser.set(dispenserName, Number(entry.id || 0));
+      }
+    });
+    return new Set(latestByDispenser.values());
+  }, [entries]);
 
   const updateEntryRow = (idx: number, key: keyof EntryRow, value: string) => {
     const next = [...entryRows];
@@ -138,7 +157,7 @@ export default function Sales() {
     const readings = entryRows.map((row) => {
       const nozzle = nozzleMap.get(row.nozzle_name);
       const meter = meterMap.get(row.nozzle_name);
-      const opening = Number(meter?.current_reading || 0);
+      const opening = row.opening_reading != null && row.opening_reading !== '' ? Number(row.opening_reading) : Number(meter?.current_reading || 0);
       const closing = row.closing_reading === '' ? null : Number(row.closing_reading);
       const grossVolume = closing == null || !Number.isFinite(closing) ? 0 : Math.max(0, closing - opening);
       const testingVolume = Number(row.testing_volume || 0);
@@ -204,6 +223,7 @@ export default function Sales() {
   }, [entryRows, nozzleMap, meterMap, priceMap, form.cash_amount, form.online_amount, form.credit_amount]);
 
   const openCreate = () => {
+    setEditingEntryId(null);
     setForm({
       sale_date: new Date().toISOString().slice(0, 10),
       shift_name: '',
@@ -218,13 +238,44 @@ export default function Sales() {
     setShowAdd(true);
   };
 
+  const openEdit = (entry: any) => {
+    setEditingEntryId(Number(entry.id));
+    setForm({
+      sale_date: entry.sale_date || '',
+      shift_name: entry.shift_name || '',
+      operator_name: entry.operator_name || '',
+      dispenser_name: entry.dispenser_name || '',
+      cash_amount: String(entry.cash_amount ?? ''),
+      online_amount: String(entry.online_amount ?? ''),
+      credit_amount: String(entry.credit_amount ?? ''),
+    });
+    setEntryRows((entry.daily_sales_nozzle_readings || []).map((reading: any) => {
+      const testing = (entry.daily_sales_testing || []).find((row: any) => row.nozzle_name === reading.nozzle_name);
+      return {
+        nozzle_name: reading.nozzle_name,
+        opening_reading: String(reading.opening_reading ?? ''),
+        closing_reading: String(reading.closing_reading ?? ''),
+        testing_volume: testing ? String(testing.volume ?? '') : '',
+        remarks: testing?.remarks || '',
+      };
+    }));
+    setFormErr('');
+    setShowAdd(true);
+  };
+
+  const closeModal = () => {
+    setShowAdd(false);
+    setEditingEntryId(null);
+    setFormErr('');
+  };
+
   const save = async () => {
     setFormErr('');
     if (!form.sale_date || !form.shift_name || !form.operator_name || !form.dispenser_name) {
       setFormErr('Sale date, shift, operator and dispenser are required');
       return;
     }
-    if (assignedDispenserNames.has(form.dispenser_name)) {
+    if (!editingEntryId && assignedDispenserNames.has(form.dispenser_name)) {
       setFormErr(`Sales already entered for dispenser ${form.dispenser_name} in ${form.shift_name} shift on ${form.sale_date}`);
       return;
     }
@@ -250,7 +301,7 @@ export default function Sales() {
     }
     setSaving(true);
     try {
-      await apiPost('/api/daily-sales', {
+      const payload = {
         sale_date: form.sale_date,
         shift_name: form.shift_name,
         operator_name: form.operator_name,
@@ -262,13 +313,29 @@ export default function Sales() {
         testing_volumes: entryRows
           .filter((row) => Number(row.testing_volume || 0) > 0)
           .map((row) => ({ nozzle_name: row.nozzle_name, volume: Number(row.testing_volume || 0), remarks: row.remarks || null })),
-      });
-      setShowAdd(false);
+      };
+      if (editingEntryId) {
+        await apiPut('/api/daily-sales', { id: editingEntryId, ...payload });
+      } else {
+        await apiPost('/api/daily-sales', payload);
+      }
+      closeModal();
       await load();
     } catch (e: any) {
       setFormErr(e.message || 'Failed to submit sales entry');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteEntry = async (entryId: number) => {
+    try {
+      await apiDelete('/api/daily-sales', { id: entryId });
+      setDeleteTarget(null);
+      if (expandedId === entryId) setExpandedId(null);
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete sales entry');
     }
   };
 
@@ -292,6 +359,7 @@ export default function Sales() {
         <div className="space-y-3">
           {entries.map((entry) => {
             const isExpanded = expandedId === entry.id;
+            const canMutate = editableEntryIds.has(Number(entry.id || 0));
             return (
               <Card key={entry.id} className="overflow-hidden">
                 <button onClick={() => setExpandedId(isExpanded ? null : entry.id)} className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-50">
@@ -309,6 +377,28 @@ export default function Sales() {
                 </button>
                 {isExpanded && (
                   <div className="px-5 pb-4 border-t border-slate-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
+                      <div className="text-xs text-slate-500">
+                        {canMutate ? 'This is the latest sales entry for the dispenser, so it can be corrected if needed.' : 'Only the latest sales entry for each dispenser can be edited or deleted, to avoid breaking later meter and stock flow.'}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openEdit(entry)}
+                          disabled={!canMutate}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Pencil className="w-4 h-4" /> Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(entry)}
+                          disabled={!canMutate}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 className="w-4 h-4" /> Delete
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-3 gap-3 mt-4 text-sm">
                       <div className="bg-emerald-50 rounded-lg p-3 text-center">
                         <p className="text-xs text-slate-500">Cash</p>
@@ -381,11 +471,11 @@ export default function Sales() {
         </div>
       )}
 
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Record Daily Sales" wide>
+      <Modal open={showAdd} onClose={closeModal} title={editingEntryId ? 'Edit Daily Sales' : 'Record Daily Sales'} wide>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Field label="Date" required>
-              <Input type="date" value={form.sale_date || ''} onChange={(e) => setForm({ ...form, sale_date: e.target.value })} />
+              <Input type="date" value={form.sale_date || ''} onChange={(e) => setForm({ ...form, sale_date: e.target.value })} disabled={Boolean(editingEntryId)} />
             </Field>
             <Field label="Shift" required>
               <Select value={form.shift_name || ''} onChange={(e) => setForm({ ...form, shift_name: e.target.value })}>
@@ -404,7 +494,7 @@ export default function Sales() {
                 const dispenserName = e.target.value;
                 setForm({ ...form, dispenser_name: dispenserName });
                 syncEntryRowsForDispenser(dispenserName);
-              }}>
+              }} disabled={Boolean(editingEntryId)}>
                 <option value="">Select…</option>
                 {availableDispensers.map((d) => <option key={d.id} value={d.name}>{d.name}</option>)}
               </Select>
@@ -439,7 +529,7 @@ export default function Sales() {
                 {entryRows.map((row, idx) => {
                   const nozzle = nozzleMap.get(row.nozzle_name);
                   const meter = meterMap.get(row.nozzle_name);
-                  const opening = Number(meter?.current_reading || 0);
+                  const opening = row.opening_reading != null && row.opening_reading !== '' ? Number(row.opening_reading) : Number(meter?.current_reading || 0);
                   const closing = row.closing_reading === '' ? opening : Number(row.closing_reading);
                   const dispensed = Math.max(0, closing - opening);
                   const testing = Number(row.testing_volume || 0);
@@ -564,11 +654,19 @@ export default function Sales() {
 
           {formErr && <p className="text-sm text-rose-600">{formErr}</p>}
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowAdd(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
-            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Submitting…' : 'Submit Entry'}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+            <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{saving ? 'Saving…' : editingEntryId ? 'Save Changes' : 'Submit Entry'}</button>
           </div>
         </div>
       </Modal>
+
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteEntry(Number(deleteTarget.id))}
+        title="Delete Sales Entry"
+        message={deleteTarget ? `Delete the sales entry for ${fmtDate(deleteTarget.sale_date)} / ${deleteTarget.shift_name} / ${deleteTarget.dispenser_name}? This should only be used to correct a human entry mistake.` : ''}
+      />
     </div>
   );
 }
