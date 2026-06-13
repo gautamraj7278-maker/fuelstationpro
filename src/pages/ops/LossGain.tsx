@@ -63,75 +63,80 @@ export default function LossGain() {
   };
 
   const dailyRows = useMemo<DailyTankRow[]>(() => {
-    const dipMap = new Map<string, number>();
-    (dipReadings || []).forEach((r) => {
-      dipMap.set(`${r.reading_date}||${r.tank_name}||${r.reading_type}`, Number(r.volume_liters || 0));
-    });
-
-    const receiptsMap = new Map<string, number>();
-    (unloadLines || []).forEach((u) => {
-      const tankName = String(u.tank_name || '').trim();
-      const unloadDate = String(u.unload_date || '').trim();
-      if (!tankName || !unloadDate) return;
-      const key = `${unloadDate}||${tankName}`;
-      receiptsMap.set(key, (receiptsMap.get(key) || 0) + Number(u.received_volume || 0));
-    });
-
-    const dispatchMap = new Map<string, number>();
-    const testingMap = new Map<string, number>();
-    (dailySales || []).forEach((entry) => {
-      const saleDate = String(entry.sale_date || '').trim();
-      (entry.daily_sales_nozzle_readings || []).forEach((r: any) => {
-        const tankName = String(r.tank_name || '').trim();
-        if (!saleDate || !tankName) return;
-        const key = `${saleDate}||${tankName}`;
-        dispatchMap.set(key, (dispatchMap.get(key) || 0) + Number(r.volume || 0));
+    try {
+      const dipMap = new Map<string, number>();
+      (dipReadings || []).forEach((r) => {
+        dipMap.set(`${r.reading_date}||${r.tank_name}||${r.reading_type}`, Number(r.volume_liters || 0));
       });
-      (entry.daily_sales_testing || []).forEach((t: any) => {
-        const tankName = String(t.tank_name || '').trim();
-        if (!saleDate || !tankName) return;
-        const key = `${saleDate}||${tankName}`;
-        testingMap.set(key, (testingMap.get(key) || 0) + Number(t.volume || 0));
+
+      const receiptsMap = new Map<string, number>();
+      (unloadLines || []).forEach((u) => {
+        const tankName = String(u.tank_name || '').trim();
+        const unloadDate = String(u.unload_date || '').trim();
+        if (!tankName || !unloadDate) return;
+        const key = `${unloadDate}||${tankName}`;
+        receiptsMap.set(key, (receiptsMap.get(key) || 0) + Number(u.received_volume || 0));
       });
-    });
 
-    const allDates = Array.from(new Set([
-      ...(dipReadings || []).map((r) => r.reading_date),
-      ...(unloadLines || []).map((u) => u.unload_date),
-      ...(dailySales || []).map((e) => e.sale_date),
-    ].filter(Boolean))).sort();
-
-    const rows: DailyTankRow[] = [];
-    (tanks || []).forEach((tank) => {
-      let lastPhysical: number | null = null;
-      allDates.forEach((businessDate) => {
-        const opening = dipMap.get(`${businessDate}||${tank.name}||opening`) ?? lastPhysical;
-        const physicalClosing = dipMap.get(`${businessDate}||${tank.name}||closing`) ?? null;
-        const receipts = receiptsMap.get(`${businessDate}||${tank.name}`) || 0;
-        const dispatch = dispatchMap.get(`${businessDate}||${tank.name}`) || 0;
-        const testing = testingMap.get(`${businessDate}||${tank.name}`) || 0;
-        const bookClosing = opening == null ? null : opening + receipts - dispatch;
-        const variance = physicalClosing == null || bookClosing == null ? null : physicalClosing - bookClosing;
-
-        if (opening != null || receipts > 0 || dispatch > 0 || physicalClosing != null || testing > 0) {
-          rows.push({
-            date: businessDate,
-            tank: tank.name,
-            product: tank.product_name,
-            opening,
-            receipts,
-            dispatch,
-            testing,
-            bookClosing,
-            physicalClosing,
-            variance,
-          });
-        }
-
-        if (physicalClosing != null) lastPhysical = physicalClosing;
+      const dispatchMap = new Map<string, number>();
+      const testingMap = new Map<string, number>();
+      (dailySales || []).forEach((entry) => {
+        const saleDate = String(entry.sale_date || '').trim();
+        (entry.daily_sales_nozzle_readings || []).forEach((r: any) => {
+          const tankName = String(r.tank_name || '').trim();
+          if (!saleDate || !tankName) return;
+          const key = `${saleDate}||${tankName}`;
+          dispatchMap.set(key, (dispatchMap.get(key) || 0) + Number(r.volume || 0));
+        });
+        (entry.daily_sales_testing || []).forEach((t: any) => {
+          const tankName = String(t.tank_name || '').trim();
+          if (!saleDate || !tankName) return;
+          const key = `${saleDate}||${tankName}`;
+          testingMap.set(key, (testingMap.get(key) || 0) + Number(t.volume || 0));
+        });
       });
-    });
-    return rows;
+
+      const allDates = Array.from(new Set([
+        ...(dipReadings || []).map((r) => r.reading_date),
+        ...(unloadLines || []).map((u) => u.unload_date),
+        ...(dailySales || []).map((e) => e.sale_date),
+      ].filter(Boolean))).sort();
+
+      const rows: DailyTankRow[] = [];
+      (tanks || []).forEach((tank) => {
+        let lastPhysical: number | null = null;
+        allDates.forEach((businessDate) => {
+          const opening = dipMap.get(`${businessDate}||${tank.name}||opening`) ?? lastPhysical;
+          const physicalClosing = dipMap.get(`${businessDate}||${tank.name}||closing`) ?? null;
+          const receipts = receiptsMap.get(`${businessDate}||${tank.name}`) || 0;
+          const dispatch = dispatchMap.get(`${businessDate}||${tank.name}`) || 0;
+          const testing = testingMap.get(`${businessDate}||${tank.name}`) || 0;
+          const bookClosing = opening == null ? null : opening + receipts - dispatch;
+          const variance = physicalClosing == null || bookClosing == null ? null : physicalClosing - bookClosing;
+
+          if (opening != null || receipts > 0 || dispatch > 0 || physicalClosing != null || testing > 0) {
+            rows.push({
+              date: businessDate,
+              tank: tank.name,
+              product: tank.product_name,
+              opening,
+              receipts,
+              dispatch,
+              testing,
+              bookClosing,
+              physicalClosing,
+              variance,
+            });
+          }
+
+          if (physicalClosing != null) lastPhysical = physicalClosing;
+        });
+      });
+      return rows;
+    } catch (e) {
+      console.warn('LossGain dailyRows computation error:', e);
+      return [];
+    }
   }, [dipReadings, unloadLines, dailySales, tanks]);
 
   const selectedRows = useMemo(() => {
@@ -144,53 +149,63 @@ export default function LossGain() {
   }, [dailyRows, period, date, month, quarterYear, quarter, year]);
 
   const byTankRows = useMemo(() => {
-    const grouped = new Map<string, DailyTankRow[]>();
-    selectedRows.forEach((row) => {
-      if (!grouped.has(row.tank)) grouped.set(row.tank, []);
-      grouped.get(row.tank)!.push(row);
-    });
+    try {
+      const grouped = new Map<string, DailyTankRow[]>();
+      selectedRows.forEach((row) => {
+        if (!grouped.has(row.tank)) grouped.set(row.tank, []);
+        grouped.get(row.tank)!.push(row);
+      });
 
-    return Array.from(grouped.entries()).map(([tankName, rows]) => {
-      const sorted = rows.slice().sort((a, b) => a.date.localeCompare(b.date));
-      const firstOpening = sorted.find((r) => r.opening != null)?.opening ?? null;
-      const receipts = sorted.reduce((s, r) => s + r.receipts, 0);
-      const dispatch = sorted.reduce((s, r) => s + r.dispatch, 0);
-      const testing = sorted.reduce((s, r) => s + r.testing, 0);
-      const lastPhysical = [...sorted].reverse().find((r) => r.physicalClosing != null)?.physicalClosing ?? null;
-      const bookClosing = firstOpening == null ? null : firstOpening + receipts - dispatch;
-      const variance = lastPhysical == null || bookClosing == null ? null : lastPhysical - bookClosing;
-      return {
-        tank: tankName,
-        product: sorted[0]?.product || '',
-        opening: firstOpening,
-        receipts,
-        dispatch,
-        testing,
-        bookClosing,
-        physicalClosing: lastPhysical,
-        variance,
-      };
-    }).sort((a, b) => a.tank.localeCompare(b.tank));
+      return Array.from(grouped.entries()).map(([tankName, rows]) => {
+        const sorted = rows.slice().sort((a, b) => a.date.localeCompare(b.date));
+        const firstOpening = sorted.find((r) => r.opening != null)?.opening ?? null;
+        const receipts = sorted.reduce((s, r) => s + r.receipts, 0);
+        const dispatch = sorted.reduce((s, r) => s + r.dispatch, 0);
+        const testing = sorted.reduce((s, r) => s + r.testing, 0);
+        const lastPhysical = [...sorted].reverse().find((r) => r.physicalClosing != null)?.physicalClosing ?? null;
+        const bookClosing = firstOpening == null ? null : firstOpening + receipts - dispatch;
+        const variance = lastPhysical == null || bookClosing == null ? null : lastPhysical - bookClosing;
+        return {
+          tank: tankName,
+          product: sorted[0]?.product || '',
+          opening: firstOpening,
+          receipts,
+          dispatch,
+          testing,
+          bookClosing,
+          physicalClosing: lastPhysical,
+          variance,
+        };
+      }).sort((a, b) => a.tank.localeCompare(b.tank));
+    } catch (e) {
+      console.warn('LossGain byTankRows computation error:', e);
+      return [];
+    }
   }, [selectedRows]);
 
   const breakdownRows = useMemo(() => {
-    const grouped = new Map<string, { receipts: number; dispatch: number; testing: number; variance: number; reconciled: number }>();
-    selectedRows.forEach((row) => {
-      const key =
-        period === 'daily' ? row.date :
-        period === 'monthly' ? row.date :
-        row.date.slice(0, 7);
-      if (!grouped.has(key)) grouped.set(key, { receipts: 0, dispatch: 0, testing: 0, variance: 0, reconciled: 0 });
-      const item = grouped.get(key)!;
-      item.receipts += row.receipts;
-      item.dispatch += row.dispatch;
-      item.testing += row.testing;
-      if (row.variance != null) {
-        item.variance += row.variance;
-        item.reconciled += 1;
-      }
-    });
-    return Array.from(grouped.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([label, item]) => ({ label, ...item }));
+    try {
+      const grouped = new Map<string, { receipts: number; dispatch: number; testing: number; variance: number; reconciled: number }>();
+      selectedRows.forEach((row) => {
+        const key =
+          period === 'daily' ? row.date :
+          period === 'monthly' ? row.date :
+          row.date.slice(0, 7);
+        if (!grouped.has(key)) grouped.set(key, { receipts: 0, dispatch: 0, testing: 0, variance: 0, reconciled: 0 });
+        const item = grouped.get(key)!;
+        item.receipts += row.receipts;
+        item.dispatch += row.dispatch;
+        item.testing += row.testing;
+        if (row.variance != null) {
+          item.variance += row.variance;
+          item.reconciled += 1;
+        }
+      });
+      return Array.from(grouped.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([label, item]) => ({ label, ...item }));
+    } catch (e) {
+      console.warn('LossGain breakdownRows computation error:', e);
+      return [];
+    }
   }, [selectedRows, period]);
 
   const totalVar = byTankRows.reduce((s, r) => s + Number(r.variance || 0), 0);
