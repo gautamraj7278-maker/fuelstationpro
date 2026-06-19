@@ -302,7 +302,7 @@ export default async function handler(req, res) {
       if (error) throw error;
       if (dbTable === 'tanks') {
         const reconciled = await Promise.all((data || []).map(async (tank) => {
-          const vol = await reconcileTankCurrentVolume(tank.name);
+          const vol = await reconcileTankCurrentVolume(tank.name, tank.current_volume);
           return { ...tank, current_volume: vol };
         }));
         return res.status(200).json(reconciled);
@@ -1019,7 +1019,7 @@ function sumByKey(rows, keyField, valueField) {
   return map;
 }
 
-async function reconcileTankCurrentVolume(tankName) {
+async function reconcileTankCurrentVolume(tankName, storedVolume = 0) {
   const { data: latestDip } = await supabase
     .from('dip_readings')
     .select('volume_liters, reading_date')
@@ -1064,6 +1064,11 @@ async function reconcileTankCurrentVolume(tankName) {
     .reduce((s, m) => s + Number(m.volume || 0), 0);
 
   const base = latestDip ? Number(latestDip.volume_liters || 0) : 0;
+
+  if (!latestDip && received === 0 && sold === 0 && moveIn === 0 && moveOut === 0) {
+    return Number(storedVolume || 0);
+  }
+
   return Math.max(0, base + received - sold + moveIn - moveOut);
 }
 

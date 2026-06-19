@@ -10,6 +10,7 @@ export interface FieldSpec {
   type?: 'text' | 'number' | 'date';
   required?: boolean;
   example: string;
+  options?: string[];
 }
 
 interface Props {
@@ -25,6 +26,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   const [parsed, setParsed] = useState<Record<string, string>[]>([]);
   const [errors, setErrors] = useState<{ row: number; msg: string }[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [progressText, setProgressText] = useState('');
   const [result, setResult] = useState<{ ok: number; fail: number; errors?: string[] } | null>(null);
   const [fileName, setFileName] = useState('');
 
@@ -51,6 +53,9 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
           if (f.type === 'number' && r[f.key] && isNaN(Number(r[f.key]))) {
             errs.push({ row: i + 2, msg: `"${f.label}" must be a number` });
           }
+          if (f.options && r[f.key] && !f.options.includes(r[f.key])) {
+            errs.push({ row: i + 2, msg: `"${f.label}" must be one of: ${f.options.join(', ')}` });
+          }
         }
       });
       setParsed(rows); setErrors(errs); setStep(2);
@@ -62,6 +67,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
     setUploading(true);
     let ok = 0, fail = 0;
     const errors: string[] = [];
+    const CHUNK = 250;
     const payload = parsed.map((r) => {
       const o: Record<string, any> = {};
       fields.forEach((f) => {
@@ -71,32 +77,28 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       });
       return o;
     });
-    try {
-      const res = await apiPost<any>(endpoint, payload);
-      if (typeof res.ok === 'number') ok = res.ok;
-      else ok = payload.length;
-      if (typeof res.fail === 'number') fail = res.fail;
-      if (Array.isArray(res.results)) {
-        for (const r of res.results) {
-          if (r.error) errors.push(String(r.error));
+
+    const total = payload.length;
+    for (let i = 0; i < total; i += CHUNK) {
+      const chunk = payload.slice(i, i + CHUNK);
+      const chunkIdx = Math.floor(i / CHUNK) + 1;
+      const totalChunks = Math.ceil(total / CHUNK);
+      setProgressText(totalChunks > 1 ? `Uploading chunk ${chunkIdx}/${totalChunks} (${chunk.length} records)...` : `Uploading ${total} records...`);
+      try {
+        const res = await apiPost<any>(endpoint, chunk);
+        ok += typeof res.ok === 'number' ? res.ok : chunk.length;
+        fail += typeof res.fail === 'number' ? res.fail : 0;
+        if (Array.isArray(res.results)) {
+          for (const r of res.results) {
+            if (r.error) errors.push(String(r.error));
+          }
         }
-      }
-    } catch (e: any) {
-      const msg = String(e?.message || '');
-      const isClientError = /failed: 4\d\d/.test(msg);
-      if (isClientError) {
-        for (const row of payload) {
-          try {
-            const res = await apiPost<any>(endpoint, [row]);
-            if (typeof res.ok === 'number') ok += res.ok;
-            else ok++;
-          } catch { fail++; }
-        }
-      } else {
-        fail = payload.length;
-        errors.push(msg);
+      } catch (e: any) {
+        fail += chunk.length;
+        errors.push(String(e?.message || e?.error || `Chunk ${chunkIdx} failed`));
       }
     }
+    setProgressText('');
     setResult({ ok, fail, errors: errors.length > 0 ? errors : undefined }); setUploading(false); setStep(3);
   };
 
@@ -175,11 +177,12 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
             </table>
           </div>
           <div className="flex justify-end gap-2 mt-5">
-            <button onClick={reset} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+            <button onClick={reset} disabled={uploading} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50">Cancel</button>
             <button onClick={commit} disabled={errors.length > 0 || parsed.length === 0 || uploading} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Commit {parsed.length} Records
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} {uploading ? 'Uploading...' : `Commit ${parsed.length} Records`}
             </button>
           </div>
+          {uploading && progressText && <p className="text-xs text-slate-400 text-right mt-2">{progressText}</p>}
         </Card>
       )}
 

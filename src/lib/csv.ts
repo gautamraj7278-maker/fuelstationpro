@@ -1,5 +1,6 @@
 export function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter((l) => l.trim().length > 0);
+  const cleaned = text.replace(/^\ufeff/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = cleaned.split('\n').filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
   const headers = splitCSVLine(lines[0]).map((h) => h.trim());
   const rows: Record<string, string>[] = [];
