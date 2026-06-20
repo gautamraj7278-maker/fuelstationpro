@@ -27,11 +27,33 @@ export async function normalizeSalesRows(rows, supabase) {
   const productNames = [...new Set(list.map((row) => String(row?.product_name ?? '').trim()).filter(Boolean))];
   const nozzleNames = [...new Set(list.map((row) => String(row?.nozzle_name ?? '').trim()).filter(Boolean))];
 
-  const productMap = new Map();
+  const historyByProduct = new Map();
   if (productNames.length > 0) {
-    const { data, error } = await supabase.from('products').select('name, current_price').in('name', productNames);
+    const { data, error } = await supabase
+      .from('price_history')
+      .select('product_name, new_price, effective_date')
+      .in('product_name', productNames)
+      .order('product_name', { ascending: true })
+      .order('effective_date', { ascending: true })
+      .order('id', { ascending: true });
     if (error) throw error;
-    for (const product of data || []) productMap.set(product.name, product);
+    for (const row of data || []) {
+      const name = String(row.product_name || '').trim();
+      if (!name) continue;
+      if (!historyByProduct.has(name)) historyByProduct.set(name, []);
+      historyByProduct.get(name).push(row);
+    }
+  }
+
+  function resolvePriceFromHistory(productName, targetDate) {
+    const history = historyByProduct.get(productName) || [];
+    if (history.length === 0) return null;
+    let price = null;
+    for (const row of history) {
+      if (row.effective_date > targetDate) break;
+      price = Number(row.new_price || 0);
+    }
+    return price;
   }
 
   const nozzleMap = new Map();
@@ -81,11 +103,9 @@ export async function normalizeSalesRows(rows, supabase) {
 
     let unitPrice = providedUnitPrice;
     if (unitPrice == null) {
-      const product = productMap.get(productName);
-      const fallbackPrice = optionalNumber(product?.current_price, `${rowLabel}Product current price`);
-      unitPrice = fallbackPrice;
+      unitPrice = resolvePriceFromHistory(productName, saleDate);
     }
-    if (unitPrice == null) throw new Error(`${rowLabel}Unit price is required`);
+    if (unitPrice == null) throw new Error(`${rowLabel}Unit price is required. Provide unit_price or ensure a price_history record exists for ${productName} on or before ${saleDate}.`);
     if (unitPrice < 0) throw new Error(`${rowLabel}Unit price cannot be negative`);
 
     if (nozzleName) {

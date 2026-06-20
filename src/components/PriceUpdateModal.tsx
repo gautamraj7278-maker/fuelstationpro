@@ -55,9 +55,22 @@ export default function PriceUpdateModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const skip = () => {
-    localStorage.setItem('lastPriceUpdateDate', new Date().toISOString().slice(0, 10));
-    onClose();
+  const skip = async () => {
+    setSaving(true);
+    const today = new Date().toISOString().slice(0, 10);
+    const records = products.map((p) => ({
+      product_name: p.name,
+      new_price: Number(p.current_price) || 0,
+      effective_date: today,
+    }));
+    try {
+      await apiPost('/api/price-history', records);
+      localStorage.setItem('lastPriceUpdateDate', today);
+      onClose();
+    } catch {
+      localStorage.setItem('lastPriceUpdateDate', today);
+      onClose();
+    }
   };
 
   if (loading) {
@@ -98,7 +111,7 @@ export default function PriceUpdateModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-100">
-          <button onClick={skip} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">
+          <button onClick={skip} disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50">
             <SkipForward className="w-4 h-4" /> Skip for Today
           </button>
           <button onClick={save} disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">

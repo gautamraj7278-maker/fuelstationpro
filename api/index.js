@@ -1190,7 +1190,7 @@ async function createDailySalesEntry(payload, opts = {}) {
     if (closing < opening) throw new Error(`${label}Closing reading must be >= opening reading`);
     const volume = closing - opening;
     const unitPrice = Number(priceMap.get(nozzle.product_name) ?? 0);
-    const amount = volume * unitPrice;
+    const amount = Math.round(volume * unitPrice * 100) / 100;
     grossSalesAmount += amount;
     normalizedReadings.push({
       nozzle_name: nozzleName,
@@ -1220,7 +1220,7 @@ async function createDailySalesEntry(payload, opts = {}) {
     const resolvedProduct = noz.product_name;
     const resolvedTank = noz.tank_name || null;
     const price = Number(priceMap.get(resolvedProduct) ?? 0);
-    const amount = volume * price;
+    const amount = Math.round(volume * price * 100) / 100;
     testingDeduction += amount;
     normalizedTesting.push({
       nozzle_name: nozzleName,
@@ -1233,9 +1233,9 @@ async function createDailySalesEntry(payload, opts = {}) {
     });
   }
 
-  const totalSalesAmount = grossSalesAmount - testingDeduction;
-  const totalSubmitted = Number(cashAmount) + Number(onlineAmount) + Number(creditAmount);
-  const variance = totalSubmitted - totalSalesAmount;
+  const totalSalesAmount = Math.round((grossSalesAmount - testingDeduction) * 100) / 100;
+  const totalSubmitted = Math.round((Number(cashAmount) + Number(onlineAmount) + Number(creditAmount)) * 100) / 100;
+  const variance = Math.round((totalSubmitted - totalSalesAmount) * 100) / 100;
 
   const { data: entry, error: eErr } = await supabase
     .from('daily_sales_entries')
@@ -1412,7 +1412,7 @@ async function updateDailySalesEntry(entryId, payload) {
     if (closing < opening) throw new Error(`${label}Closing reading must be >= opening reading`);
     const volume = closing - opening;
     const unitPrice = Number(priceMap.get(nozzle.product_name) ?? 0);
-    const amount = volume * unitPrice;
+    const amount = Math.round(volume * unitPrice * 100) / 100;
     grossSalesAmount += amount;
     normalizedReadings.push({
       nozzle_name: nozzleName,
@@ -1450,7 +1450,7 @@ async function updateDailySalesEntry(entryId, payload) {
     const resolvedProduct = noz.product_name;
     const resolvedTank = noz.tank_name || null;
     const price = Number(priceMap.get(resolvedProduct) ?? 0);
-    const amount = volume * price;
+    const amount = Math.round(volume * price * 100) / 100;
     testingDeduction += amount;
     normalizedTesting.push({
       nozzle_name: nozzleName,
@@ -1463,9 +1463,9 @@ async function updateDailySalesEntry(entryId, payload) {
     });
   }
 
-  const totalSalesAmount = grossSalesAmount - testingDeduction;
-  const totalSubmitted = Number(cashAmount) + Number(onlineAmount) + Number(creditAmount);
-  const variance = totalSubmitted - totalSalesAmount;
+  const totalSalesAmount = Math.round((grossSalesAmount - testingDeduction) * 100) / 100;
+  const totalSubmitted = Math.round((Number(cashAmount) + Number(onlineAmount) + Number(creditAmount)) * 100) / 100;
+  const variance = Math.round((totalSubmitted - totalSalesAmount) * 100) / 100;
 
   const oldTankVolumes = sumByKey(existing.daily_sales_nozzle_readings || [], 'tank_name', 'volume');
   const newTankVolumes = sumByKey(normalizedReadings, 'tank_name', 'volume');

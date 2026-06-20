@@ -9,19 +9,23 @@ import { resolveTable } from '../api/table-resolve.js';
 import { isAllowedResource, isOriginAllowed, parseAllowedOrigins } from '../api/runtime-config.js';
 import { buildLossGainRows } from '../src/lib/loss-gain.js';
 
-function createSupabaseMock({ products = [], nozzles = [], tanks = [] } = {}) {
-  const tables = { products, nozzles, tanks };
+function createSupabaseMock({ products = [], nozzles = [], tanks = [], price_history = [] } = {}) {
+  const tables = { products, nozzles, tanks, price_history };
 
   return {
     from(tableName) {
       return {
         select() {
-          return {
+          let rows = (tables[tableName] || []).slice();
+          const chain = {
             in(column, values) {
-              const rows = (tables[tableName] || []).filter((row) => values.includes(row[column]));
-              return Promise.resolve({ data: rows, error: null });
+              rows = rows.filter((row) => values.includes(row[column]));
+              return chain;
             },
+            order() { return chain; },
+            then(resolve) { resolve({ data: rows, error: null }); },
           };
+          return chain;
         },
       };
     },
@@ -78,7 +82,9 @@ test('validateChart rejects duplicate or decreasing calibration points', () => {
 
 test('normalizeSalesRows recomputes sale volume and total amount from readings', async () => {
   const supabase = createSupabaseMock({
-    products: [{ name: 'Petrol', current_price: 102.5 }],
+    price_history: [
+      { product_name: 'Petrol', new_price: 102.5, effective_date: '2026-06-01' },
+    ],
     nozzles: [{ name: 'Nozzle 1', product_name: 'Petrol' }],
   });
 
@@ -100,7 +106,9 @@ test('normalizeSalesRows recomputes sale volume and total amount from readings',
 
 test('normalizeSalesRows rejects nozzle and product mismatch', async () => {
   const supabase = createSupabaseMock({
-    products: [{ name: 'Diesel', current_price: 90 }],
+    price_history: [
+      { product_name: 'Diesel', new_price: 90, effective_date: '2026-06-01' },
+    ],
     nozzles: [{ name: 'Nozzle 1', product_name: 'Petrol' }],
   });
 
