@@ -56,7 +56,6 @@ export default function PriceHistory() {
   const currentPriceByProduct = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
     const map = new Map<string, number>();
-    products.forEach((p) => map.set(p.name, Number(p.current_price || 0)));
     [...history]
       .filter((row) => String(row.effective_date || '') <= today)
       .sort((a, b) => {
@@ -68,7 +67,7 @@ export default function PriceHistory() {
         map.set(String(row.product_name || ''), Number(row.new_price || 0));
       });
     return map;
-  }, [products, history]);
+  }, [history]);
 
   const latestActiveHistoryIds = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -96,8 +95,8 @@ export default function PriceHistory() {
         return Number(b.id || 0) - Number(a.id || 0);
       });
     if (applicable.length > 0) return Number(applicable[0].new_price || 0);
-    return Number(products.find((p) => p.name === form.product_name)?.current_price || 0);
-  }, [form.product_name, form.effective_date, history, products]);
+    return 0;
+  }, [form.product_name, form.effective_date, history]);
 
   const newPriceNumber = Number(form.new_price || 0);
   const inflationPct = resolvedOldPrice > 0 && Number.isFinite(newPriceNumber)
