@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS stock_movements (
   created_at timestamptz default now()
 );
 ALTER TABLE stock_movements DROP COLUMN IF EXISTS type;
+ALTER TABLE stock_movements DROP COLUMN IF EXISTS quantity;
 ALTER TABLE stock_movements ADD COLUMN IF NOT EXISTS movement_type text default 'IN';
 ALTER TABLE stock_movements ADD COLUMN IF NOT EXISTS tank_name text;
 ALTER TABLE stock_movements ADD COLUMN IF NOT EXISTS product_name text;
