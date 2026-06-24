@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`bg-white rounded-xl border border-slate-200 shadow-sm ${className}`}>{children}</div>;
+export function Card({ children, className = '', onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
+  return <div onClick={onClick} className={`bg-white rounded-xl border border-slate-200 shadow-sm ${onClick ? 'cursor-pointer' : ''} ${className}`}>{children}</div>;
 }
 
 export function CardHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
