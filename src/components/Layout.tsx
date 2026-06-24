@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Fuel, LayoutDashboard, Database, Truck, Gauge, ClipboardList, Wallet, BarChart3, Upload, BookOpen, LogOut, Menu, X, ChevronDown, Boxes, Settings2, FileText } from 'lucide-react';
+import { Fuel, LayoutDashboard, Database, Truck, Gauge, ClipboardList, Wallet, BarChart3, Upload, BookOpen, LogOut, Menu, X, ChevronDown, Boxes, Settings2, FileText, TrendingUp } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ConfirmModal } from './ui/Modal';
 
@@ -33,7 +33,12 @@ const groups: NavGroup[] = [
     { to: '/finance/credit-sales', label: 'Credit Sales', icon: ClipboardList },
     { to: '/finance/management', label: 'Finance Management', icon: Wallet },
   ]},
-  { label: 'Reports', icon: BarChart3, items: [ { to: '/reports', label: 'Advanced Reports', icon: BarChart3 } ] },
+  { label: 'Reports', icon: BarChart3, items: [
+    { to: '/reports', label: 'Report Hub', icon: BarChart3 },
+    { to: '/reports/daily-sales', label: 'Daily Sales Report', icon: ClipboardList },
+    { to: '/reports/tanker-unloading', label: 'Tanker Unloading Report', icon: Truck },
+    { to: '/reports/price-history', label: 'Price History Report', icon: TrendingUp },
+  ]},
   { label: 'Bulk Upload', icon: Upload, items: [
     { to: '/bulk/daily-sales', label: 'Daily Sales Upload', icon: Upload },
     { to: '/bulk/tank-data', label: 'Tank Data Upload', icon: Upload },
