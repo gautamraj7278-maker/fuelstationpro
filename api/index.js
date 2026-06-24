@@ -198,7 +198,29 @@ function parsePath(url) {
 
 function getFilters(url) {
   const params = new URL(url, 'http://localhost').searchParams;
-  return Array.from(params.entries()).filter(([key, value]) => key && value !== '');
+  const filters: Record<string, string> = {};
+  const pagination = {
+    page: 1,
+    pageSize: 20,
+    search: '',
+    hasPagination: false,
+  };
+  
+  for (const [key, value] of params.entries()) {
+    if (key === 'page') {
+      pagination.page = Math.max(1, parseInt(value) || 1);
+      pagination.hasPagination = true;
+    } else if (key === 'pageSize') {
+      pagination.pageSize = Math.max(1, Math.min(100, parseInt(value) || 20));
+      pagination.hasPagination = true;
+    } else if (key === 'search') {
+      pagination.search = value;
+    } else if (key && value !== '') {
+      filters[key] = value;
+    }
+  }
+  
+  return { filters, pagination };
 }
 
 export default async function handler(req, res) {
@@ -291,11 +313,45 @@ export default async function handler(req, res) {
     if (!dbTable) return res.status(404).json({ error: 'Not found' });
 
     if (req.method === 'GET') {
-      const filters = getFilters(req.url);
+      const { filters, pagination } = getFilters(req.url);
+      const { page, pageSize, search, hasPagination } = pagination;
       const orderCol = TXN_TABLES.includes(dbTable) ? 'id' : 'id';
       const orderDir = TXN_TABLES.includes(dbTable) ? { ascending: false } : { ascending: true };
+      
+      if (hasPagination) {
+        let query = supabase.from(dbTable).select('*', { count: 'exact' });
+        for (const [key, value] of Object.entries(filters)) {
+          query = query.eq(key, value);
+        }
+        if (search) {
+          const searchableFields = ['name', 'code', 'product_name', 'supplier_name', 'operator_name', 'shift_name', 'dispenser_name', 'tank_name', 'nozzle_name'];
+          const searchConditions = searchableFields.map((f) => `${f}.ilike.%${search}%`).join(',');
+          query = query.or(searchConditions);
+        }
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+        query = query.order(orderCol, orderDir).range(from, to);
+        const { data, error, count } = await query;
+        if (error) throw error;
+        if (dbTable === 'tanks') {
+          const reconciled = await Promise.all((data || []).map(async (tank) => {
+            const vol = await reconcileTankCurrentVolume(tank.name);
+            return { ...tank, current_volume: vol };
+          }));
+          return res.status(200).json({ data: reconciled, total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) });
+        }
+        if (dbTable === 'buffer_tanks') {
+          const reconciled = await Promise.all((data || []).map(async (bt) => {
+            const vol = await reconcileBufferVolume(bt.product_name);
+            return { ...bt, volume: vol };
+          }));
+          return res.status(200).json({ data: reconciled, total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) });
+        }
+        return res.status(200).json({ data: data || [], total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) });
+      }
+      
       let query = supabase.from(dbTable).select('*');
-      for (const [key, value] of filters) {
+      for (const [key, value] of Object.entries(filters)) {
         query = query.eq(key, value);
       }
       const { data, error } = await query.order(orderCol, orderDir);
@@ -498,47 +554,126 @@ async function handleStockMovementDelete(req, res) {
 }
 
 async function handleTankerUnloadingListV2(req, res) {
-  const { data, error } = await supabase
-    .from('tanker_unloading_headers')
-    .select('id, unload_date, tanker_number, supplier_name, waybill_no, invoice_no, temperature, created_at, tanker_unloading_lines ( id, product_name, tank_name, tanker_qty, dip_before_mm, dip_after_mm, volume_before_liters, volume_after_liters, received_volume, variance, created_at )')
-    .order('id', { ascending: false });
-  if (error) throw error;
-  const lines = [];
-  for (const h of data || []) {
-    const hLines = Array.isArray(h.tanker_unloading_lines) ? h.tanker_unloading_lines : [];
-    for (const l of hLines) {
-      lines.push({
-        id: l.id,
-        header_id: h.id,
-        unload_date: h.unload_date,
-        tanker_number: h.tanker_number,
-        supplier_name: h.supplier_name,
-        waybill_no: h.waybill_no,
-        invoice_no: h.invoice_no,
-        temperature: h.temperature,
-        product_name: l.product_name,
-        tank_name: l.tank_name,
-        declared_volume: l.tanker_qty,
-        tanker_qty: l.tanker_qty,
-        dip_before_mm: l.dip_before_mm,
-        dip_after_mm: l.dip_after_mm,
-        volume_before_liters: l.volume_before_liters,
-        volume_after_liters: l.volume_after_liters,
-        received_volume: l.received_volume,
-        variance: l.variance,
-        created_at: l.created_at,
-      });
+  const { filters, pagination } = getFilters(req.url);
+  const { page, pageSize, search, hasPagination } = pagination;
+
+  const selectFields = 'id, header_id, product_name, tank_name, tanker_qty, dip_before_mm, dip_after_mm, volume_before_liters, volume_after_liters, received_volume, variance, created_at, tanker_unloading_headers ( id, unload_date, tanker_number, supplier_name, waybill_no, invoice_no, temperature )';
+  
+  let query = hasPagination
+    ? supabase.from('tanker_unloading_lines').select(selectFields, { count: 'exact' }).order('id', { ascending: false })
+    : supabase.from('tanker_unloading_lines').select(selectFields).order('id', { ascending: false });
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (key === 'unload_date_from') {
+      query = query.gte('tanker_unloading_headers.unload_date', value);
+    } else if (key === 'unload_date_to') {
+      query = query.lte('tanker_unloading_headers.unload_date', value);
+    } else if (key === 'tanker_number' || key === 'supplier_name' || key === 'product_name' || key === 'tank_name') {
+      query = query.eq(key, value);
     }
   }
+
+  if (search) {
+    query = query.or(`product_name.ilike.%${search}%,tank_name.ilike.%${search}%,tanker_unloading_headers.tanker_number.ilike.%${search}%,tanker_unloading_headers.supplier_name.ilike.%${search}%`);
+  }
+
+  if (hasPagination) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+    const { data, error, count } = await query;
+    if (error) throw error;
+    const lines = (data || []).map((l) => ({
+      id: l.id,
+      header_id: l.header_id,
+      unload_date: l.tanker_unloading_headers?.unload_date,
+      tanker_number: l.tanker_unloading_headers?.tanker_number,
+      supplier_name: l.tanker_unloading_headers?.supplier_name,
+      waybill_no: l.tanker_unloading_headers?.waybill_no,
+      invoice_no: l.tanker_unloading_headers?.invoice_no,
+      temperature: l.tanker_unloading_headers?.temperature,
+      product_name: l.product_name,
+      tank_name: l.tank_name,
+      declared_volume: l.tanker_qty,
+      tanker_qty: l.tanker_qty,
+      dip_before_mm: l.dip_before_mm,
+      dip_after_mm: l.dip_after_mm,
+      volume_before_liters: l.volume_before_liters,
+      volume_after_liters: l.volume_after_liters,
+      received_volume: l.received_volume,
+      variance: l.variance,
+      created_at: l.created_at,
+    }));
+    return res.status(200).json({ data: lines, total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) });
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  const lines = (data || []).map((l) => ({
+    id: l.id,
+    header_id: l.header_id,
+    unload_date: l.tanker_unloading_headers?.unload_date,
+    tanker_number: l.tanker_unloading_headers?.tanker_number,
+    supplier_name: l.tanker_unloading_headers?.supplier_name,
+    waybill_no: l.tanker_unloading_headers?.waybill_no,
+    invoice_no: l.tanker_unloading_headers?.invoice_no,
+    temperature: l.tanker_unloading_headers?.temperature,
+    product_name: l.product_name,
+    tank_name: l.tank_name,
+    declared_volume: l.tanker_qty,
+    tanker_qty: l.tanker_qty,
+    dip_before_mm: l.dip_before_mm,
+    dip_after_mm: l.dip_after_mm,
+    volume_before_liters: l.volume_before_liters,
+    volume_after_liters: l.volume_after_liters,
+    received_volume: l.received_volume,
+    variance: l.variance,
+    created_at: l.created_at,
+  }));
   return res.status(200).json(lines);
 }
 
 async function handleTankerUnloadingBatches(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-  const { data, error } = await supabase
-    .from('tanker_unloading_headers')
-    .select('id, unload_date, tanker_number, supplier_name, waybill_no, invoice_no, temperature, created_at, tanker_unloading_lines ( id, product_name, tank_name, tanker_qty, dip_before_mm, dip_after_mm, volume_before_liters, volume_after_liters, received_volume, variance, created_at )')
-    .order('id', { ascending: false });
+  const { filters, pagination } = getFilters(req.url);
+  const { page, pageSize, search, hasPagination } = pagination;
+
+  const selectFields = 'id, unload_date, tanker_number, supplier_name, waybill_no, invoice_no, temperature, created_at, tanker_unloading_lines ( id, product_name, tank_name, tanker_qty, dip_before_mm, dip_after_mm, volume_before_liters, volume_after_liters, received_volume, variance, created_at )';
+  
+  let query = hasPagination
+    ? supabase.from('tanker_unloading_headers').select(selectFields, { count: 'exact' }).order('id', { ascending: false })
+    : supabase.from('tanker_unloading_headers').select(selectFields).order('id', { ascending: false });
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (key === 'unload_date_from') {
+      query = query.gte('unload_date', value);
+    } else if (key === 'unload_date_to') {
+      query = query.lte('unload_date', value);
+    } else {
+      query = query.eq(key, value);
+    }
+  }
+
+  if (search) {
+    query = query.or(`unload_date.ilike.%${search}%,tanker_number.ilike.%${search}%,supplier_name.ilike.%${search}%,waybill_no.ilike.%${search}%`);
+  }
+
+  if (hasPagination) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+    const { data, error, count } = await query;
+    if (error) throw error;
+    const batches = (data || []).map((h) => {
+      const lines = Array.isArray(h.tanker_unloading_lines) ? h.tanker_unloading_lines : [];
+      const totalTankerQty = lines.reduce((s, l) => s + Number(l.tanker_qty || 0), 0);
+      const totalReceived = lines.reduce((s, l) => s + Number(l.received_volume || 0), 0);
+      return { ...h, totals: { tanker_qty: totalTankerQty, received_volume: totalReceived, variance: totalReceived - totalTankerQty } };
+    });
+    return res.status(200).json({ data: batches, total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) });
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   const batches = (data || []).map((h) => {
     const lines = Array.isArray(h.tanker_unloading_lines) ? h.tanker_unloading_lines : [];
@@ -851,10 +986,39 @@ async function handleTankerUnloadingDeleteV2(req, res) {
 }
 
 async function handleDailySalesList(req, res) {
-  const { data, error } = await supabase
-    .from('daily_sales_entries')
-    .select('id, sale_date, shift_name, operator_name, dispenser_name, cash_amount, online_amount, credit_amount, total_submitted, total_sales_amount, variance, status, created_at, daily_sales_nozzle_readings ( id, nozzle_name, dispenser_name, tank_name, product_name, opening_reading, closing_reading, volume, unit_price, amount ), daily_sales_testing ( id, nozzle_name, tank_name, product_name, volume, unit_price, amount, remarks )')
-    .order('id', { ascending: false });
+  const { filters, pagination } = getFilters(req.url);
+  const { page, pageSize, search, hasPagination } = pagination;
+
+  const selectFields = 'id, sale_date, shift_name, operator_name, dispenser_name, cash_amount, online_amount, credit_amount, total_submitted, total_sales_amount, variance, status, created_at, daily_sales_nozzle_readings ( id, nozzle_name, dispenser_name, tank_name, product_name, opening_reading, closing_reading, volume, unit_price, amount ), daily_sales_testing ( id, nozzle_name, tank_name, product_name, volume, unit_price, amount, remarks )';
+  
+  let query = hasPagination
+    ? supabase.from('daily_sales_entries').select(selectFields, { count: 'exact' }).order('id', { ascending: false })
+    : supabase.from('daily_sales_entries').select(selectFields).order('id', { ascending: false });
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (key === 'sale_date_from') {
+      query = query.gte('sale_date', value);
+    } else if (key === 'sale_date_to') {
+      query = query.lte('sale_date', value);
+    } else {
+      query = query.eq(key, value);
+    }
+  }
+
+  if (search) {
+    query = query.or(`sale_date.ilike.%${search}%,shift_name.ilike.%${search}%,operator_name.ilike.%${search}%,dispenser_name.ilike.%${search}%`);
+  }
+
+  if (hasPagination) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+    const { data, error, count } = await query;
+    if (error) throw error;
+    return res.status(200).json({ data: data || [], total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) });
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return res.status(200).json(data || []);
 }

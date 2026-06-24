@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Plus, ChevronDown, ChevronUp, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import Modal, { ConfirmModal } from '../../components/ui/Modal';
@@ -6,6 +6,8 @@ import { Field, Input, Select } from '../../components/ui/Field';
 import { Loading, ErrorState } from '../../components/ui/States';
 import { Badge } from '../../components/ui/Badge';
 import { apiDelete, apiGet, apiPost, apiPut, fmtMoney, fmtNum, fmtDate } from '../../lib/api';
+import Pagination from '../../components/ui/Pagination';
+import DataFilters from '../../components/ui/DataFilters';
 
 type EntryRow = {
   nozzle_name: string;
@@ -17,6 +19,11 @@ type EntryRow = {
 
 export default function Sales() {
   const [entries, setEntries] = useState<any[]>([]);
+  const [totalEntries, setTotalEntries] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState<Record<string, any>>({ sale_date_from: '', sale_date_to: '', shift_name: '', operator_name: '', dispenser_name: '' });
   const [products, setProducts] = useState<any[]>([]);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [operators, setOperators] = useState<any[]>([]);
@@ -44,11 +51,22 @@ export default function Sales() {
   });
   const [entryRows, setEntryRows] = useState<EntryRow[]>([]);
 
-  const load = async () => {
+  const buildQueryString = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set('page', String(currentPage));
+    params.set('pageSize', String(pageSize));
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    return params.toString();
+  }, [currentPage, pageSize, filters]);
+
+  const load = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const [e, p, ph, o, sh, d, n, m] = await Promise.all([
-        apiGet('/api/daily-sales'),
+      const qs = buildQueryString();
+      const [res, p, ph, o, sh, d, n, m] = await Promise.all([
+        apiGet(`/api/daily-sales?${qs}`),
         apiGet('/api/products'),
         apiGet('/api/price-history'),
         apiGet('/api/operators'),
@@ -57,7 +75,9 @@ export default function Sales() {
         apiGet('/api/nozzles'),
         apiGet('/api/meters'),
       ]);
-      setEntries(e || []);
+      setEntries(res.data || []);
+      setTotalEntries(res.total || 0);
+      setTotalPages(res.totalPages || 0);
       setProducts(p || []);
       setPriceHistory(ph || []);
       setOperators(o || []);
@@ -66,8 +86,33 @@ export default function Sales() {
       setNozzles(n || []);
       setMeters(m || []);
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+  }, [buildQueryString]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleFiltersChange = (newFilters: Record<string, any>) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
   };
-  useEffect(() => { load(); }, []);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setExpandedId(null);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+    setExpandedId(null);
+  };
+
+  const filterFields = [
+    { key: 'sale_date_from', label: 'Date From', type: 'date' as const },
+    { key: 'sale_date_to', label: 'Date To', type: 'date' as const },
+    { key: 'shift_name', label: 'Shift', type: 'select' as const, options: shifts.map((s: any) => ({ value: s.name, label: s.name })) },
+    { key: 'operator_name', label: 'Operator', type: 'select' as const, options: operators.map((o: any) => ({ value: o.name, label: o.name })) },
+    { key: 'dispenser_name', label: 'Dispenser', type: 'select' as const, options: dispensers.map((d: any) => ({ value: d.name, label: d.name })) },
+  ];
 
   const meterMap = useMemo(() => new Map(meters.map((m) => [m.nozzle_name, m])), [meters]);
   const nozzleMap = useMemo(() => new Map(nozzles.map((n) => [n.name, n])), [nozzles]);
@@ -383,6 +428,10 @@ export default function Sales() {
         <ErrorState message={error} onRetry={load} />
       ) : (
         <div className="space-y-3">
+          <DataFilters filters={filters} onFiltersChange={handleFiltersChange} fields={filterFields} />
+
+          <div className="text-sm text-slate-500 px-1">{totalEntries} entries found</div>
+
           {entries.map((entry) => {
             const isExpanded = expandedId === entry.id;
             const canMutate = editableEntryIds.has(Number(entry.id || 0));
@@ -493,7 +542,15 @@ export default function Sales() {
               </Card>
             );
           })}
-          {entries.length === 0 && <Card className="p-10 text-center text-slate-400">No sales entries recorded yet.</Card>}
+          {entries.length === 0 && !loading && <Card className="p-10 text-center text-slate-400">No sales entries recorded yet.</Card>}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalEntries}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         </div>
       )}
 

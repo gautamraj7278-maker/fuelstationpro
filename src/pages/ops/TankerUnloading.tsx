@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Plus, X, Truck, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -7,11 +7,18 @@ import Modal, { ConfirmModal } from '../../components/ui/Modal';
 import { Loading, ErrorState } from '../../components/ui/States';
 import { apiDelete, apiGet, apiPost, apiPut, fmtDate, fmtNum } from '../../lib/api';
 import { interpolateVolume } from '../../lib/interp';
+import Pagination from '../../components/ui/Pagination';
+import DataFilters from '../../components/ui/DataFilters';
 
 export default function TankerUnloading() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [batches, setBatches] = useState<any[]>([]);
+  const [totalBatches, setTotalBatches] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState<Record<string, any>>({ unload_date_from: '', unload_date_to: '', tanker_number: '', supplier_name: '' });
   const [tanks, setTanks] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -35,17 +42,30 @@ export default function TankerUnloading() {
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState('');
 
-  const load = async () => {
+  const buildQueryString = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set('page', String(currentPage));
+    params.set('pageSize', String(pageSize));
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    return params.toString();
+  }, [currentPage, pageSize, filters]);
+
+  const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const [b, t, p, s] = await Promise.all([
-        apiGet('/api/tanker-unloading/batches'),
+      const qs = buildQueryString();
+      const [res, t, p, s] = await Promise.all([
+        apiGet(`/api/tanker-unloading/batches?${qs}`),
         apiGet('/api/tanks'),
         apiGet('/api/products'),
         apiGet('/api/suppliers'),
       ]);
-      setBatches(b || []);
+      setBatches(res.data || []);
+      setTotalBatches(res.total || 0);
+      setTotalPages(res.totalPages || 0);
       setTanks(t || []);
       setProducts(p || []);
       setSuppliers(s || []);
@@ -54,11 +74,34 @@ export default function TankerUnloading() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [buildQueryString]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  const handleFiltersChange = (newFilters: Record<string, any>) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setExpandedId(null);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+    setExpandedId(null);
+  };
+
+  const filterFields = [
+    { key: 'unload_date_from', label: 'Date From', type: 'date' as const },
+    { key: 'unload_date_to', label: 'Date To', type: 'date' as const },
+    { key: 'tanker_number', label: 'Tanker Number', type: 'text' as const },
+    { key: 'supplier_name', label: 'Supplier', type: 'select' as const, options: suppliers.map((s: any) => ({ value: s.name, label: s.name })) },
+  ];
 
   const getPoints = async (tankName: string) => {
     const tank = tanks.find((t) => t.name === tankName);
@@ -217,6 +260,10 @@ export default function TankerUnloading() {
       </div>
 
       <div className="space-y-3">
+        <DataFilters filters={filters} onFiltersChange={handleFiltersChange} fields={filterFields} />
+
+        <div className="text-sm text-slate-500 px-1">{totalBatches} entries found</div>
+
         {batches.map((b) => {
           const isExpanded = expandedId === b.id;
           const totals = b.totals || {};
@@ -306,9 +353,17 @@ export default function TankerUnloading() {
             </Card>
           );
         })}
-        {batches.length === 0 && (
+        {batches.length === 0 && !loading && (
           <Card className="p-10 text-center text-slate-400">No tanker unloadings recorded yet.</Card>
         )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalBatches}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
 
       <Modal open={open} onClose={closeModal} title={editingId ? 'Edit Tanker Unloading' : 'Record Tanker Unloading'} wide>

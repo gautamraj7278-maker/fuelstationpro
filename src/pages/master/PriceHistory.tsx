@@ -7,6 +7,8 @@ import { Loading, ErrorState } from '../../components/ui/States';
 import { Badge } from '../../components/ui/Badge';
 import { apiDelete, apiGet, apiPost, apiPut, fmtMoney, fmtDate, fmtNum } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
+import Pagination from '../../components/ui/Pagination';
+import DataFilters from '../../components/ui/DataFilters';
 
 export default function PriceHistory() {
   const { user } = useAuth();
@@ -14,6 +16,9 @@ export default function PriceHistory() {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState<Record<string, any>>({ product_name: '', effective_date_from: '', effective_date_to: '', search: '' });
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState('');
@@ -52,6 +57,31 @@ export default function PriceHistory() {
       return Number(b.id || 0) - Number(a.id || 0);
     });
   }, [history]);
+
+  const filteredHistory = useMemo(() => {
+    return sortedHistory.filter((row) => {
+      if (filters.product_name && row.product_name !== filters.product_name) return false;
+      if (filters.effective_date_from && row.effective_date < filters.effective_date_from) return false;
+      if (filters.effective_date_to && row.effective_date > filters.effective_date_to) return false;
+      if (filters.search) {
+        const s = filters.search.toLowerCase();
+        const matchProduct = String(row.product_name || '').toLowerCase().includes(s);
+        const matchRemarks = String(row.remarks || '').toLowerCase().includes(s);
+        const matchChangedBy = String(row.changed_by || '').toLowerCase().includes(s);
+        if (!matchProduct && !matchRemarks && !matchChangedBy) return false;
+      }
+      return true;
+    });
+  }, [sortedHistory, filters]);
+
+  const paginatedHistory = useMemo(() => {
+    const from = (currentPage - 1) * pageSize;
+    const to = from + pageSize;
+    return filteredHistory.slice(from, to);
+  }, [filteredHistory, currentPage, pageSize]);
+
+  const totalFiltered = filteredHistory.length;
+  const totalFilteredPages = Math.ceil(totalFiltered / pageSize);
 
   const currentPriceByProduct = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -97,6 +127,27 @@ export default function PriceHistory() {
     if (applicable.length > 0) return Number(applicable[0].new_price || 0);
     return 0;
   }, [form.product_name, form.effective_date, history]);
+
+  const handleFiltersChange = (newFilters: Record<string, any>) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
+
+  const filterFields = [
+    { key: 'effective_date_from', label: 'Date From', type: 'date' as const },
+    { key: 'effective_date_to', label: 'Date To', type: 'date' as const },
+    { key: 'product_name', label: 'Product', type: 'select' as const, options: products.map((p: any) => ({ value: p.name, label: p.name })) },
+    { key: 'search', label: 'Search', type: 'text' as const, placeholder: 'Search product, remarks, changed by...' },
+  ];
 
   const newPriceNumber = Number(form.new_price || 0);
   const inflationPct = resolvedOldPrice > 0 && Number.isFinite(newPriceNumber)
@@ -228,6 +279,8 @@ export default function PriceHistory() {
 
       <Card>
         <CardHeader title="Price Change History" subtitle="Old price is loaded automatically, and inflation is calculated from the previous price" />
+        <DataFilters filters={filters} onFiltersChange={handleFiltersChange} fields={filterFields} className="mx-5 mb-4" />
+        <div className="px-5 pb-2 text-sm text-slate-500">{totalFiltered} entries found</div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -244,7 +297,7 @@ export default function PriceHistory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {sortedHistory.map((row) => {
+              {paginatedHistory.map((row) => {
                 const oldPrice = Number(row.old_price || 0);
                 const newPrice = Number(row.new_price || 0);
                 const inflation = oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice) * 100 : null;
@@ -273,10 +326,18 @@ export default function PriceHistory() {
                   </tr>
                 );
               })}
-              {sortedHistory.length === 0 && <tr><td colSpan={9} className="px-5 py-10 text-center text-slate-400">No price changes recorded yet</td></tr>}
+              {paginatedHistory.length === 0 && <tr><td colSpan={9} className="px-5 py-10 text-center text-slate-400">No price changes recorded yet</td></tr>}
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalFilteredPages}
+          totalItems={totalFiltered}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </Card>
 
       <Modal open={open} onClose={closeModal} title={editing ? 'Edit Product Price Update' : 'Update Product Price'}>

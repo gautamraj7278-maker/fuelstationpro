@@ -1,0 +1,217 @@
+{
+  "communities": {
+    "0": [
+      "api_stock_validate_js",
+      "demo_anthropic_api",
+      "demo_api_index",
+      "demo_awesome_openclaw_agents",
+      "demo_fuelflow_agent",
+      "demo_stock_validate",
+      "readme_agent_capabilities",
+      "readme_customization",
+      "readme_integration_with_graphify",
+      "readme_license",
+      "readme_overview",
+      "readme_setup",
+      "readme_supabase",
+      "readme_vercel"
+    ],
+    "1": [
+      "package",
+      "package_dependencies",
+      "package_dependencies_anthropic_ai_sdk",
+      "package_dependencies_dotenv",
+      "package_dependencies_node_telegram_bot_api",
+      "package_description",
+      "package_main",
+      "package_name",
+      "package_scripts",
+      "package_scripts_start",
+      "package_version"
+    ],
+    "2": [
+      "soul_behavioral_guidelines",
+      "soul_core_architecture",
+      "soul_core_identity",
+      "soul_do",
+      "soul_don_t",
+      "soul_example_interactions",
+      "soul_fuelflow_agent_ai_development_assistant",
+      "soul_fuelflow_specific_knowledge",
+      "soul_key_systems",
+      "soul_severity_levels_for_feedback"
+    ],
+    "3": [
+      "bot",
+      "bot_anthropic",
+      "bot_bot",
+      "bot_conversations",
+      "bot_fs",
+      "bot_soulmd",
+      "bot_telegrambot"
+    ],
+    "4": [
+      "cli",
+      "cli_anthropic",
+      "cli_askquestion",
+      "cli_conversations",
+      "cli_fs",
+      "cli_getresponse",
+      "cli_soulmd"
+    ],
+    "5": [
+      "demo",
+      "demo_files_created",
+      "demo_fuelflow_agent_demonstration",
+      "demo_how_it_would_work_with_api_key",
+      "demo_integration_with_fuelflow_workflow",
+      "demo_next_steps",
+      "demo_what_we_ve_built"
+    ],
+    "6": [
+      "soul_1_code_review_quality_assurance",
+      "soul_2_database_schema_assistance",
+      "soul_3_api_endpoint_development_testing",
+      "soul_4_component_development_guidance",
+      "soul_5_documentation_knowledge_sharing",
+      "soul_responsibilities"
+    ],
+    "7": [
+      "api_index_js",
+      "graphify_knowledge_graph",
+      "readme",
+      "soul",
+      "supabase_schema"
+    ],
+    "8": [
+      "readme_direct_interaction",
+      "readme_integration_with_development_workflow",
+      "readme_usage"
+    ],
+    "9": [
+      "soul_fuelflow_agent_identity",
+      "soul_graphify",
+      "soul_validation_constants"
+    ],
+    "10": [
+      "test_agent",
+      "test_agent_fs",
+      "test_agent_soulmd"
+    ]
+  },
+  "cohesion": {
+    "0": 0.15384615384615385,
+    "1": 0.18181818181818182,
+    "2": 0.2,
+    "3": 0.2857142857142857,
+    "4": 0.2857142857142857,
+    "5": 0.2857142857142857,
+    "6": 0.3333333333333333,
+    "7": 0.4,
+    "8": 0.6666666666666666,
+    "9": 0.6666666666666666,
+    "10": 0.6666666666666666
+  },
+  "gods": [
+    {
+      "id": "demo_fuelflow_agent",
+      "label": "FuelFlow Agent",
+      "degree": 17
+    },
+    {
+      "id": "soul_fuelflow_agent_ai_development_assistant",
+      "label": "FuelFlow Agent - AI Development Assistant",
+      "degree": 7
+    },
+    {
+      "id": "demo_fuelflow_agent_demonstration",
+      "label": "FuelFlow Agent Demonstration",
+      "degree": 6
+    },
+    {
+      "id": "soul_responsibilities",
+      "label": "Responsibilities",
+      "degree": 6
+    },
+    {
+      "id": "readme_usage",
+      "label": "Usage",
+      "degree": 3
+    },
+    {
+      "id": "soul_fuelflow_specific_knowledge",
+      "label": "FuelFlow-Specific Knowledge",
+      "degree": 3
+    },
+    {
+      "id": "soul_behavioral_guidelines",
+      "label": "Behavioral Guidelines",
+      "degree": 3
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 2
+    },
+    {
+      "id": "api_index_js",
+      "label": "api/index.js",
+      "degree": 2
+    },
+    {
+      "id": "demo_stock_validate",
+      "label": "api/stock-validate.js",
+      "degree": 2
+    }
+  ],
+  "surprises": [
+    {
+      "source": "FuelFlow Agent",
+      "target": "api/index.js",
+      "source_files": [
+        "DEMO.md",
+        "api/index.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "crosses file types (doc \u2194 code); connects across different repos/directories; bridges separate communities; peripheral node `api/index.js` unexpectedly reaches hub `FuelFlow Agent`"
+    },
+    {
+      "source": "FuelFlow Agent",
+      "target": "api/stock-validate.js",
+      "source_files": [
+        "DEMO.md",
+        "api/stock-validate.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "crosses file types (doc \u2194 code); connects across different repos/directories; peripheral node `api/stock-validate.js` unexpectedly reaches hub `FuelFlow Agent`"
+    },
+    {
+      "source": "FuelFlow Agent",
+      "target": "Supabase",
+      "source_files": [
+        "DEMO.md",
+        "README.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; peripheral node `Supabase` unexpectedly reaches hub `FuelFlow Agent`"
+    },
+    {
+      "source": "FuelFlow Agent",
+      "target": "Vercel",
+      "source_files": [
+        "DEMO.md",
+        "README.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; peripheral node `Vercel` unexpectedly reaches hub `FuelFlow Agent`"
+    }
+  ],
+  "tokens": {
+    "input": 3713,
+    "output": 1049
+  }
+}
