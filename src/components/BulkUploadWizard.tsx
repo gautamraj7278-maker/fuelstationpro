@@ -11,6 +11,7 @@ export interface FieldSpec {
   required?: boolean;
   example: string;
   options?: string[];
+  unique?: boolean;
 }
 
 interface Props {
@@ -24,10 +25,11 @@ interface Props {
 export default function BulkUploadWizard({ title, description, endpoint, fields, templateName }: Props) {
   const [step, setStep] = useState(1);
   const [parsed, setParsed] = useState<Record<string, string>[]>([]);
-  const [errors, setErrors] = useState<{ row: number; msg: string }[]>([]);
+  const [validationErrors, setValidationErrors] = useState<{ row: number; msg: string }[]>([]);
+  const [duplicateErrors, setDuplicateErrors] = useState<{ row: number; msg: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progressText, setProgressText] = useState('');
-  const [result, setResult] = useState<{ ok: number; fail: number; errors?: string[] } | null>(null);
+  const [result, setResult] = useState<{ ok: number; fail: number; duplicates: number; validationErrors: number; errors?: string[] } | null>(null);
   const [fileName, setFileName] = useState('');
 
   const downloadTemplate = () => {
@@ -44,39 +46,97 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
     reader.onload = () => {
       const text = String(reader.result || '');
       const rows = parseCSV(text);
-      const errs: { row: number; msg: string }[] = [];
-      rows.forEach((r, i) => {
+      const validationErrors: { row: number; msg: string }[] = [];
+      const duplicateErrors: { row: number; msg: string }[] = [];
+      // For tracking seen values for unique fields
+      const seenValues = new Map<string, Map<string, number>>();
+      // Initialize seenValues for each unique field
+      fields
+        .filter((f) => f.unique)
+        .forEach((f) => {
+          seenValues.set(f.key, new Map<string, number>());
+        });
+
+      rows.forEach((row, rowIndex) => {
+        const rowNumber = rowIndex + 2; // header is row 1, data starts at row 2
+        let isValid = true;
+
+        // Validation checks
         for (const f of fields) {
-          if (f.required && (!r[f.key] || r[f.key].trim() === '')) {
-            errs.push({ row: i + 2, msg: `Missing required "${f.label}"` });
+          if (f.required && (!row[f.key] || row[f.key].trim() === '')) {
+            validationErrors.push({ row: rowNumber, msg: `Missing required "${f.label}"` });
+            isValid = false;
           }
-          if (f.type === 'number' && r[f.key] && isNaN(Number(r[f.key]))) {
-            errs.push({ row: i + 2, msg: `"${f.label}" must be a number` });
+          if (f.type === 'number' && row[f.key] && isNaN(Number(row[f.key]))) {
+            validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be a number` });
+            isValid = false;
           }
-          if (f.options && r[f.key] && !f.options.includes(r[f.key])) {
-            errs.push({ row: i + 2, msg: `"${f.label}" must be one of: ${f.options.join(', ')}` });
+          if (f.options && row[f.key] && !f.options.includes(row[f.key])) {
+            validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be one of: ${f.options.join(', ')}` });
+            isValid = false;
+          }
+        }
+
+        // If validation failed, skip duplicate check for this row
+        if (!isValid) {
+          return;
+        }
+
+        // Duplicate check for unique fields
+        for (const f of fields) {
+          if (f.unique) {
+            const value = row[f.key];
+            if (value !== undefined && value !== null && value !== '') {
+              const seenMap = seenValues.get(f.key)!;
+              if (seenMap.has(value)) {
+                // Duplicate found
+                duplicateErrors.push({
+                  row: rowNumber,
+                  msg: `Duplicate value for "${f.label}"`,
+                });
+                isValid = false;
+                // Do not add this duplicate value to the seen map
+                break; // break out of the field loop for this row
+              } else {
+                // First time seeing this value
+                seenMap.set(value, rowNumber);
+              }
+            }
           }
         }
       });
-      setParsed(rows); setErrors(errs); setStep(2);
+
+      setParsed(rows);
+      setValidationErrors(validationErrors);
+      setDuplicateErrors(duplicateErrors);
+      setStep(2);
     };
     reader.readAsText(file);
   };
 
   const commit = async () => {
     setUploading(true);
+
+    // Compute the set of rows to skip (validation errors and duplicates)
+    const validationErrorRows = new Set(validationErrors.map(e => e.row));
+    const duplicateErrorRows = new Set(duplicateErrors.map(e => e.row));
+    const skipRows = new Set([...validationErrorRows, ...duplicateErrorRows]);
+
     let ok = 0, fail = 0;
     const errors: string[] = [];
     const CHUNK = 250;
-    const payload = parsed.map((r) => {
-      const o: Record<string, any> = {};
-      fields.forEach((f) => {
-        let v: any = r[f.key];
-        if (f.type === 'number') v = v === '' || v == null ? null : Number(v);
-        o[f.key] = v;
+    // Build payload excluding skipped rows
+    const payload = parsed
+      .filter((_, index) => !skipRows.has(index + 2)) // row number = index + 2
+      .map((r) => {
+        const o: Record<string, any> = {};
+        fields.forEach((f) => {
+          let v: any = r[f.key];
+          if (f.type === 'number') v = v === '' || v == null ? null : Number(v);
+          o[f.key] = v;
+        });
+        return o;
       });
-      return o;
-    });
 
     const total = payload.length;
     for (let i = 0; i < total; i += CHUNK) {
@@ -99,10 +159,27 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       }
     }
     setProgressText('');
-    setResult({ ok, fail, errors: errors.length > 0 ? errors : undefined }); setUploading(false); setStep(3);
+    const validationErrorCount = validationErrorRows.size;
+    const duplicateCount = duplicateErrorRows.size;
+    setResult({
+      ok,
+      fail,
+      duplicates: duplicateCount,
+      validationErrors: validationErrorCount,
+      errors: errors.length > 0 ? errors : undefined
+    });
+    setUploading(false);
+    setStep(3);
   };
 
-  const reset = () => { setStep(1); setParsed([]); setErrors([]); setResult(null); setFileName(''); };
+  const reset = () => {
+    setStep(1);
+    setParsed([]);
+    setValidationErrors([]);
+    setDuplicateErrors([]);
+    setResult(null);
+    setFileName('');
+  };
 
   return (
     <div className="space-y-4">
@@ -154,15 +231,25 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold text-slate-800">Step 2 — Validate ({fileName})</h3>
-              <p className="text-sm text-slate-500">{parsed.length} rows parsed • {errors.length} validation issue{errors.length !== 1 ? 's' : ''}</p>
+              <p className="text-sm text-slate-500">
+                {parsed.length} rows parsed •
+                {validationErrors.length} validation issue{validationErrors.length !== 1 ? 's' : ''} •
+                {duplicateErrors.length} duplicate issue{duplicateErrors.length !== 1 ? 's' : ''}
+              </p>
             </div>
             <button onClick={reset} className="text-sm text-slate-500 hover:underline">Start over</button>
           </div>
-          {errors.length > 0 && (
+          {validationErrors.length + duplicateErrors.length > 0 && (
             <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 mb-4">
               <div className="flex items-center gap-2 text-amber-700 text-sm font-medium mb-1"><AlertTriangle className="w-4 h-4" /> Issues found — fix these rows before committing</div>
               <ul className="text-xs text-amber-700 space-y-0.5 max-h-32 overflow-y-auto">
-                {errors.slice(0, 30).map((e, i) => <li key={i}>Row {e.row}: {e.msg}</li>)}
+                {[...validationErrors, ...duplicateErrors]
+                  .slice(0, 30)
+                  .map((e, i) => (
+                    <li key={i}>
+                      Row {e.row}: {e.msg}
+                    </li>
+                  ))}
               </ul>
             </div>
           )}
@@ -178,7 +265,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
           </div>
           <div className="flex justify-end gap-2 mt-5">
             <button onClick={reset} disabled={uploading} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50">Cancel</button>
-            <button onClick={commit} disabled={errors.length > 0 || parsed.length === 0 || uploading} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
+            <button onClick={commit} disabled={(validationErrors.length + duplicateErrors.length) > 0 || parsed.length === 0 || uploading} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} {uploading ? 'Uploading...' : `Commit ${parsed.length} Records`}
             </button>
           </div>
@@ -194,7 +281,15 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
             <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
           )}
           <h3 className="text-lg font-semibold text-slate-800">Upload complete</h3>
-          <p className="text-sm text-slate-500 mt-1">{result.ok} records imported successfully{result.fail > 0 ? `, ${result.fail} failed` : ''}.</p>
+          <p className="text-sm text-slate-500 mt-1">
+            {result.ok} records processed successfully{
+              result.fail > 0 ? `, ${result.fail} failed` : ''
+            }{
+              result.duplicates > 0 ? `, ${result.duplicates} duplicates skipped` : ''
+            }{
+              result.validationErrors > 0 ? `, ${result.validationErrors} validation errors` : ''
+            }
+          </p>
           {result.errors && result.errors.length > 0 && (
             <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-left max-h-48 overflow-y-auto">
               <p className="text-xs font-medium text-amber-700 mb-1">Errors:</p>
