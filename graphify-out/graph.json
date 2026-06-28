@@ -197,7 +197,7 @@
       "label": "handler()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L204",
+      "source_location": "L226",
       "_origin": "ast",
       "id": "api_index_handler",
       "community": 3,
@@ -207,7 +207,7 @@
       "label": "handleCalibration()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L380",
+      "source_location": "L436",
       "_origin": "ast",
       "id": "api_index_handlecalibration",
       "community": 3,
@@ -217,7 +217,7 @@
       "label": "handleSalesCreate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L440",
+      "source_location": "L496",
       "_origin": "ast",
       "id": "api_index_handlesalescreate",
       "community": 3,
@@ -227,7 +227,7 @@
       "label": "handleSalesUpdate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L448",
+      "source_location": "L504",
       "_origin": "ast",
       "id": "api_index_handlesalesupdate",
       "community": 3,
@@ -237,7 +237,7 @@
       "label": "handleStockMovementCreate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L457",
+      "source_location": "L513",
       "_origin": "ast",
       "id": "api_index_handlestockmovementcreate",
       "community": 3,
@@ -247,7 +247,7 @@
       "label": "handleStockMovementUpdate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L469",
+      "source_location": "L525",
       "_origin": "ast",
       "id": "api_index_handlestockmovementupdate",
       "community": 3,
@@ -257,7 +257,7 @@
       "label": "handleStockMovementDelete()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L488",
+      "source_location": "L544",
       "_origin": "ast",
       "id": "api_index_handlestockmovementdelete",
       "community": 3,
@@ -267,7 +267,7 @@
       "label": "handleTankerUnloadingListV2()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L500",
+      "source_location": "L556",
       "_origin": "ast",
       "id": "api_index_handletankerunloadinglistv2",
       "community": 3,
@@ -277,7 +277,7 @@
       "label": "handleTankerUnloadingBatches()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L536",
+      "source_location": "L636",
       "_origin": "ast",
       "id": "api_index_handletankerunloadingbatches",
       "community": 3,
@@ -287,7 +287,7 @@
       "label": "requireText()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L552",
+      "source_location": "L687",
       "_origin": "ast",
       "id": "api_index_requiretext",
       "community": 3,
@@ -297,7 +297,7 @@
       "label": "optionalText()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L558",
+      "source_location": "L693",
       "_origin": "ast",
       "id": "api_index_optionaltext",
       "community": 3,
@@ -307,7 +307,7 @@
       "label": "requireNonNegativeNumber()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L563",
+      "source_location": "L698",
       "_origin": "ast",
       "id": "api_index_requirenonnegativenumber",
       "community": 3,
@@ -317,7 +317,7 @@
       "label": "optionalNumber()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L569",
+      "source_location": "L704",
       "_origin": "ast",
       "id": "api_index_optionalnumber",
       "community": 3,
@@ -327,7 +327,7 @@
       "label": "resolvePriceBeforeOrOnDate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L576",
+      "source_location": "L711",
       "_origin": "ast",
       "id": "api_index_resolvepricebeforeorondate",
       "community": 3,
@@ -337,7 +337,7 @@
       "label": "normalizePriceHistoryRow()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L592",
+      "source_location": "L727",
       "_origin": "ast",
       "id": "api_index_normalizepricehistoryrow",
       "community": 3,
@@ -347,7 +347,7 @@
       "label": "syncProductCurrentPrice()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L607",
+      "source_location": "L742",
       "_origin": "ast",
       "id": "api_index_syncproductcurrentprice",
       "community": 3,
@@ -357,7 +357,7 @@
       "label": "loadEffectivePriceMap()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L626",
+      "source_location": "L761",
       "_origin": "ast",
       "id": "api_index_loadeffectivepricemap",
       "community": 3,
@@ -367,7 +367,7 @@
       "label": "interpolateVolume()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L672",
+      "source_location": "L807",
       "_origin": "ast",
       "id": "api_index_interpolatevolume",
       "community": 3,
@@ -377,7 +377,7 @@
       "label": "loadCalibrationPointsByTankName()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L693",
+      "source_location": "L828",
       "_origin": "ast",
       "id": "api_index_loadcalibrationpointsbytankname",
       "community": 3,
@@ -387,7 +387,7 @@
       "label": "normalizeTankerUnloadingCompartments()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L702",
+      "source_location": "L837",
       "_origin": "ast",
       "id": "api_index_normalizetankerunloadingcompartments",
       "community": 3,
@@ -397,7 +397,7 @@
       "label": "handleTankerUnloadingCreateV2()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L740",
+      "source_location": "L875",
       "_origin": "ast",
       "id": "api_index_handletankerunloadingcreatev2",
       "community": 3,
@@ -407,7 +407,7 @@
       "label": "handleTankerUnloadingUpdateV2()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L781",
+      "source_location": "L916",
       "_origin": "ast",
       "id": "api_index_handletankerunloadingupdatev2",
       "community": 3,
@@ -417,7 +417,7 @@
       "label": "handleTankerUnloadingDeleteV2()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L828",
+      "source_location": "L963",
       "_origin": "ast",
       "id": "api_index_handletankerunloadingdeletev2",
       "community": 3,
@@ -427,7 +427,7 @@
       "label": "handleDailySalesList()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L853",
+      "source_location": "L988",
       "_origin": "ast",
       "id": "api_index_handledailysaleslist",
       "community": 3,
@@ -437,7 +437,7 @@
       "label": "handleDailySalesCreate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L862",
+      "source_location": "L1026",
       "_origin": "ast",
       "id": "api_index_handledailysalescreate",
       "community": 3,
@@ -447,7 +447,7 @@
       "label": "handleDailySalesUpdate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L867",
+      "source_location": "L1031",
       "_origin": "ast",
       "id": "api_index_handledailysalesupdate",
       "community": 3,
@@ -457,7 +457,7 @@
       "label": "handleDailySalesDelete()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L875",
+      "source_location": "L1039",
       "_origin": "ast",
       "id": "api_index_handledailysalesdelete",
       "community": 3,
@@ -467,7 +467,7 @@
       "label": "loadDailySalesEntryById()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L883",
+      "source_location": "L1047",
       "_origin": "ast",
       "id": "api_index_loaddailysalesentrybyid",
       "community": 3,
@@ -477,7 +477,7 @@
       "label": "isLaterSalesEntry()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L893",
+      "source_location": "L1057",
       "_origin": "ast",
       "id": "api_index_islatersalesentry",
       "community": 3,
@@ -487,7 +487,7 @@
       "label": "ensureDailySalesEntryMutable()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L899",
+      "source_location": "L1063",
       "_origin": "ast",
       "id": "api_index_ensuredailysalesentrymutable",
       "community": 3,
@@ -497,7 +497,7 @@
       "label": "syncMetersForNozzles()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L911",
+      "source_location": "L1075",
       "_origin": "ast",
       "id": "api_index_syncmetersfornozzles",
       "community": 3,
@@ -507,7 +507,7 @@
       "label": "hasClosingDipOnOrAfter()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L943",
+      "source_location": "L1107",
       "_origin": "ast",
       "id": "api_index_hasclosingdiponorafter",
       "community": 3,
@@ -517,7 +517,7 @@
       "label": "adjustTankCurrentVolumeForSalesDelta()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L958",
+      "source_location": "L1122",
       "_origin": "ast",
       "id": "api_index_adjusttankcurrentvolumeforsalesdelta",
       "community": 3,
@@ -527,7 +527,7 @@
       "label": "adjustBufferVolumeByProduct()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L972",
+      "source_location": "L1136",
       "_origin": "ast",
       "id": "api_index_adjustbuffervolumebyproduct",
       "community": 3,
@@ -537,7 +537,7 @@
       "label": "sumByKey()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1000",
+      "source_location": "L1164",
       "_origin": "ast",
       "id": "api_index_sumbykey",
       "community": 3,
@@ -547,7 +547,7 @@
       "label": "reconcileTankCurrentVolume()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1010",
+      "source_location": "L1174",
       "_origin": "ast",
       "id": "api_index_reconciletankcurrentvolume",
       "community": 3,
@@ -557,7 +557,7 @@
       "label": "reconcileBufferVolume()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1059",
+      "source_location": "L1223",
       "_origin": "ast",
       "id": "api_index_reconcilebuffervolume",
       "community": 3,
@@ -567,7 +567,7 @@
       "label": "createDailySalesEntry()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1077",
+      "source_location": "L1241",
       "_origin": "ast",
       "id": "api_index_createdailysalesentry",
       "community": 3,
@@ -577,7 +577,7 @@
       "label": "updateDailySalesEntry()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1315",
+      "source_location": "L1479",
       "_origin": "ast",
       "id": "api_index_updatedailysalesentry",
       "community": 3,
@@ -587,7 +587,7 @@
       "label": "deleteDailySalesEntry()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1531",
+      "source_location": "L1695",
       "_origin": "ast",
       "id": "api_index_deletedailysalesentry",
       "community": 3,
@@ -597,7 +597,7 @@
       "label": "handleDailySalesImport()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1561",
+      "source_location": "L1725",
       "_origin": "ast",
       "id": "api_index_handledailysalesimport",
       "community": 3,
@@ -607,7 +607,7 @@
       "label": "handleDipReadingCreate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1610",
+      "source_location": "L1774",
       "_origin": "ast",
       "id": "api_index_handledipreadingcreate",
       "community": 3,
@@ -617,7 +617,7 @@
       "label": "syncTankCurrentVolumeToLatestClosing()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1629",
+      "source_location": "L1793",
       "_origin": "ast",
       "id": "api_index_synctankcurrentvolumetolatestclosing",
       "community": 3,
@@ -627,7 +627,7 @@
       "label": "handleDipReadingUpdate()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1646",
+      "source_location": "L1810",
       "_origin": "ast",
       "id": "api_index_handledipreadingupdate",
       "community": 3,
@@ -637,7 +637,7 @@
       "label": "handleDipReadingDelete()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1707",
+      "source_location": "L1871",
       "_origin": "ast",
       "id": "api_index_handledipreadingdelete",
       "community": 3,
@@ -647,7 +647,7 @@
       "label": "createDipReading()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1737",
+      "source_location": "L1901",
       "_origin": "ast",
       "id": "api_index_createdipreading",
       "community": 3,
@@ -657,7 +657,7 @@
       "label": "handleCalibrationImport()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1789",
+      "source_location": "L1953",
       "_origin": "ast",
       "id": "api_index_handlecalibrationimport",
       "community": 3,
@@ -667,7 +667,7 @@
       "label": "handleBufferTransfer()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1836",
+      "source_location": "L2000",
       "_origin": "ast",
       "id": "api_index_handlebuffertransfer",
       "community": 3,
@@ -677,7 +677,7 @@
       "label": "handleTankerUnloadingImport()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1879",
+      "source_location": "L2043",
       "_origin": "ast",
       "id": "api_index_handletankerunloadingimport",
       "community": 3,
@@ -942,6 +942,286 @@
       "id": "eslint_config",
       "community": 20,
       "norm_label": "eslint.config.js"
+    },
+    {
+      "label": "bot.js",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot",
+      "community": 23,
+      "norm_label": "bot.js"
+    },
+    {
+      "label": "fs",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot_fs",
+      "community": 23,
+      "norm_label": "fs"
+    },
+    {
+      "label": "TelegramBot",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot_telegrambot",
+      "community": 23,
+      "norm_label": "telegrambot"
+    },
+    {
+      "label": "Anthropic",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot_anthropic",
+      "community": 23,
+      "norm_label": "anthropic"
+    },
+    {
+      "label": "soulMd",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot_soulmd",
+      "community": 23,
+      "norm_label": "soulmd"
+    },
+    {
+      "label": "bot",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot_bot",
+      "community": 23,
+      "norm_label": "bot"
+    },
+    {
+      "label": "conversations",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "fuelflow_agent_bot_conversations",
+      "community": 23,
+      "norm_label": "conversations"
+    },
+    {
+      "label": "cli.js",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli",
+      "community": 24,
+      "norm_label": "cli.js"
+    },
+    {
+      "label": "Anthropic",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli_anthropic",
+      "community": 24,
+      "norm_label": "anthropic"
+    },
+    {
+      "label": "fs",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli_fs",
+      "community": 24,
+      "norm_label": "fs"
+    },
+    {
+      "label": "soulMd",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli_soulmd",
+      "community": 24,
+      "norm_label": "soulmd"
+    },
+    {
+      "label": "conversations",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli_conversations",
+      "community": 24,
+      "norm_label": "conversations"
+    },
+    {
+      "label": "getResponse()",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli_getresponse",
+      "community": 24,
+      "norm_label": "getresponse()"
+    },
+    {
+      "label": "askQuestion()",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "fuelflow_agent_cli_askquestion",
+      "community": 24,
+      "norm_label": "askquestion()"
+    },
+    {
+      "label": "package.json",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package",
+      "community": 14,
+      "norm_label": "package.json"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_name",
+      "community": 14,
+      "norm_label": "name"
+    },
+    {
+      "label": "version",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_version",
+      "community": 14,
+      "norm_label": "version"
+    },
+    {
+      "label": "description",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_description",
+      "community": 14,
+      "norm_label": "description"
+    },
+    {
+      "label": "main",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_main",
+      "community": 14,
+      "norm_label": "main"
+    },
+    {
+      "label": "scripts",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_scripts",
+      "community": 14,
+      "norm_label": "scripts"
+    },
+    {
+      "label": "start",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_scripts_start",
+      "community": 14,
+      "norm_label": "start"
+    },
+    {
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_dependencies",
+      "community": 14,
+      "norm_label": "dependencies"
+    },
+    {
+      "label": "@anthropic-ai/sdk",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_dependencies_anthropic_ai_sdk",
+      "community": 14,
+      "norm_label": "@anthropic-ai/sdk"
+    },
+    {
+      "label": "dotenv",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_dependencies_dotenv",
+      "community": 14,
+      "norm_label": "dotenv"
+    },
+    {
+      "label": "node-telegram-bot-api",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "fuelflow_agent_package_dependencies_node_telegram_bot_api",
+      "community": 14,
+      "norm_label": "node-telegram-bot-api"
+    },
+    {
+      "label": "test-agent.js",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/test-agent.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_test_agent",
+      "community": 26,
+      "norm_label": "test-agent.js"
+    },
+    {
+      "label": "fs",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/test-agent.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "fuelflow_agent_test_agent_fs",
+      "community": 26,
+      "norm_label": "fs"
+    },
+    {
+      "label": "soulMd",
+      "file_type": "code",
+      "source_file": "fuelflow-agent/test-agent.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "fuelflow_agent_test_agent_soulmd",
+      "community": 26,
+      "norm_label": "soulmd"
     },
     {
       "label": "package.json",
@@ -1297,7 +1577,7 @@
       "label": "P()",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L39",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "src_app_p",
       "community": 1,
@@ -1307,10 +1587,10 @@
       "label": "App()",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L41",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "src_app_app",
-      "community": 4,
+      "community": 1,
       "norm_label": "app()"
     },
     {
@@ -1337,7 +1617,7 @@
       "label": "Props",
       "file_type": "code",
       "source_file": "src/components/BulkUploadWizard.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "components_bulkuploadwizard_props",
       "community": 1,
@@ -1347,7 +1627,7 @@
       "label": "BulkUploadWizard()",
       "file_type": "code",
       "source_file": "src/components/BulkUploadWizard.tsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "components_bulkuploadwizard_bulkuploadwizard",
       "community": 1,
@@ -1420,7 +1700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_layout",
-      "community": 4,
+      "community": 1,
       "norm_label": "layout.tsx"
     },
     {
@@ -1430,7 +1710,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_layout_navitem",
-      "community": 4,
+      "community": 1,
       "norm_label": "navitem"
     },
     {
@@ -1440,7 +1720,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "components_layout_navgroup",
-      "community": 4,
+      "community": 1,
       "norm_label": "navgroup"
     },
     {
@@ -1450,17 +1730,17 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_layout_groups",
-      "community": 4,
+      "community": 1,
       "norm_label": "groups"
     },
     {
       "label": "Layout()",
       "file_type": "code",
       "source_file": "src/components/Layout.tsx",
-      "source_location": "L55",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "components_layout_layout",
-      "community": 4,
+      "community": 1,
       "norm_label": "layout()"
     },
     {
@@ -1540,7 +1820,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_protectedroute",
-      "community": 4,
+      "community": 1,
       "norm_label": "protectedroute.tsx"
     },
     {
@@ -1550,7 +1830,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_protectedroute_protectedroute",
-      "community": 4,
+      "community": 1,
       "norm_label": "protectedroute()"
     },
     {
@@ -1602,6 +1882,46 @@
       "id": "ui_card_cardheader",
       "community": 0,
       "norm_label": "cardheader()"
+    },
+    {
+      "label": "DataFilters.tsx",
+      "file_type": "code",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ui_datafilters",
+      "community": 0,
+      "norm_label": "datafilters.tsx"
+    },
+    {
+      "label": "FilterField",
+      "file_type": "code",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "ui_datafilters_filterfield",
+      "community": 0,
+      "norm_label": "filterfield"
+    },
+    {
+      "label": "DataFiltersProps",
+      "file_type": "code",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "ui_datafilters_datafiltersprops",
+      "community": 0,
+      "norm_label": "datafiltersprops"
+    },
+    {
+      "label": "DataFilters()",
+      "file_type": "code",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "ui_datafilters_datafilters",
+      "community": 0,
+      "norm_label": "datafilters()"
     },
     {
       "label": "Field.tsx",
@@ -1684,6 +2004,36 @@
       "norm_label": "confirmmodal()"
     },
     {
+      "label": "Pagination.tsx",
+      "file_type": "code",
+      "source_file": "src/components/ui/Pagination.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ui_pagination",
+      "community": 0,
+      "norm_label": "pagination.tsx"
+    },
+    {
+      "label": "PaginationProps",
+      "file_type": "code",
+      "source_file": "src/components/ui/Pagination.tsx",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "ui_pagination_paginationprops",
+      "community": 0,
+      "norm_label": "paginationprops"
+    },
+    {
+      "label": "Pagination()",
+      "file_type": "code",
+      "source_file": "src/components/ui/Pagination.tsx",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "ui_pagination_pagination",
+      "community": 0,
+      "norm_label": "pagination()"
+    },
+    {
       "label": "States.tsx",
       "file_type": "code",
       "source_file": "src/components/ui/States.tsx",
@@ -1730,7 +2080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "contexts_authcontext",
-      "community": 4,
+      "community": 1,
       "norm_label": "authcontext.tsx"
     },
     {
@@ -1740,7 +2090,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "contexts_authcontext_authctx",
-      "community": 4,
+      "community": 1,
       "norm_label": "authctx"
     },
     {
@@ -1750,7 +2100,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "contexts_authcontext_authcontext",
-      "community": 4,
+      "community": 1,
       "norm_label": "authcontext"
     },
     {
@@ -1760,7 +2110,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "contexts_authcontext_authprovider",
-      "community": 4,
+      "community": 1,
       "norm_label": "authprovider()"
     },
     {
@@ -1770,7 +2120,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "contexts_authcontext_useauth",
-      "community": 4,
+      "community": 1,
       "norm_label": "useauth()"
     },
     {
@@ -1870,7 +2220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_client_env",
-      "community": 4,
+      "community": 1,
       "norm_label": "client-env.js"
     },
     {
@@ -1880,7 +2230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_client_env_getrequiredclientenv",
-      "community": 4,
+      "community": 1,
       "norm_label": "getrequiredclientenv()"
     },
     {
@@ -1890,7 +2240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_csv",
-      "community": 1,
+      "community": 0,
       "norm_label": "csv.ts"
     },
     {
@@ -1930,7 +2280,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "lib_csv_downloadcsv",
-      "community": 1,
+      "community": 0,
       "norm_label": "downloadcsv()"
     },
     {
@@ -1940,7 +2290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_googleauth",
-      "community": 4,
+      "community": 1,
       "norm_label": "googleauth.js"
     },
     {
@@ -1950,7 +2300,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_googleauth_ismobile",
-      "community": 4,
+      "community": 1,
       "norm_label": "ismobile()"
     },
     {
@@ -1960,7 +2310,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_googleauth_buildgoogleurl",
-      "community": 4,
+      "community": 1,
       "norm_label": "buildgoogleurl()"
     },
     {
@@ -1970,7 +2320,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_googleauth_signinwithgoogle",
-      "community": 4,
+      "community": 1,
       "norm_label": "signinwithgoogle()"
     },
     {
@@ -1980,7 +2330,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "lib_googleauth_handlegoogleredirect",
-      "community": 4,
+      "community": 1,
       "norm_label": "handlegoogleredirect()"
     },
     {
@@ -2030,7 +2380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_supabase",
-      "community": 4,
+      "community": 1,
       "norm_label": "supabase.js"
     },
     {
@@ -2040,7 +2390,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_supabase_supabase",
-      "community": 4,
+      "community": 1,
       "norm_label": "supabase"
     },
     {
@@ -2050,8 +2400,38 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_main",
-      "community": 4,
+      "community": 1,
       "norm_label": "main.tsx"
+    },
+    {
+      "label": "DailySalesReport.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "pages_dailysalesreport",
+      "community": 0,
+      "norm_label": "dailysalesreport.tsx"
+    },
+    {
+      "label": "Period",
+      "file_type": "code",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "pages_dailysalesreport_period",
+      "community": 0,
+      "norm_label": "period"
+    },
+    {
+      "label": "DailySalesReport()",
+      "file_type": "code",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "pages_dailysalesreport_dailysalesreport",
+      "community": 0,
+      "norm_label": "dailysalesreport()"
     },
     {
       "label": "Dashboard.tsx",
@@ -2090,7 +2470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_login",
-      "community": 4,
+      "community": 1,
       "norm_label": "login.tsx"
     },
     {
@@ -2100,8 +2480,28 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "pages_login_login",
-      "community": 4,
+      "community": 1,
       "norm_label": "login()"
+    },
+    {
+      "label": "PriceHistoryReport.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "pages_pricehistoryreport",
+      "community": 0,
+      "norm_label": "pricehistoryreport.tsx"
+    },
+    {
+      "label": "PriceHistoryReport()",
+      "file_type": "code",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "pages_pricehistoryreport_pricehistoryreport",
+      "community": 0,
+      "norm_label": "pricehistoryreport()"
     },
     {
       "label": "Reports.tsx",
@@ -2114,24 +2514,54 @@
       "norm_label": "reports.tsx"
     },
     {
-      "label": "Period",
+      "label": "colorMap",
       "file_type": "code",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "pages_reports_period",
+      "id": "pages_reports_colormap",
       "community": 0,
-      "norm_label": "period"
+      "norm_label": "colormap"
     },
     {
       "label": "Reports()",
       "file_type": "code",
       "source_file": "src/pages/Reports.tsx",
-      "source_location": "L11",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "pages_reports_reports",
       "community": 0,
       "norm_label": "reports()"
+    },
+    {
+      "label": "TankerUnloadingReport.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "pages_tankerunloadingreport",
+      "community": 0,
+      "norm_label": "tankerunloadingreport.tsx"
+    },
+    {
+      "label": "Period",
+      "file_type": "code",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "pages_tankerunloadingreport_period",
+      "community": 0,
+      "norm_label": "period"
+    },
+    {
+      "label": "TankerUnloadingReport()",
+      "file_type": "code",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "pages_tankerunloadingreport_tankerunloadingreport",
+      "community": 0,
+      "norm_label": "tankerunloadingreport()"
     },
     {
       "label": "CalibrationUpload.tsx",
@@ -2557,7 +2987,7 @@
       "label": "PriceHistory()",
       "file_type": "code",
       "source_file": "src/pages/master/PriceHistory.tsx",
-      "source_location": "L11",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "master_pricehistory_pricehistory",
       "community": 0,
@@ -2747,7 +3177,7 @@
       "label": "EntryRow",
       "file_type": "code",
       "source_file": "src/pages/ops/Sales.tsx",
-      "source_location": "L10",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "ops_sales_entryrow",
       "community": 0,
@@ -2757,7 +3187,7 @@
       "label": "Sales()",
       "file_type": "code",
       "source_file": "src/pages/ops/Sales.tsx",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "ops_sales_sales",
       "community": 0,
@@ -2797,7 +3227,7 @@
       "label": "TankerUnloading()",
       "file_type": "code",
       "source_file": "src/pages/ops/TankerUnloading.tsx",
-      "source_location": "L11",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "ops_tankerunloading_tankerunloading",
       "community": 0,
@@ -3344,6 +3774,486 @@
       "norm_label": "cost guidance"
     },
     {
+      "label": "AI-AGENT-USAGE-GUIDE.md",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide",
+      "community": 8,
+      "norm_label": "ai-agent-usage-guide.md"
+    },
+    {
+      "label": "Using the FuelFlow AI Agent",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "community": 8,
+      "norm_label": "using the fuelflow ai agent"
+    },
+    {
+      "label": "Overview",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_overview",
+      "community": 8,
+      "norm_label": "overview"
+    },
+    {
+      "label": "Setup",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_setup",
+      "community": 8,
+      "norm_label": "setup"
+    },
+    {
+      "label": "Usage Methods",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_usage_methods",
+      "community": 8,
+      "norm_label": "usage methods"
+    },
+    {
+      "label": "1. Interactive Chat Mode",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_1_interactive_chat_mode",
+      "community": 8,
+      "norm_label": "1. interactive chat mode"
+    },
+    {
+      "label": "2. Code Review Integration",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_2_code_review_integration",
+      "community": 8,
+      "norm_label": "2. code review integration"
+    },
+    {
+      "label": "3. Schema Design Assistance",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_3_schema_design_assistance",
+      "community": 8,
+      "norm_label": "3. schema design assistance"
+    },
+    {
+      "label": "4. Learning & Onboarding",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_4_learning_onboarding",
+      "community": 8,
+      "norm_label": "4. learning & onboarding"
+    },
+    {
+      "label": "Example Interactions",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L84",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_example_interactions",
+      "community": 8,
+      "norm_label": "example interactions"
+    },
+    {
+      "label": "Code Review Request",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_code_review_request",
+      "community": 8,
+      "norm_label": "code review request"
+    },
+    {
+      "label": "Schema Design Help",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L116",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_schema_design_help",
+      "community": 8,
+      "norm_label": "schema design help"
+    },
+    {
+      "label": "Best Practices",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L158",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_best_practices",
+      "community": 8,
+      "norm_label": "best practices"
+    },
+    {
+      "label": "Integration with Existing Tools",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L166",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_integration_with_existing_tools",
+      "community": 8,
+      "norm_label": "integration with existing tools"
+    },
+    {
+      "label": "Customization",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L175",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_customization",
+      "community": 8,
+      "norm_label": "customization"
+    },
+    {
+      "label": "Troubleshooting",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L182",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_troubleshooting",
+      "community": 8,
+      "norm_label": "troubleshooting"
+    },
+    {
+      "label": "License",
+      "file_type": "document",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L189",
+      "_origin": "ast",
+      "id": "ai_agent_usage_guide_license",
+      "community": 8,
+      "norm_label": "license"
+    },
+    {
+      "label": "DEMO.md",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "demo",
+      "community": 22,
+      "norm_label": "demo.md"
+    },
+    {
+      "label": "FuelFlow Agent Demonstration",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "demo_fuelflow_agent_demonstration",
+      "community": 22,
+      "norm_label": "fuelflow agent demonstration"
+    },
+    {
+      "label": "What We've Built",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "demo_what_we_ve_built",
+      "community": 22,
+      "norm_label": "what we've built"
+    },
+    {
+      "label": "How It Would Work (With API Key)",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "demo_how_it_would_work_with_api_key",
+      "community": 22,
+      "norm_label": "how it would work (with api key)"
+    },
+    {
+      "label": "Files in the Agent Directory",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L82",
+      "_origin": "ast",
+      "id": "demo_files_in_the_agent_directory",
+      "community": 22,
+      "norm_label": "files in the agent directory"
+    },
+    {
+      "label": "Integration with FuelFlow Workflow",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L93",
+      "_origin": "ast",
+      "id": "demo_integration_with_fuelflow_workflow",
+      "community": 22,
+      "norm_label": "integration with fuelflow workflow"
+    },
+    {
+      "label": "Complementing Existing Tools",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L102",
+      "_origin": "ast",
+      "id": "demo_complementing_existing_tools",
+      "community": 22,
+      "norm_label": "complementing existing tools"
+    },
+    {
+      "label": "Next Steps",
+      "file_type": "document",
+      "source_file": "DEMO.md",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "demo_next_steps",
+      "community": 22,
+      "norm_label": "next steps"
+    },
+    {
+      "label": "PHASE2-SUMMARY.md",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "phase2_summary",
+      "community": 4,
+      "norm_label": "phase2-summary.md"
+    },
+    {
+      "label": "FuelFlow Phase 2: AI-Assisted Development Enhancement",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "community": 4,
+      "norm_label": "fuelflow phase 2: ai-assisted development enhancement"
+    },
+    {
+      "label": "Overview",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "phase2_summary_overview",
+      "community": 4,
+      "norm_label": "overview"
+    },
+    {
+      "label": "What Was Accomplished",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "phase2_summary_what_was_accomplished",
+      "community": 4,
+      "norm_label": "what was accomplished"
+    },
+    {
+      "label": "1. Analyzed Available AI Resources",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "phase2_summary_1_analyzed_available_ai_resources",
+      "community": 4,
+      "norm_label": "1. analyzed available ai resources"
+    },
+    {
+      "label": "2. Selected Optimal Solution",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "phase2_summary_2_selected_optimal_solution",
+      "community": 4,
+      "norm_label": "2. selected optimal solution"
+    },
+    {
+      "label": "3. Created FuelFlow-Specific AI Agent",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "phase2_summary_3_created_fuelflow_specific_ai_agent",
+      "community": 4,
+      "norm_label": "3. created fuelflow-specific ai agent"
+    },
+    {
+      "label": "Key Components:",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "phase2_summary_key_components",
+      "community": 4,
+      "norm_label": "key components:"
+    },
+    {
+      "label": "4. Created Integration Documentation",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "phase2_summary_4_created_integration_documentation",
+      "community": 4,
+      "norm_label": "4. created integration documentation"
+    },
+    {
+      "label": "Agent Capabilities",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "phase2_summary_agent_capabilities",
+      "community": 4,
+      "norm_label": "agent capabilities"
+    },
+    {
+      "label": "\ud83d\udd0d Code Review",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "phase2_summary_code_review",
+      "community": 4,
+      "norm_label": "\ud83d\udd0d code review"
+    },
+    {
+      "label": "\ud83d\uddc4\ufe0f Schema Assistance",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "phase2_summary_schema_assistance",
+      "community": 4,
+      "norm_label": "\ud83d\uddc4\ufe0f schema assistance"
+    },
+    {
+      "label": "\ud83d\udd0c API Development Guidance",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "phase2_summary_api_development_guidance",
+      "community": 4,
+      "norm_label": "\ud83d\udd0c api development guidance"
+    },
+    {
+      "label": "\u269b\ufe0f Component Development Help",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "phase2_summary_component_development_help",
+      "community": 4,
+      "norm_label": "\u269b\ufe0f component development help"
+    },
+    {
+      "label": "\ud83d\udcda Knowledge Sharing",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L73",
+      "_origin": "ast",
+      "id": "phase2_summary_knowledge_sharing",
+      "community": 4,
+      "norm_label": "\ud83d\udcda knowledge sharing"
+    },
+    {
+      "label": "How It Integrates with Existing Workflow",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "phase2_summary_how_it_integrates_with_existing_workflow",
+      "community": 4,
+      "norm_label": "how it integrates with existing workflow"
+    },
+    {
+      "label": "Complements Graphify",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L81",
+      "_origin": "ast",
+      "id": "phase2_summary_complements_graphify",
+      "community": 4,
+      "norm_label": "complements graphify"
+    },
+    {
+      "label": "Usage Examples",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L88",
+      "_origin": "ast",
+      "id": "phase2_summary_usage_examples",
+      "community": 4,
+      "norm_label": "usage examples"
+    },
+    {
+      "label": "Files Created",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "phase2_summary_files_created",
+      "community": 4,
+      "norm_label": "files created"
+    },
+    {
+      "label": "Next Steps for Activation",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L118",
+      "_origin": "ast",
+      "id": "phase2_summary_next_steps_for_activation",
+      "community": 4,
+      "norm_label": "next steps for activation"
+    },
+    {
+      "label": "Benefits",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L140",
+      "_origin": "ast",
+      "id": "phase2_summary_benefits",
+      "community": 4,
+      "norm_label": "benefits"
+    },
+    {
+      "label": "Maintenance",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L148",
+      "_origin": "ast",
+      "id": "phase2_summary_maintenance",
+      "community": 4,
+      "norm_label": "maintenance"
+    },
+    {
+      "label": "Conclusion",
+      "file_type": "document",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L156",
+      "_origin": "ast",
+      "id": "phase2_summary_conclusion",
+      "community": 4,
+      "norm_label": "conclusion"
+    },
+    {
       "label": "README.md",
       "file_type": "document",
       "source_file": "README.md",
@@ -3614,6 +4524,356 @@
       "norm_label": "status"
     },
     {
+      "label": "DEMO.md",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo",
+      "community": 25,
+      "norm_label": "demo.md"
+    },
+    {
+      "label": "FuelFlow Agent Demonstration",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "community": 25,
+      "norm_label": "fuelflow agent demonstration"
+    },
+    {
+      "label": "What We've Built",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo_what_we_ve_built",
+      "community": 25,
+      "norm_label": "what we've built"
+    },
+    {
+      "label": "How It Would Work (With API Key)",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo_how_it_would_work_with_api_key",
+      "community": 25,
+      "norm_label": "how it would work (with api key)"
+    },
+    {
+      "label": "Files Created",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L82",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo_files_created",
+      "community": 25,
+      "norm_label": "files created"
+    },
+    {
+      "label": "Integration with FuelFlow Workflow",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L91",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo_integration_with_fuelflow_workflow",
+      "community": 25,
+      "norm_label": "integration with fuelflow workflow"
+    },
+    {
+      "label": "Next Steps",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "fuelflow_agent_demo_next_steps",
+      "community": 25,
+      "norm_label": "next steps"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme",
+      "community": 18,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "FuelFlow AI Agent",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "community": 18,
+      "norm_label": "fuelflow ai agent"
+    },
+    {
+      "label": "Overview",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_overview",
+      "community": 18,
+      "norm_label": "overview"
+    },
+    {
+      "label": "Setup",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_setup",
+      "community": 18,
+      "norm_label": "setup"
+    },
+    {
+      "label": "Usage",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_usage",
+      "community": 18,
+      "norm_label": "usage"
+    },
+    {
+      "label": "Direct Interaction",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_direct_interaction",
+      "community": 18,
+      "norm_label": "direct interaction"
+    },
+    {
+      "label": "Integration with Development Workflow",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_integration_with_development_workflow",
+      "community": 18,
+      "norm_label": "integration with development workflow"
+    },
+    {
+      "label": "Agent Capabilities",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_agent_capabilities",
+      "community": 18,
+      "norm_label": "agent capabilities"
+    },
+    {
+      "label": "Customization",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_customization",
+      "community": 18,
+      "norm_label": "customization"
+    },
+    {
+      "label": "Integration with graphify",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_integration_with_graphify",
+      "community": 18,
+      "norm_label": "integration with graphify"
+    },
+    {
+      "label": "License",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "fuelflow_agent_readme_license",
+      "community": 18,
+      "norm_label": "license"
+    },
+    {
+      "label": "SOUL.md",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul",
+      "community": 12,
+      "norm_label": "soul.md"
+    },
+    {
+      "label": "FuelFlow Agent - AI Development Assistant",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "community": 12,
+      "norm_label": "fuelflow agent - ai development assistant"
+    },
+    {
+      "label": "Core Identity",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_core_identity",
+      "community": 12,
+      "norm_label": "core identity"
+    },
+    {
+      "label": "Responsibilities",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_responsibilities",
+      "community": 12,
+      "norm_label": "responsibilities"
+    },
+    {
+      "label": "1. Code Review & Quality Assurance",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_1_code_review_quality_assurance",
+      "community": 12,
+      "norm_label": "1. code review & quality assurance"
+    },
+    {
+      "label": "2. Database Schema Assistance",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_2_database_schema_assistance",
+      "community": 12,
+      "norm_label": "2. database schema assistance"
+    },
+    {
+      "label": "3. API Endpoint Development & Testing",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_3_api_endpoint_development_testing",
+      "community": 12,
+      "norm_label": "3. api endpoint development & testing"
+    },
+    {
+      "label": "4. Component Development Guidance",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_4_component_development_guidance",
+      "community": 12,
+      "norm_label": "4. component development guidance"
+    },
+    {
+      "label": "5. Documentation & Knowledge Sharing",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_5_documentation_knowledge_sharing",
+      "community": 12,
+      "norm_label": "5. documentation & knowledge sharing"
+    },
+    {
+      "label": "FuelFlow-Specific Knowledge",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_fuelflow_specific_knowledge",
+      "community": 12,
+      "norm_label": "fuelflow-specific knowledge"
+    },
+    {
+      "label": "Core Architecture",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_core_architecture",
+      "community": 12,
+      "norm_label": "core architecture"
+    },
+    {
+      "label": "Key Systems",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_key_systems",
+      "community": 12,
+      "norm_label": "key systems"
+    },
+    {
+      "label": "Behavioral Guidelines",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_behavioral_guidelines",
+      "community": 12,
+      "norm_label": "behavioral guidelines"
+    },
+    {
+      "label": "Do:",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_do",
+      "community": 12,
+      "norm_label": "do:"
+    },
+    {
+      "label": "Don't:",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L78",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_don_t",
+      "community": 12,
+      "norm_label": "don't:"
+    },
+    {
+      "label": "Severity Levels (for Feedback)",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L85",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_severity_levels_for_feedback",
+      "community": 12,
+      "norm_label": "severity levels (for feedback)"
+    },
+    {
+      "label": "Example Interactions",
+      "file_type": "document",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L92",
+      "_origin": "ast",
+      "id": "fuelflow_agent_soul_example_interactions",
+      "community": 12,
+      "norm_label": "example interactions"
+    },
+    {
       "label": "README.md",
       "file_type": "document",
       "source_file": "handoff/README.md",
@@ -3762,6 +5022,26 @@
       "id": "handoff_release_checklist_8_rollback_preparedness",
       "community": 13,
       "norm_label": "8. rollback preparedness"
+    },
+    {
+      "label": "test_graphify.md",
+      "file_type": "document",
+      "source_file": "test_graphify.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "test_graphify",
+      "community": 27,
+      "norm_label": "test_graphify.md"
+    },
+    {
+      "label": "Test File",
+      "file_type": "document",
+      "source_file": "test_graphify.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "test_graphify_test_file",
+      "community": 27,
+      "norm_label": "test file"
     },
     {
       "label": "FuelFlow README",
@@ -4794,11 +6074,44 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "api/index.js",
+      "source_location": "L989",
+      "weight": 1.0,
+      "source": "api_index_handledailysaleslist",
+      "target": "api_index_getfilters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "api/index.js",
       "source_location": "L294",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "api_index_handler",
       "target": "api_index_getfilters"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "api/index.js",
+      "source_location": "L638",
+      "weight": 1.0,
+      "source": "api_index_handletankerunloadingbatches",
+      "target": "api_index_getfilters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "api/index.js",
+      "source_location": "L557",
+      "weight": 1.0,
+      "source": "api_index_handletankerunloadinglistv2",
+      "target": "api_index_getfilters",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -5896,9 +7209,9 @@
       "source_file": "api/index.js",
       "source_location": "L1852",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "api_index_handlebuffertransfer",
-      "target": "api_index_reconcilebuffervolume",
-      "confidence_score": 1.0
+      "target": "api_index_reconcilebuffervolume"
     },
     {
       "relation": "calls",
@@ -6329,6 +7642,246 @@
       "confidence_score": 1.0,
       "source": "tests_repaired_flows_test",
       "target": "api_table_resolve_resolvetable"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "fuelflow_agent_bot",
+      "target": "fuelflow_agent_bot_anthropic",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "fuelflow_agent_bot",
+      "target": "fuelflow_agent_bot_bot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "fuelflow_agent_bot",
+      "target": "fuelflow_agent_bot_conversations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "fuelflow_agent_bot",
+      "target": "fuelflow_agent_bot_fs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "fuelflow_agent_bot",
+      "target": "fuelflow_agent_bot_soulmd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/bot.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "fuelflow_agent_bot",
+      "target": "fuelflow_agent_bot_telegrambot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "fuelflow_agent_cli",
+      "target": "fuelflow_agent_cli_anthropic",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "fuelflow_agent_cli",
+      "target": "fuelflow_agent_cli_askquestion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "fuelflow_agent_cli",
+      "target": "fuelflow_agent_cli_conversations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "fuelflow_agent_cli",
+      "target": "fuelflow_agent_cli_fs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "fuelflow_agent_cli",
+      "target": "fuelflow_agent_cli_getresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/cli.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "fuelflow_agent_cli",
+      "target": "fuelflow_agent_cli_soulmd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package",
+      "target": "fuelflow_agent_package_dependencies",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package",
+      "target": "fuelflow_agent_package_description",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package",
+      "target": "fuelflow_agent_package_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package",
+      "target": "fuelflow_agent_package_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package",
+      "target": "fuelflow_agent_package_scripts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package",
+      "target": "fuelflow_agent_package_version",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package_scripts",
+      "target": "fuelflow_agent_package_scripts_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package_dependencies",
+      "target": "fuelflow_agent_package_dependencies_anthropic_ai_sdk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package_dependencies",
+      "target": "fuelflow_agent_package_dependencies_dotenv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/package.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "fuelflow_agent_package_dependencies",
+      "target": "fuelflow_agent_package_dependencies_node_telegram_bot_api",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/test-agent.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "fuelflow_agent_test_agent",
+      "target": "fuelflow_agent_test_agent_fs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/test-agent.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "fuelflow_agent_test_agent",
+      "target": "fuelflow_agent_test_agent_soulmd",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7237,6 +8790,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.tsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "pages_dailysalesreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -7259,11 +8823,44 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.tsx",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "pages_pricehistoryreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
       "source_location": "L25",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_app",
       "target": "pages_reports"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "pages_reports_reports",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "pages_tankerunloadingreport",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7558,6 +9155,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "components_charts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L4",
       "weight": 1.0,
@@ -7569,12 +9177,34 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "components_charts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "components_charts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "components_charts",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -7591,6 +9221,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "components_charts_barchart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L4",
       "weight": 1.0,
@@ -7613,6 +9254,28 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "components_charts_barchart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "components_charts_linechart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L4",
       "weight": 1.0,
@@ -7624,12 +9287,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "components_charts_linechart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "components_charts_linechart"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "components_charts_donutchart",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -8449,12 +10134,56 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_dashboard",
       "target": "ui_badge"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/Reports.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_reports",
+      "target": "ui_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_badge",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8624,12 +10353,56 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_badge_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_dashboard",
       "target": "ui_badge_badge"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_badge_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/Reports.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_reports",
+      "target": "ui_badge_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_badge_badge",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -8778,6 +10551,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_card",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L3",
       "weight": 1.0,
@@ -8789,12 +10573,34 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_card",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "ui_card"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_card",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8963,6 +10769,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_card_card",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L3",
       "weight": 1.0,
@@ -8974,12 +10791,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_card_card",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "ui_card_card"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_card_card",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -9062,6 +10901,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_card_cardheader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L3",
       "weight": 1.0,
@@ -9073,12 +10923,141 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_card_cardheader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "ui_card_cardheader"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_card_cardheader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/master/PriceHistory.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "master_pricehistory",
+      "target": "ui_datafilters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ops/Sales.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "ops_sales",
+      "target": "ui_datafilters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ops/TankerUnloading.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "ops_tankerunloading",
+      "target": "ui_datafilters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_datafilters_datafilters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_datafilters_datafiltersprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_datafilters_filterfield",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_field",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_field_field",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_field_input",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/DataFilters.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ui_datafilters",
+      "target": "ui_field_select",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -9662,6 +11641,59 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/master/PriceHistory.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "master_pricehistory",
+      "target": "ui_pagination",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ops/Sales.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "ops_sales",
+      "target": "ui_pagination",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ops/TankerUnloading.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "ops_tankerunloading",
+      "target": "ui_pagination",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/Pagination.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "ui_pagination",
+      "target": "ui_pagination_pagination",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ui/Pagination.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "ui_pagination",
+      "target": "ui_pagination_paginationprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/master/PriceHistory.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -9749,6 +11781,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_states",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L5",
       "weight": 1.0,
@@ -9760,12 +11803,34 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_states",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "ui_states"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_states",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -9889,6 +11954,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_states_loading",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L5",
       "weight": 1.0,
@@ -9900,12 +11976,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_states_loading",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "ui_states_loading"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_states_loading",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -9988,6 +12086,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "ui_states_errorstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L5",
       "weight": 1.0,
@@ -9999,12 +12108,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "ui_states_errorstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "ui_states_errorstate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "ui_states_errorstate",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -10394,6 +12525,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_api",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
@@ -10405,12 +12547,34 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_api",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "lib_api"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_api",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -10559,6 +12723,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_api_apiget",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
@@ -10570,12 +12745,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_api_apiget",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "lib_api_apiget"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_api_apiget",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -10845,6 +13042,28 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_api_fmtmoney",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L171",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport_dailysalesreport",
+      "target": "lib_api_fmtmoney"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
@@ -10867,6 +13086,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_api_fmtmoney",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L6",
       "weight": 1.0,
@@ -10884,6 +13114,17 @@
       "weight": 1.0,
       "source": "pages_reports_reports",
       "target": "lib_api_fmtmoney"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_api_fmtmoney",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -11054,11 +13295,55 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_api_fmtnum",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport_dailysalesreport",
+      "target": "lib_api_fmtnum"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_dashboard",
+      "target": "lib_api_fmtnum"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_api_fmtnum",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport_pricehistoryreport",
       "target": "lib_api_fmtnum"
     },
     {
@@ -11081,6 +13366,28 @@
       "source_location": "L146",
       "weight": 1.0,
       "source": "pages_reports_reports",
+      "target": "lib_api_fmtnum"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_api_fmtnum",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L159",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport_tankerunloadingreport",
       "target": "lib_api_fmtnum"
     },
     {
@@ -11230,12 +13537,45 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_api_fmtdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_dashboard",
       "target": "lib_api_fmtdate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_api_fmtdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_api_fmtdate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -11324,12 +13664,45 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_csv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_csv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "lib_csv"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_csv",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -11368,12 +13741,45 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_csv_tocsv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_csv_tocsv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "lib_csv_tocsv"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_csv_tocsv",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -11390,12 +13796,45 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "lib_csv_downloadcsv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "lib_csv_downloadcsv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "lib_csv_downloadcsv"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "lib_csv_downloadcsv",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -11646,6 +14085,26 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "pages_dailysalesreport_dailysalesreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/DailySalesReport.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "pages_dailysalesreport",
+      "target": "pages_dailysalesreport_period",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L9",
       "weight": 1.0,
@@ -11676,12 +14135,22 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/pages/PriceHistoryReport.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "pages_pricehistoryreport",
+      "target": "pages_pricehistoryreport_pricehistoryreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/pages/Reports.tsx",
       "source_location": "L9",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "pages_reports",
-      "target": "pages_reports_period"
+      "target": "pages_reports_colormap",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -11692,6 +14161,26 @@
       "confidence_score": 1.0,
       "source": "pages_reports",
       "target": "pages_reports_reports"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "pages_tankerunloadingreport_period",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/TankerUnloadingReport.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "pages_tankerunloadingreport",
+      "target": "pages_tankerunloadingreport_tankerunloadingreport",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -12526,6 +15015,456 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide",
+      "target": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L158",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_best_practices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L175",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_customization",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_example_interactions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_integration_with_existing_tools",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L189",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_license",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_overview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L182",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_troubleshooting",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_using_the_fuelflow_ai_agent",
+      "target": "ai_agent_usage_guide_usage_methods",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_usage_methods",
+      "target": "ai_agent_usage_guide_1_interactive_chat_mode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_usage_methods",
+      "target": "ai_agent_usage_guide_2_code_review_integration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_usage_methods",
+      "target": "ai_agent_usage_guide_3_schema_design_assistance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_usage_methods",
+      "target": "ai_agent_usage_guide_4_learning_onboarding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_example_interactions",
+      "target": "ai_agent_usage_guide_code_review_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AI-AGENT-USAGE-GUIDE.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "ai_agent_usage_guide_example_interactions",
+      "target": "ai_agent_usage_guide_schema_design_help",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "demo",
+      "target": "demo_fuelflow_agent_demonstration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "demo_fuelflow_agent_demonstration",
+      "target": "demo_complementing_existing_tools",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "demo_fuelflow_agent_demonstration",
+      "target": "demo_files_in_the_agent_directory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "demo_fuelflow_agent_demonstration",
+      "target": "demo_how_it_would_work_with_api_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L93",
+      "weight": 1.0,
+      "source": "demo_fuelflow_agent_demonstration",
+      "target": "demo_integration_with_fuelflow_workflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "demo_fuelflow_agent_demonstration",
+      "target": "demo_next_steps",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEMO.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "demo_fuelflow_agent_demonstration",
+      "target": "demo_what_we_ve_built",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "phase2_summary",
+      "target": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_agent_capabilities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_benefits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_conclusion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_files_created",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_how_it_integrates_with_existing_workflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L148",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_maintenance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L118",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_next_steps_for_activation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_overview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "phase2_summary_fuelflow_phase_2_ai_assisted_development_enhancement",
+      "target": "phase2_summary_what_was_accomplished",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "phase2_summary_what_was_accomplished",
+      "target": "phase2_summary_1_analyzed_available_ai_resources",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "phase2_summary_what_was_accomplished",
+      "target": "phase2_summary_2_selected_optimal_solution",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "phase2_summary_what_was_accomplished",
+      "target": "phase2_summary_3_created_fuelflow_specific_ai_agent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "phase2_summary_what_was_accomplished",
+      "target": "phase2_summary_4_created_integration_documentation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "phase2_summary_3_created_fuelflow_specific_ai_agent",
+      "target": "phase2_summary_key_components",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "phase2_summary_agent_capabilities",
+      "target": "phase2_summary_api_development_guidance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "phase2_summary_agent_capabilities",
+      "target": "phase2_summary_code_review",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "phase2_summary_agent_capabilities",
+      "target": "phase2_summary_component_development_help",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "phase2_summary_agent_capabilities",
+      "target": "phase2_summary_knowledge_sharing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "phase2_summary_agent_capabilities",
+      "target": "phase2_summary_schema_assistance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "phase2_summary_how_it_integrates_with_existing_workflow",
+      "target": "phase2_summary_complements_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PHASE2-SUMMARY.md",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "phase2_summary_how_it_integrates_with_existing_workflow",
+      "target": "phase2_summary_usage_examples",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "README.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -12776,6 +15715,326 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "fuelflow_agent_demo",
+      "target": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "target": "fuelflow_agent_demo_files_created",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "target": "fuelflow_agent_demo_how_it_would_work_with_api_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "target": "fuelflow_agent_demo_integration_with_fuelflow_workflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "target": "fuelflow_agent_demo_next_steps",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/DEMO.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "fuelflow_agent_demo_fuelflow_agent_demonstration",
+      "target": "fuelflow_agent_demo_what_we_ve_built",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme",
+      "target": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_agent_capabilities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_customization",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_integration_with_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_license",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_overview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_fuelflow_ai_agent",
+      "target": "fuelflow_agent_readme_usage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_usage",
+      "target": "fuelflow_agent_readme_direct_interaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/README.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "fuelflow_agent_readme_usage",
+      "target": "fuelflow_agent_readme_integration_with_development_workflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul",
+      "target": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "target": "fuelflow_agent_soul_behavioral_guidelines",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "target": "fuelflow_agent_soul_core_identity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "target": "fuelflow_agent_soul_example_interactions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "target": "fuelflow_agent_soul_fuelflow_specific_knowledge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "target": "fuelflow_agent_soul_responsibilities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_agent_ai_development_assistant",
+      "target": "fuelflow_agent_soul_severity_levels_for_feedback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_responsibilities",
+      "target": "fuelflow_agent_soul_1_code_review_quality_assurance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_responsibilities",
+      "target": "fuelflow_agent_soul_2_database_schema_assistance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_responsibilities",
+      "target": "fuelflow_agent_soul_3_api_endpoint_development_testing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_responsibilities",
+      "target": "fuelflow_agent_soul_4_component_development_guidance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_responsibilities",
+      "target": "fuelflow_agent_soul_5_documentation_knowledge_sharing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_specific_knowledge",
+      "target": "fuelflow_agent_soul_core_architecture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_fuelflow_specific_knowledge",
+      "target": "fuelflow_agent_soul_key_systems",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_behavioral_guidelines",
+      "target": "fuelflow_agent_soul_do",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "fuelflow-agent/SOUL.md",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "fuelflow_agent_soul_behavioral_guidelines",
+      "target": "fuelflow_agent_soul_don_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "handoff/README.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -12944,6 +16203,16 @@
       "target": "handoff_release_checklist_fuelflow_release_checklist"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test_graphify.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "test_graphify",
+      "target": "test_graphify_test_file",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "conceptually_related_to",
       "confidence": "INFERRED",
       "confidence_score": 0.9,
@@ -12985,5 +16254,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4ae62a746fbbe8f1949db8263a25f0cebfe686a5"
+  "built_at_commit": "c5058f7479776e287d19c28615e4bcc8a64466e8"
 }

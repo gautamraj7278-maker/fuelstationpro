@@ -20,8 +20,8 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "api/index.js": {
-    "mtime": 1781973865.5479362,
-    "ast_hash": "b3799628c22d8001072bbfdbd093a3a1",
+    "mtime": 1782023030.0290053,
+    "ast_hash": "617342e38107d87f3cc8c72e30e8a87e",
     "semantic_hash": ""
   },
   "api/runtime-config.js": {
@@ -330,8 +330,8 @@
     "semantic_hash": "3d91bf3d42f2cff59045a1ed17b656d7"
   },
   "supabase-migration.sql": {
-    "mtime": 1782022468.8975298,
-    "ast_hash": "50241d057adef09326ca28cbb619a055",
+    "mtime": 1782024007.4152634,
+    "ast_hash": "afdf62f1394606fa44dd2dd9550ae6fe",
     "semantic_hash": ""
   },
   "tests/repaired-flows.test.js": {
@@ -365,8 +365,8 @@
     "semantic_hash": "1b19df7f15bb6ae159e0c8e68004fa29"
   },
   "fix.sql": {
-    "mtime": 1782022462.5883982,
-    "ast_hash": "2489908d54ef8a138c1dbafbbc4741df",
+    "mtime": 1782024002.7976499,
+    "ast_hash": "ae6a915a88f6c52278a1b7150328c0f4",
     "semantic_hash": ""
   },
   "src/components/PriceUpdateModal.tsx": {
@@ -437,6 +437,16 @@
   "src/assets/react.svg": {
     "mtime": 1781176917.645257,
     "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": ""
+  },
+  ".claude/settings.local.json": {
+    "mtime": 1782307292.8515987,
+    "ast_hash": "ac6cbcaf47cf62e2a7860f10cd1ea536",
+    "semantic_hash": ""
+  },
+  ".continue/mcpServers/new-mcp-server.yaml": {
+    "mtime": 1782306145.9225547,
+    "ast_hash": "11b23315a0ca3e285787d5c40c6030ea",
     "semantic_hash": ""
   }
 }

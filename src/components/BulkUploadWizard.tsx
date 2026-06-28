@@ -20,9 +20,25 @@ interface Props {
   endpoint: string;
   fields: FieldSpec[];
   templateName: string;
+  customValidate?: (row: Record<string, string>, rowNumber: number) => string[];
 }
 
-export default function BulkUploadWizard({ title, description, endpoint, fields, templateName }: Props) {
+function trimVal(v: any): string {
+  return String(v ?? '').trim();
+}
+
+function isBlank(v: any): boolean {
+  return trimVal(v) === '';
+}
+
+function toTrimmedNum(v: any): number | null {
+  const s = trimVal(v);
+  if (s === '') return null;
+  const n = Number(s);
+  return isNaN(n) ? null : n;
+}
+
+export default function BulkUploadWizard({ title, description, endpoint, fields, templateName, customValidate }: Props) {
   const [step, setStep] = useState(1);
   const [parsed, setParsed] = useState<Record<string, string>[]>([]);
   const [validationErrors, setValidationErrors] = useState<{ row: number; msg: string }[]>([]);
@@ -38,6 +54,13 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
     downloadCSV(`${templateName}_template.csv`, toCSV(example, headers));
   };
 
+  const downloadErrors = () => {
+    const allErrors = [...validationErrors, ...duplicateErrors];
+    if (allErrors.length === 0) return;
+    const rows = allErrors.map((e) => ({ Row: e.row, Error: e.msg }));
+    downloadCSV(`${templateName}_errors.csv`, toCSV(rows));
+  };
+
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -48,9 +71,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       const rows = parseCSV(text);
       const validationErrors: { row: number; msg: string }[] = [];
       const duplicateErrors: { row: number; msg: string }[] = [];
-      // For tracking seen values for unique fields
       const seenValues = new Map<string, Map<string, number>>();
-      // Initialize seenValues for each unique field
       fields
         .filter((f) => f.unique)
         .forEach((f) => {
@@ -58,49 +79,50 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
         });
 
       rows.forEach((row, rowIndex) => {
-        const rowNumber = rowIndex + 2; // header is row 1, data starts at row 2
+        const rowNumber = rowIndex + 2;
         let isValid = true;
 
-        // Validation checks
         for (const f of fields) {
-          if (f.required && (!row[f.key] || row[f.key].trim() === '')) {
+          const val = row[f.key];
+          const trimmed = trimVal(val);
+          if (f.required && isBlank(val)) {
             validationErrors.push({ row: rowNumber, msg: `Missing required "${f.label}"` });
             isValid = false;
           }
-          if (f.type === 'number' && row[f.key] && isNaN(Number(row[f.key]))) {
-            validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be a number` });
+          if (f.type === 'number' && !isBlank(val) && toTrimmedNum(val) === null) {
+            validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be a number, got "${trimmed}"` });
             isValid = false;
           }
-          if (f.options && row[f.key] && !f.options.includes(row[f.key])) {
+          if (f.options && !isBlank(val) && !f.options.includes(trimmed)) {
             validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be one of: ${f.options.join(', ')}` });
             isValid = false;
           }
         }
 
-        // If validation failed, skip duplicate check for this row
-        if (!isValid) {
-          return;
+        if (customValidate) {
+          const customErrors = customValidate(row, rowNumber);
+          for (const msg of customErrors) {
+            validationErrors.push({ row: rowNumber, msg });
+            isValid = false;
+          }
         }
 
-        // Duplicate check for unique fields
+        if (!isValid) return;
+
         for (const f of fields) {
           if (f.unique) {
-            const value = row[f.key];
-            if (value !== undefined && value !== null && value !== '') {
+            const normalized = trimVal(row[f.key]).toLowerCase();
+            if (normalized !== '') {
               const seenMap = seenValues.get(f.key)!;
-              if (seenMap.has(value)) {
-                // Duplicate found
+              if (seenMap.has(normalized)) {
                 duplicateErrors.push({
                   row: rowNumber,
-                  msg: `Duplicate value for "${f.label}"`,
+                  msg: `Duplicate value "${trimVal(row[f.key])}" for "${f.label}" (already at row ${seenMap.get(normalized)})`,
                 });
                 isValid = false;
-                // Do not add this duplicate value to the seen map
-                break; // break out of the field loop for this row
-              } else {
-                // First time seeing this value
-                seenMap.set(value, rowNumber);
+                break;
               }
+              seenMap.set(normalized, rowNumber);
             }
           }
         }
@@ -114,28 +136,45 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
     reader.readAsText(file);
   };
 
+  const safeApiPost = async (url: string, body: any): Promise<any> => {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      let json: any;
+      try { json = JSON.parse(text); } catch { json = null; }
+      if (!res.ok) {
+        const msg = json?.error || json?.message || text.slice(0, 200) || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return json;
+    } catch (e: any) {
+      if (e.name === 'AbortError') throw new Error('Request timed out');
+      throw e;
+    }
+  };
+
   const commit = async () => {
     setUploading(true);
 
-    // Compute the set of rows to skip (validation errors and duplicates)
     const validationErrorRows = new Set(validationErrors.map(e => e.row));
     const duplicateErrorRows = new Set(duplicateErrors.map(e => e.row));
     const skipRows = new Set([...validationErrorRows, ...duplicateErrorRows]);
 
     let ok = 0, fail = 0;
-    const errors: string[] = [];
+    const errors: { row: number; msg: string }[] = [];
     const CHUNK = 250;
-    // Build payload excluding skipped rows
     const payload = parsed
-      .filter((_, index) => !skipRows.has(index + 2)) // row number = index + 2
-      .map((r) => {
+      .filter((_, index) => !skipRows.has(index + 2))
+      .map((r, batchIdx) => {
         const o: Record<string, any> = {};
         fields.forEach((f) => {
-          let v: any = r[f.key];
-          if (f.type === 'number') v = v === '' || v == null ? null : Number(v);
-          o[f.key] = v;
+          o[f.key] = f.type === 'number' ? toTrimmedNum(r[f.key]) : trimVal(r[f.key]) || null;
         });
-        return o;
+        return { _batchRow: batchIdx + 2, ...o };
       });
 
     const total = payload.length;
@@ -145,17 +184,25 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       const totalChunks = Math.ceil(total / CHUNK);
       setProgressText(totalChunks > 1 ? `Uploading chunk ${chunkIdx}/${totalChunks} (${chunk.length} records)...` : `Uploading ${total} records...`);
       try {
-        const res = await apiPost<any>(endpoint, chunk);
-        ok += typeof res.ok === 'number' ? res.ok : chunk.length;
-        fail += typeof res.fail === 'number' ? res.fail : 0;
-        if (Array.isArray(res.results)) {
-          for (const r of res.results) {
-            if (r.error) errors.push(String(r.error));
+        const cleanChunk = chunk.map(({ _batchRow, ...rest }) => rest);
+        const res = await safeApiPost(endpoint, cleanChunk);
+        if (res && Array.isArray(res)) {
+          ok += res.length;
+        } else if (res && typeof res.ok === 'number') {
+          ok += res.ok;
+          fail += typeof res.fail === 'number' ? res.fail : 0;
+          if (Array.isArray(res.results)) {
+            res.results.forEach((r: any) => {
+              if (r.error) errors.push({ row: 0, msg: String(r.error) });
+            });
           }
+        } else {
+          ok += chunk.length;
         }
       } catch (e: any) {
+        const msg = e?.message || e?.error || `Chunk ${chunkIdx} failed`;
         fail += chunk.length;
-        errors.push(String(e?.message || e?.error || `Chunk ${chunkIdx} failed`));
+        chunk.forEach((r) => errors.push({ row: r._batchRow, msg }));
       }
     }
     setProgressText('');
@@ -166,7 +213,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       fail,
       duplicates: duplicateCount,
       validationErrors: validationErrorCount,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors.map((e) => `Row ${e.row}: ${e.msg}`) : undefined,
     });
     setUploading(false);
     setStep(3);
@@ -180,6 +227,9 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
     setResult(null);
     setFileName('');
   };
+
+  const hasIssues = validationErrors.length + duplicateErrors.length > 0;
+  const allIssues = [...validationErrors, ...duplicateErrors];
 
   return (
     <div className="space-y-4">
@@ -239,17 +289,17 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
             </div>
             <button onClick={reset} className="text-sm text-slate-500 hover:underline">Start over</button>
           </div>
-          {validationErrors.length + duplicateErrors.length > 0 && (
+          {hasIssues && (
             <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 mb-4">
-              <div className="flex items-center gap-2 text-amber-700 text-sm font-medium mb-1"><AlertTriangle className="w-4 h-4" /> Issues found — fix these rows before committing</div>
+              <div className="flex items-center justify-between gap-2 text-amber-700 text-sm font-medium mb-1">
+                <span className="flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Issues found — fix these rows before committing</span>
+                <button onClick={downloadErrors} className="inline-flex items-center gap-1 text-xs font-normal text-amber-600 hover:text-amber-800 underline"><FileDown className="w-3 h-3" /> Download errors</button>
+              </div>
               <ul className="text-xs text-amber-700 space-y-0.5 max-h-32 overflow-y-auto">
-                {[...validationErrors, ...duplicateErrors]
-                  .slice(0, 30)
-                  .map((e, i) => (
-                    <li key={i}>
-                      Row {e.row}: {e.msg}
-                    </li>
-                  ))}
+                {allIssues.slice(0, 30).map((e, i) => (
+                  <li key={i}>Row {e.row}: {e.msg}</li>
+                ))}
+                {allIssues.length > 30 && <li className="text-slate-400">...and {allIssues.length - 30} more</li>}
               </ul>
             </div>
           )}
@@ -265,7 +315,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
           </div>
           <div className="flex justify-end gap-2 mt-5">
             <button onClick={reset} disabled={uploading} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50">Cancel</button>
-            <button onClick={commit} disabled={(validationErrors.length + duplicateErrors.length) > 0 || parsed.length === 0 || uploading} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
+            <button onClick={commit} disabled={hasIssues || parsed.length === 0 || uploading} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} {uploading ? 'Uploading...' : `Commit ${parsed.length} Records`}
             </button>
           </div>
@@ -294,12 +344,19 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
             <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-left max-h-48 overflow-y-auto">
               <p className="text-xs font-medium text-amber-700 mb-1">Errors:</p>
               <ul className="text-xs text-amber-700 space-y-0.5">
-                {result.errors.slice(0, 10).map((err, i) => <li key={i}>{err}</li>)}
-                {result.errors.length > 10 && <li className="text-slate-400">...and {result.errors.length - 10} more</li>}
+                {result.errors.slice(0, 20).map((err, i) => <li key={i}>{err}</li>)}
+                {result.errors.length > 20 && <li className="text-slate-400">...and {result.errors.length - 20} more</li>}
               </ul>
             </div>
           )}
-          <button onClick={reset} className="mt-5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">Upload Another File</button>
+          <div className="flex items-center justify-center gap-3 mt-5">
+            {(hasIssues || (result.errors && result.errors.length > 0)) && (
+              <button onClick={downloadErrors} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                <FileDown className="w-4 h-4" /> Download Error Report
+              </button>
+            )}
+            <button onClick={reset} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">Upload Another File</button>
+          </div>
         </Card>
       )}
     </div>

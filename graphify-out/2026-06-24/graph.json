@@ -677,7 +677,7 @@
       "label": "handleTankerUnloadingImport()",
       "file_type": "code",
       "source_file": "api/index.js",
-      "source_location": "L1874",
+      "source_location": "L1879",
       "_origin": "ast",
       "id": "api_index_handletankerunloadingimport",
       "community": 3,
@@ -690,7 +690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_runtime_config",
-      "community": 8,
+      "community": 3,
       "norm_label": "runtime-config.js"
     },
     {
@@ -700,7 +700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_runtime_config_allowed_resources",
-      "community": 8,
+      "community": 3,
       "norm_label": "allowed_resources"
     },
     {
@@ -720,7 +720,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "api_runtime_config_isallowedresource",
-      "community": 8,
+      "community": 3,
       "norm_label": "isallowedresource()"
     },
     {
@@ -730,7 +730,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "api_runtime_config_parseallowedorigins",
-      "community": 8,
+      "community": 3,
       "norm_label": "parseallowedorigins()"
     },
     {
@@ -740,7 +740,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "api_runtime_config_isoriginallowed",
-      "community": 8,
+      "community": 3,
       "norm_label": "isoriginallowed()"
     },
     {
@@ -750,7 +750,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "api_runtime_config_resolvecorsorigin",
-      "community": 8,
+      "community": 3,
       "norm_label": "resolvecorsorigin()"
     },
     {
@@ -760,7 +760,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "api_runtime_config_applycorsheaders",
-      "community": 8,
+      "community": 3,
       "norm_label": "applycorsheaders()"
     },
     {
@@ -770,7 +770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_sales_validate",
-      "community": 8,
+      "community": 3,
       "norm_label": "sales-validate.js"
     },
     {
@@ -780,7 +780,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_sales_validate_requiredtext",
-      "community": 8,
+      "community": 3,
       "norm_label": "requiredtext()"
     },
     {
@@ -790,7 +790,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "api_sales_validate_optionaltext",
-      "community": 8,
+      "community": 3,
       "norm_label": "optionaltext()"
     },
     {
@@ -800,7 +800,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "api_sales_validate_optionalnumber",
-      "community": 8,
+      "community": 3,
       "norm_label": "optionalnumber()"
     },
     {
@@ -810,7 +810,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "api_sales_validate_round2",
-      "community": 8,
+      "community": 3,
       "norm_label": "round2()"
     },
     {
@@ -830,7 +830,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_stock_validate",
-      "community": 8,
+      "community": 3,
       "norm_label": "stock-validate.js"
     },
     {
@@ -840,7 +840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_stock_validate_requiredtext",
-      "community": 8,
+      "community": 3,
       "norm_label": "requiredtext()"
     },
     {
@@ -850,7 +850,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "api_stock_validate_optionaltext",
-      "community": 8,
+      "community": 3,
       "norm_label": "optionaltext()"
     },
     {
@@ -860,7 +860,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "api_stock_validate_requiredpositivenumber",
-      "community": 8,
+      "community": 3,
       "norm_label": "requiredpositivenumber()"
     },
     {
@@ -870,7 +870,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "api_stock_validate_optionalnumber",
-      "community": 8,
+      "community": 3,
       "norm_label": "optionalnumber()"
     },
     {
@@ -880,7 +880,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "api_stock_validate_buildtankmap",
-      "community": 8,
+      "community": 3,
       "norm_label": "buildtankmap()"
     },
     {
@@ -890,7 +890,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "api_stock_validate_normalizestockmovementrows",
-      "community": 8,
+      "community": 3,
       "norm_label": "normalizestockmovementrows()"
     },
     {
@@ -900,7 +900,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "api_stock_validate_normalizetankerunloadingrows",
-      "community": 8,
+      "community": 3,
       "norm_label": "normalizetankerunloadingrows()"
     },
     {
@@ -910,7 +910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_table_resolve",
-      "community": 8,
+      "community": 3,
       "norm_label": "table-resolve.js"
     },
     {
@@ -920,7 +920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "api_table_resolve_table_aliases",
-      "community": 8,
+      "community": 3,
       "norm_label": "table_aliases"
     },
     {
@@ -930,7 +930,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "api_table_resolve_resolvetable",
-      "community": 8,
+      "community": 3,
       "norm_label": "resolvetable()"
     },
     {
@@ -2010,7 +2010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_loss_gain",
-      "community": 8,
+      "community": 3,
       "norm_label": "loss-gain.js"
     },
     {
@@ -2020,7 +2020,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "lib_loss_gain_buildlossgainrows",
-      "community": 8,
+      "community": 3,
       "norm_label": "buildlossgainrows()"
     },
     {
@@ -2840,7 +2840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_repaired_flows_test",
-      "community": 8,
+      "community": 3,
       "norm_label": "repaired-flows.test.js"
     },
     {
@@ -2850,7 +2850,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "tests_repaired_flows_test_createsupabasemock",
-      "community": 8,
+      "community": 3,
       "norm_label": "createsupabasemock()"
     },
     {
@@ -4490,9 +4490,9 @@
       "source_file": "api/index.js",
       "source_location": "L1059",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "api_index",
-      "target": "api_index_reconcilebuffervolume",
-      "confidence_score": 1.0
+      "target": "api_index_reconcilebuffervolume"
     },
     {
       "relation": "contains",
@@ -4500,9 +4500,9 @@
       "source_file": "api/index.js",
       "source_location": "L1010",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "api_index",
-      "target": "api_index_reconciletankcurrentvolume",
-      "confidence_score": 1.0
+      "target": "api_index_reconciletankcurrentvolume"
     },
     {
       "relation": "contains",
@@ -5894,6 +5894,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "api/index.js",
+      "source_location": "L1852",
+      "weight": 1.0,
+      "source": "api_index_handlebuffertransfer",
+      "target": "api_index_reconcilebuffervolume",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "api/index.js",
       "source_location": "L1527",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -6766,9 +6777,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "bulk_pricehistoryupload",
-      "confidence_score": 1.0
+      "target": "bulk_pricehistoryupload"
     },
     {
       "relation": "imports",
@@ -6777,9 +6788,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "bulk_pricehistoryupload_pricehistoryupload",
-      "confidence_score": 1.0
+      "target": "bulk_pricehistoryupload_pricehistoryupload"
     },
     {
       "relation": "imports_from",
@@ -7358,9 +7369,9 @@
       "source_file": "src/pages/bulk/PriceHistoryUpload.tsx",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bulk_pricehistoryupload",
-      "target": "components_bulkuploadwizard",
-      "confidence_score": 1.0
+      "target": "components_bulkuploadwizard"
     },
     {
       "relation": "imports_from",
@@ -8146,9 +8157,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "components_priceupdatemodal_priceupdatemodal",
-      "confidence_score": 1.0
+      "target": "components_priceupdatemodal_priceupdatemodal"
     },
     {
       "relation": "contains",
@@ -8156,9 +8167,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "components_priceupdatemodal_productprice",
-      "confidence_score": 1.0
+      "target": "components_priceupdatemodal_productprice"
     },
     {
       "relation": "imports_from",
@@ -8167,9 +8178,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "lib_api",
-      "confidence_score": 1.0
+      "target": "lib_api"
     },
     {
       "relation": "imports",
@@ -8178,9 +8189,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "lib_api_apiget",
-      "confidence_score": 1.0
+      "target": "lib_api_apiget"
     },
     {
       "relation": "imports",
@@ -8189,9 +8200,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "lib_api_apipost",
-      "confidence_score": 1.0
+      "target": "lib_api_apipost"
     },
     {
       "relation": "imports",
@@ -8200,9 +8211,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "lib_api_fmtmoney",
-      "confidence_score": 1.0
+      "target": "lib_api_fmtmoney"
     },
     {
       "relation": "imports_from",
@@ -8211,9 +8222,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "ui_card",
-      "confidence_score": 1.0
+      "target": "ui_card"
     },
     {
       "relation": "imports",
@@ -8222,9 +8233,9 @@
       "source_file": "src/components/PriceUpdateModal.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_priceupdatemodal",
-      "target": "ui_card_card",
-      "confidence_score": 1.0
+      "target": "ui_card_card"
     },
     {
       "relation": "imports_from",
@@ -8233,9 +8244,9 @@
       "source_file": "src/pages/Dashboard.tsx",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_dashboard",
-      "target": "components_priceupdatemodal",
-      "confidence_score": 1.0
+      "target": "components_priceupdatemodal"
     },
     {
       "relation": "contains",
@@ -11738,9 +11749,9 @@
       "source_file": "src/pages/bulk/PriceHistoryUpload.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bulk_pricehistoryupload",
-      "target": "bulk_pricehistoryupload_pricehistoryupload",
-      "confidence_score": 1.0
+      "target": "bulk_pricehistoryupload_pricehistoryupload"
     },
     {
       "relation": "contains",
@@ -12058,9 +12069,9 @@
       "source_file": "tests/price-lookup-test.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_price_lookup_test",
-      "target": "tests_price_lookup_test_loadeffectivepricemap",
-      "confidence_score": 1.0
+      "target": "tests_price_lookup_test_loadeffectivepricemap"
     },
     {
       "relation": "contains",
@@ -12068,9 +12079,9 @@
       "source_file": "tests/price-lookup-test.js",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_price_lookup_test",
-      "target": "tests_price_lookup_test_loadeffectivepricemapwithdateobjects",
-      "confidence_score": 1.0
+      "target": "tests_price_lookup_test_loadeffectivepricemapwithdateobjects"
     },
     {
       "relation": "contains",
@@ -12478,9 +12489,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents",
-      "target": "agents_fuelflow_graphify_workflow",
-      "confidence_score": 1.0
+      "target": "agents_fuelflow_graphify_workflow"
     },
     {
       "relation": "contains",
@@ -12488,9 +12499,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents_fuelflow_graphify_workflow",
-      "target": "agents_cost_guidance",
-      "confidence_score": 1.0
+      "target": "agents_cost_guidance"
     },
     {
       "relation": "contains",
@@ -12498,9 +12509,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents_fuelflow_graphify_workflow",
-      "target": "agents_recommended_commands",
-      "confidence_score": 1.0
+      "target": "agents_recommended_commands"
     },
     {
       "relation": "contains",
@@ -12508,9 +12519,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents_fuelflow_graphify_workflow",
-      "target": "agents_rules",
-      "confidence_score": 1.0
+      "target": "agents_rules"
     },
     {
       "relation": "contains",
@@ -12518,9 +12529,9 @@
       "source_file": "README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme",
-      "target": "readme_fuelflow",
-      "confidence_score": 1.0
+      "target": "readme_fuelflow"
     },
     {
       "relation": "contains",
@@ -12528,9 +12539,9 @@
       "source_file": "README.md",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_backend_notes",
-      "confidence_score": 1.0
+      "target": "readme_backend_notes"
     },
     {
       "relation": "contains",
@@ -12538,9 +12549,9 @@
       "source_file": "README.md",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_canonical_tables",
-      "confidence_score": 1.0
+      "target": "readme_canonical_tables"
     },
     {
       "relation": "contains",
@@ -12548,9 +12559,9 @@
       "source_file": "README.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_current_status",
-      "confidence_score": 1.0
+      "target": "readme_current_status"
     },
     {
       "relation": "contains",
@@ -12558,9 +12569,9 @@
       "source_file": "README.md",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_deployment_notes",
-      "confidence_score": 1.0
+      "target": "readme_deployment_notes"
     },
     {
       "relation": "contains",
@@ -12568,9 +12579,9 @@
       "source_file": "README.md",
       "source_location": "L175",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_handoff_pack",
-      "confidence_score": 1.0
+      "target": "readme_handoff_pack"
     },
     {
       "relation": "contains",
@@ -12578,9 +12589,9 @@
       "source_file": "README.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_implemented_modules",
-      "confidence_score": 1.0
+      "target": "readme_implemented_modules"
     },
     {
       "relation": "contains",
@@ -12588,9 +12599,9 @@
       "source_file": "README.md",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_known_operational_notes",
-      "confidence_score": 1.0
+      "target": "readme_known_operational_notes"
     },
     {
       "relation": "contains",
@@ -12598,9 +12609,9 @@
       "source_file": "README.md",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_local_development",
-      "confidence_score": 1.0
+      "target": "readme_local_development"
     },
     {
       "relation": "contains",
@@ -12608,9 +12619,9 @@
       "source_file": "README.md",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_production_hardening_checklist",
-      "confidence_score": 1.0
+      "target": "readme_production_hardening_checklist"
     },
     {
       "relation": "contains",
@@ -12618,9 +12629,9 @@
       "source_file": "README.md",
       "source_location": "L208",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_recommended_next_improvements",
-      "confidence_score": 1.0
+      "target": "readme_recommended_next_improvements"
     },
     {
       "relation": "contains",
@@ -12628,9 +12639,9 @@
       "source_file": "README.md",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_repository_structure",
-      "confidence_score": 1.0
+      "target": "readme_repository_structure"
     },
     {
       "relation": "contains",
@@ -12638,9 +12649,9 @@
       "source_file": "README.md",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_required_environment_variables",
-      "confidence_score": 1.0
+      "target": "readme_required_environment_variables"
     },
     {
       "relation": "contains",
@@ -12648,9 +12659,9 @@
       "source_file": "README.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_tech_stack",
-      "confidence_score": 1.0
+      "target": "readme_tech_stack"
     },
     {
       "relation": "contains",
@@ -12658,9 +12669,9 @@
       "source_file": "README.md",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_fuelflow",
-      "target": "readme_testing",
-      "confidence_score": 1.0
+      "target": "readme_testing"
     },
     {
       "relation": "contains",
@@ -12668,9 +12679,9 @@
       "source_file": "README.md",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_required_environment_variables",
-      "target": "readme_frontend",
-      "confidence_score": 1.0
+      "target": "readme_frontend"
     },
     {
       "relation": "contains",
@@ -12678,9 +12689,9 @@
       "source_file": "README.md",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_required_environment_variables",
-      "target": "readme_serverless_backend",
-      "confidence_score": 1.0
+      "target": "readme_serverless_backend"
     },
     {
       "relation": "contains",
@@ -12688,9 +12699,9 @@
       "source_file": "README.md",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_production_hardening_checklist",
-      "target": "readme_environment_and_deployment_validation",
-      "confidence_score": 1.0
+      "target": "readme_environment_and_deployment_validation"
     },
     {
       "relation": "contains",
@@ -12698,9 +12709,9 @@
       "source_file": "README.md",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_production_hardening_checklist",
-      "target": "readme_privileged_api_usage_audit",
-      "confidence_score": 1.0
+      "target": "readme_privileged_api_usage_audit"
     },
     {
       "relation": "contains",
@@ -12708,9 +12719,9 @@
       "source_file": "README.md",
       "source_location": "L137",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_production_hardening_checklist",
-      "target": "readme_supabase_rls_review",
-      "confidence_score": 1.0
+      "target": "readme_supabase_rls_review"
     },
     {
       "relation": "contains",
@@ -12718,9 +12729,9 @@
       "source_file": "debug-login-failed-to-fetch.md",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "debug_login_failed_to_fetch",
-      "target": "debug_login_failed_to_fetch_evidence_plan",
-      "confidence_score": 1.0
+      "target": "debug_login_failed_to_fetch_evidence_plan"
     },
     {
       "relation": "contains",
@@ -12728,9 +12739,9 @@
       "source_file": "debug-login-failed-to-fetch.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "debug_login_failed_to_fetch",
-      "target": "debug_login_failed_to_fetch_expected",
-      "confidence_score": 1.0
+      "target": "debug_login_failed_to_fetch_expected"
     },
     {
       "relation": "contains",
@@ -12738,9 +12749,9 @@
       "source_file": "debug-login-failed-to-fetch.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "debug_login_failed_to_fetch",
-      "target": "debug_login_failed_to_fetch_hypotheses_falsifiable",
-      "confidence_score": 1.0
+      "target": "debug_login_failed_to_fetch_hypotheses_falsifiable"
     },
     {
       "relation": "contains",
@@ -12748,9 +12759,9 @@
       "source_file": "debug-login-failed-to-fetch.md",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "debug_login_failed_to_fetch",
-      "target": "debug_login_failed_to_fetch_status",
-      "confidence_score": 1.0
+      "target": "debug_login_failed_to_fetch_status"
     },
     {
       "relation": "contains",
@@ -12758,9 +12769,9 @@
       "source_file": "debug-login-failed-to-fetch.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "debug_login_failed_to_fetch",
-      "target": "debug_login_failed_to_fetch_symptom",
-      "confidence_score": 1.0
+      "target": "debug_login_failed_to_fetch_symptom"
     },
     {
       "relation": "contains",
@@ -12768,9 +12779,9 @@
       "source_file": "handoff/README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_readme",
-      "target": "handoff_readme_fuelflow_handoff_pack",
-      "confidence_score": 1.0
+      "target": "handoff_readme_fuelflow_handoff_pack"
     },
     {
       "relation": "contains",
@@ -12778,9 +12789,9 @@
       "source_file": "handoff/README.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_readme_fuelflow_handoff_pack",
-      "target": "handoff_readme_contents",
-      "confidence_score": 1.0
+      "target": "handoff_readme_contents"
     },
     {
       "relation": "contains",
@@ -12788,9 +12799,9 @@
       "source_file": "handoff/README.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_readme_fuelflow_handoff_pack",
-      "target": "handoff_readme_current_architecture_assumption",
-      "confidence_score": 1.0
+      "target": "handoff_readme_current_architecture_assumption"
     },
     {
       "relation": "contains",
@@ -12798,9 +12809,9 @@
       "source_file": "handoff/README.md",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_readme_fuelflow_handoff_pack",
-      "target": "handoff_readme_environment_templates",
-      "confidence_score": 1.0
+      "target": "handoff_readme_environment_templates"
     },
     {
       "relation": "references",
@@ -12832,9 +12843,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist",
-      "target": "handoff_release_checklist_fuelflow_release_checklist",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_fuelflow_release_checklist"
     },
     {
       "relation": "contains",
@@ -12842,9 +12853,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_1_environment_readiness",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_1_environment_readiness"
     },
     {
       "relation": "contains",
@@ -12852,9 +12863,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_2_supabase_readiness",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_2_supabase_readiness"
     },
     {
       "relation": "contains",
@@ -12862,9 +12873,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_3_auth_and_redirects",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_3_auth_and_redirects"
     },
     {
       "relation": "contains",
@@ -12872,9 +12883,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_4_api_hardening_checks",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_4_api_hardening_checks"
     },
     {
       "relation": "contains",
@@ -12882,9 +12893,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_5_functional_smoke_tests",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_5_functional_smoke_tests"
     },
     {
       "relation": "contains",
@@ -12892,9 +12903,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_6_regression_checks",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_6_regression_checks"
     },
     {
       "relation": "contains",
@@ -12902,9 +12913,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_7_deployment_validation",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_7_deployment_validation"
     },
     {
       "relation": "contains",
@@ -12912,9 +12923,9 @@
       "source_file": "handoff/release-checklist.md",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handoff_release_checklist_fuelflow_release_checklist",
-      "target": "handoff_release_checklist_8_rollback_preparedness",
-      "confidence_score": 1.0
+      "target": "handoff_release_checklist_8_rollback_preparedness"
     },
     {
       "relation": "references",
@@ -12974,5 +12985,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ae405b39c0807390e65f7668daaec77658ac9a34"
+  "built_at_commit": "4ae62a746fbbe8f1949db8263a25f0cebfe686a5"
 }

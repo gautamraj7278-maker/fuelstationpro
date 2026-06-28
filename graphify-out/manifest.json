@@ -20,8 +20,8 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "api/index.js": {
-    "mtime": 1782023030.0290053,
-    "ast_hash": "617342e38107d87f3cc8c72e30e8a87e",
+    "mtime": 1782313330.2389057,
+    "ast_hash": "caf4297830c608ff67a18ae6f8ab9851",
     "semantic_hash": ""
   },
   "api/runtime-config.js": {
@@ -65,13 +65,13 @@
     "semantic_hash": "c13fc213f1bfd6a4db1241dd0b69da92"
   },
   "src/App.tsx": {
-    "mtime": 1781941784.3199794,
-    "ast_hash": "23de8c243cc7c72989e574eaa22e9ddc",
+    "mtime": 1782320861.0629957,
+    "ast_hash": "1962f11a4fd6569e34d325a16ed0d5eb",
     "semantic_hash": ""
   },
   "src/components/BulkUploadWizard.tsx": {
-    "mtime": 1781860385.55259,
-    "ast_hash": "258baf9165db1b6025eed5acc483ebc1",
+    "mtime": 1782318464.5995734,
+    "ast_hash": "aeda13e20508d6356f3a967ffd12ec46",
     "semantic_hash": ""
   },
   "src/components/Charts.tsx": {
@@ -85,8 +85,8 @@
     "semantic_hash": "d5831998048d8a6249c3747f4e461bb7"
   },
   "src/components/Layout.tsx": {
-    "mtime": 1781941791.3596642,
-    "ast_hash": "4e262880c232e230d3655ea035fa2a5a",
+    "mtime": 1782320877.0907555,
+    "ast_hash": "9e0ad801d8903969af7c5f04ce253247",
     "semantic_hash": ""
   },
   "src/components/MasterTable.tsx": {
@@ -105,9 +105,9 @@
     "semantic_hash": "851907c1cd4ab84ba2a8c8cc1da2e5b1"
   },
   "src/components/ui/Card.tsx": {
-    "mtime": 1781176917.6337943,
-    "ast_hash": "02c7075bd09ce9f2b98afd8707b40a8d",
-    "semantic_hash": "02c7075bd09ce9f2b98afd8707b40a8d"
+    "mtime": 1782322243.3543806,
+    "ast_hash": "117ab212d294c129339d5dbda1d9b125",
+    "semantic_hash": ""
   },
   "src/components/ui/Field.tsx": {
     "mtime": 1781176917.6275558,
@@ -180,9 +180,9 @@
     "semantic_hash": "575b700af67bbf7c873c1b532febde8f"
   },
   "src/pages/Reports.tsx": {
-    "mtime": 1781415989.9176385,
-    "ast_hash": "fd3a36b24147ac9079aa9e380f1ed78c",
-    "semantic_hash": "fd3a36b24147ac9079aa9e380f1ed78c"
+    "mtime": 1782320962.7119415,
+    "ast_hash": "e40c6b46d365a970bf36f8348144b50a",
+    "semantic_hash": ""
   },
   "src/pages/bulk/CalibrationUpload.tsx": {
     "mtime": 1781327234.0830166,
@@ -275,8 +275,8 @@
     "semantic_hash": "81b159655063de097189538e5abfb1e0"
   },
   "src/pages/master/PriceHistory.tsx": {
-    "mtime": 1781971048.8711135,
-    "ast_hash": "dd568bc6b0dc5ad1a2f8f927abcb11fe",
+    "mtime": 1782312642.2267327,
+    "ast_hash": "5d86783b650dee4cd810a313fd435f6f",
     "semantic_hash": ""
   },
   "src/pages/master/Products.tsx": {
@@ -315,8 +315,8 @@
     "semantic_hash": "84b22845f9e445f537381688db588b72"
   },
   "src/pages/ops/Sales.tsx": {
-    "mtime": 1781973935.1457365,
-    "ast_hash": "05db96e692c797dd274b69f45693fdb6",
+    "mtime": 1782312636.6420445,
+    "ast_hash": "7c4074aee941143d7c0355d11233a770",
     "semantic_hash": ""
   },
   "src/pages/ops/Stock.tsx": {
@@ -325,9 +325,9 @@
     "semantic_hash": "2abc958369a9c128e2aa3be538d0e1b3"
   },
   "src/pages/ops/TankerUnloading.tsx": {
-    "mtime": 1781415989.8429482,
-    "ast_hash": "3d91bf3d42f2cff59045a1ed17b656d7",
-    "semantic_hash": "3d91bf3d42f2cff59045a1ed17b656d7"
+    "mtime": 1782311193.9656868,
+    "ast_hash": "ae45f5e6dd798a2734bf0c22f416b60b",
+    "semantic_hash": ""
   },
   "supabase-migration.sql": {
     "mtime": 1782024007.4152634,
@@ -440,13 +440,93 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1782307292.8515987,
-    "ast_hash": "ac6cbcaf47cf62e2a7860f10cd1ea536",
+    "mtime": 1782312563.929745,
+    "ast_hash": "1a7358d9533b83e685a120ab5abdf602",
     "semantic_hash": ""
   },
   ".continue/mcpServers/new-mcp-server.yaml": {
     "mtime": 1782306145.9225547,
     "ast_hash": "11b23315a0ca3e285787d5c40c6030ea",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/bot.js": {
+    "mtime": 1782309574.64263,
+    "ast_hash": "013a23b2851dbc582fd5c1fa63445ade",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/cli.js": {
+    "mtime": 1782309892.3530433,
+    "ast_hash": "8a55bd004ae28e0078a579842050a1c7",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/package.json": {
+    "mtime": 1782309908.761283,
+    "ast_hash": "c01ef7c35cf430a9959a9368158a8951",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/test-agent.js": {
+    "mtime": 1782309793.8859599,
+    "ast_hash": "cf56ef20763541be9db4625c900b59f2",
+    "semantic_hash": ""
+  },
+  "src/components/ui/DataFilters.tsx": {
+    "mtime": 1782311141.9298882,
+    "ast_hash": "8d40c1012ed91687c156f9e1cbb9d443",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Pagination.tsx": {
+    "mtime": 1782311263.6479318,
+    "ast_hash": "69deb495351650fcf4c59d8759b2dd78",
+    "semantic_hash": ""
+  },
+  "src/pages/DailySalesReport.tsx": {
+    "mtime": 1782320889.3736398,
+    "ast_hash": "2b00ed03f893bdf9e219286f09e83d8c",
+    "semantic_hash": ""
+  },
+  "src/pages/PriceHistoryReport.tsx": {
+    "mtime": 1782320905.547531,
+    "ast_hash": "01e06bff709ca0b8d15d06081a72b812",
+    "semantic_hash": ""
+  },
+  "src/pages/TankerUnloadingReport.tsx": {
+    "mtime": 1782320915.3721516,
+    "ast_hash": "f37c3688dbb7e295907446af24d2c8a4",
+    "semantic_hash": ""
+  },
+  "AI-AGENT-USAGE-GUIDE.md": {
+    "mtime": 1782309821.26951,
+    "ast_hash": "36452e68f0486a45492f98fa64986b59",
+    "semantic_hash": ""
+  },
+  "DEMO.md": {
+    "mtime": 1782310019.797075,
+    "ast_hash": "a93edd4d9831dfe966b1d75a1630d123",
+    "semantic_hash": ""
+  },
+  "PHASE2-SUMMARY.md": {
+    "mtime": 1782310085.4742632,
+    "ast_hash": "01d4a20aa18fe6319b6607921a6b7c99",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/DEMO.md": {
+    "mtime": 1782309958.6861136,
+    "ast_hash": "fbd76a92215695858ba0bec93da15540",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/README.md": {
+    "mtime": 1782309769.7134323,
+    "ast_hash": "717b5b9e37e0e4739e9a488686a33f7f",
+    "semantic_hash": ""
+  },
+  "fuelflow-agent/SOUL.md": {
+    "mtime": 1782309618.9855056,
+    "ast_hash": "e3a085c57b552a6186762ad14a92413d",
+    "semantic_hash": ""
+  },
+  "test_graphify.md": {
+    "mtime": 1782311943.2453668,
+    "ast_hash": "24cce16149e31af9dc87a3d2a9a39cce",
     "semantic_hash": ""
   }
 }

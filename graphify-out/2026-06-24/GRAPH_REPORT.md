@@ -1,16 +1,16 @@
-# Graph Report - FuelFlow  (2026-06-21)
+# Graph Report - FuelFlow  (2026-06-24)
 
 ## Corpus Check
-- 82 files · ~43,916 words
+- 83 files · ~43,974 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 384 nodes · 861 edges · 19 communities (16 shown, 3 thin omitted)
+- 384 nodes · 862 edges · 18 communities (15 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ae405b39`
+- Built from commit: `4ae62a74`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -23,7 +23,6 @@
 - [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 7|Community 7]]
-- [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 13|Community 13]]
@@ -58,7 +57,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (19 total, 3 thin omitted)
+## Communities (18 total, 3 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -73,8 +72,8 @@ Cohesion: 0.06
 Nodes (33): dependencies, framer-motion, lucide-react, react, react-dom, react-router-dom, @supabase/supabase-js, tailwindcss (+25 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (62): authenticateRequest(), validateChart(), supabase, adjustBufferVolumeByProduct(), adjustTankCurrentVolumeForSalesDelta(), beforeDeleteCheck(), checkCrossReferences(), checkDuplicateFields() (+54 more)
+Cohesion: 0.05
+Nodes (75): authenticateRequest(), validateChart(), supabase, adjustBufferVolumeByProduct(), adjustTankCurrentVolumeForSalesDelta(), beforeDeleteCheck(), checkCrossReferences(), checkDuplicateFields() (+67 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.13
@@ -91,10 +90,6 @@ Nodes (19): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib
 ### Community 7 - "Community 7"
 Cohesion: 0.33
 Nodes (5): Evidence Plan, Expected, Hypotheses (falsifiable), Status, Symptom
-
-### Community 8 - "Community 8"
-Cohesion: 0.11
-Nodes (12): ALLOWED_RESOURCES, applyCorsHeaders(), isAllowedResource(), isOriginAllowed(), parseAllowedOrigins(), resolveCorsOrigin(), buildTankMap(), normalizeStockMovementRows() (+4 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.11
@@ -118,8 +113,6 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Card()` connect `Community 0` to `Community 1`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `handler()` connect `Community 3` to `Community 8`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `TXN_TABLES`, `REFERENCE_MAP`, `UNIQUE_FIELDS` to the rest of the system?**
   _134 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
@@ -129,4 +122,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.058823529411764705 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.0763000852514919 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05241228070175439 - nodes in this community are weakly interconnected._
+- **Should `Community 4` be split into smaller, more focused modules?**
+  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
