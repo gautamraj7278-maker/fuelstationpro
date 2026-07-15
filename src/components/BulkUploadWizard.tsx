@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileDown, CheckCircle2, AlertTriangle, ChevronRight, Loader2 } from 'lucide-react';
 import { Card } from './ui/Card';
 import { parseCSV, toCSV, downloadCSV } from '../lib/csv';
-import { apiPost } from '../lib/api';
+import { getAuthHeaders } from '../lib/api';
 
 export interface FieldSpec {
   key: string;
@@ -140,7 +140,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
         body: JSON.stringify(body),
       });
       const text = await res.text();

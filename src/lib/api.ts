@@ -1,6 +1,6 @@
 import supabase from './supabase';
 
-async function getAuthHeaders() {
+export async function getAuthHeaders() {
   const { data } = await supabase.auth.getSession();
   const headers: Record<string, string> = {};
   if (data.session?.access_token) {

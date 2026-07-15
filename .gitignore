@@ -1,25 +1,40 @@
-# Logs
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+coverage
+
+# production
+/build
+/*.production
+*.alg
+*.map
+
+# misc
+.DS_Store
+.DS_Store?
+.*
+*.sock
+*.pem
+*.key
+
+# debug
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.npmrc
 
-node_modules
-dist
-dist-ssr
-
-# Local environment files
-*.local
-.env
-.env.*.local
+# local env files
+.env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
 
-# Editor directories and files
+# editor extensions
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -31,3 +46,23 @@ dist-ssr
 *.sw?
 .vite-source-tags.js
 .vercel
+
+# database and config files
+graphify-out/
+.ruvector.db
+.swarm/
+.claude-flow/
+.mcp.json
+git/
+debug-login-failed-to-fetch.md
+fix.sql
+supabase-migration.sql
+RECOMMENDED Next Improvements
+HISTORY
+test_graphify.md
+PHASE2-SUMMARY.md
+index.html
+handoff/
+dist/
+release-checklist.md
+AI-AGENT-USAGE-GUIDE.md
