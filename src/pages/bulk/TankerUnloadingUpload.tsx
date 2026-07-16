@@ -16,9 +16,9 @@ export default function TankerUnloadingUpload() {
         { key: 'temperature', label: 'Temp (°C)', type: 'number', example: '32.5' },
         { key: 'product_name', label: 'Product', required: true, example: 'Diesel (HSD)' },
         { key: 'tank_name', label: 'Tank', required: true, example: 'Tank 1' },
-        { key: 'tanker_qty', label: 'Tanker Qty (L)', type: 'number', required: true, example: '12000' },
-        { key: 'dip_before_mm', label: 'Dip Before (mm)', type: 'number', required: true, example: '500' },
-        { key: 'dip_after_mm', label: 'Dip After (mm)', type: 'number', required: true, example: '1850' },
+        { key: 'tanker_qty', label: 'Tanker Qty (L)', type: 'number', required: true, min: 0, example: '12000' },
+        { key: 'dip_before_mm', label: 'Dip Before (mm)', type: 'number', required: true, min: 0, example: '500' },
+        { key: 'dip_after_mm', label: 'Dip After (mm)', type: 'number', required: true, min: 0, example: '1850' },
       ]}
     />
   );

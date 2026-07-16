@@ -11,6 +11,8 @@ export default function PriceHistoryUpload() {
         { key: 'product_name', label: 'Product', required: true, example: 'Petrol (MS)' },
         { key: 'new_price', label: 'New Price', type: 'number', required: true, example: '103.50' },
         { key: 'effective_date', label: 'Effective Date', type: 'date', required: true, example: '2026-06-01' },
+        { key: 'changed_by', label: 'Changed By', example: 'Ramesh Kumar' },
+        { key: 'remarks', label: 'Remarks', example: 'Monthly price revision' },
       ]}
     />
   );

@@ -53,7 +53,10 @@ export async function normalizeStockMovementRows(rows, supabase) {
     }
 
     const tank = tankMap.get(tankName);
-    if (tank?.product_name && tank.product_name !== productName) {
+    if (!tank) {
+      throw new Error(`${rowLabel}Tank not found: ${tankName}`);
+    }
+    if (tank.product_name && tank.product_name !== productName) {
       throw new Error(`${rowLabel}Selected tank does not match the chosen product`);
     }
 

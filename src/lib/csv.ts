@@ -1,16 +1,32 @@
 export function parseCSV(text: string): Record<string, string>[] {
   const cleaned = text.replace(/^\ufeff/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  const lines = cleaned.split('\n').filter((l) => l.trim().length > 0);
-  if (lines.length < 2) return [];
-  const headers = splitCSVLine(lines[0]).map((h) => h.trim());
+  const rawLines = splitLinesPreservingQuotes(cleaned).filter((l) => l.trim().length > 0);
+  if (rawLines.length < 2) return [];
+  const headers = splitCSVLine(rawLines[0]).map((h) => h.trim());
   const rows: Record<string, string>[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cells = splitCSVLine(lines[i]);
+  for (let i = 1; i < rawLines.length; i++) {
+    const cells = splitCSVLine(rawLines[i]);
     const row: Record<string, string> = {};
     headers.forEach((h, idx) => { row[h] = (cells[idx] ?? '').trim(); });
     rows.push(row);
   }
   return rows;
+}
+
+function splitLinesPreservingQuotes(text: string): string[] {
+  const lines: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      if (inQuotes && text[i + 1] === '"') { cur += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (c === '\n' && !inQuotes) { lines.push(cur); cur = ''; }
+    else cur += c;
+  }
+  if (cur.length > 0) lines.push(cur);
+  return lines;
 }
 
 function splitCSVLine(line: string): string[] {

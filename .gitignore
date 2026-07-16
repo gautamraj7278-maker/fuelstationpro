@@ -48,10 +48,15 @@ logs
 .vercel
 
 # database and config files
-graphify-out/
-.ruvector.db
+ruvector.db
 .swarm/
-.claude-flow/
+
+# Non-application files (AI tools, configs, docs)
+/.claude/
+/.claude-flow/
+CLAUDE.md
+AGENTS.md
+graphify-out/
 .mcp.json
 git/
 debug-login-failed-to-fetch.md
@@ -61,8 +66,11 @@ RECOMMENDED Next Improvements
 HISTORY
 test_graphify.md
 PHASE2-SUMMARY.md
-index.html
 handoff/
-dist/
 release-checklist.md
 AI-AGENT-USAGE-GUIDE.md
+
+# Node artifacts
+/node_modules
+/.pnp
+.pnp.js

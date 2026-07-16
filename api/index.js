@@ -6,6 +6,7 @@ import { resolveTable } from './table-resolve.js';
 import { applyCorsHeaders, isAllowedResource, isOriginAllowed } from './runtime-config.js';
 import { authenticateRequest } from './auth.js';
 
+const MAX_PAYLOAD_SIZE = 5 * 1024 * 1024;
 const TXN_TABLES = [
   'tanker_unloading', 'tanker_unloading_headers', 'tanker_unloading_lines',
   'daily_sales_entries', 'daily_sales_nozzle_readings', 'daily_sales_testing',
@@ -127,8 +128,19 @@ const FIELD_VALIDATIONS = {
   },
   tanks: {
     capacity: (v) => v != null && v !== '' && Number(v) > 0 || 'Capacity must be greater than 0',
-    dead_stock: (v, body) => v == null || v === '' || Number(v) < Number(body.capacity || 0) || 'Dead stock must be less than capacity',
-    current_volume: (v, body) => v == null || v === '' || Number(v) <= Number(body.capacity || Infinity) || 'Current volume must not exceed capacity',
+    dead_stock: (v, body) => {
+      if (v == null || v === '') return true;
+      if (Number(v) < 0) return 'Dead stock must be 0 or greater';
+      if (body.capacity != null && body.capacity !== '' && Number(v) >= Number(body.capacity)) return 'Dead stock must be less than capacity';
+      return true;
+    },
+    current_volume: (v, body) => {
+      if (v == null || v === '') return true;
+      if (body.capacity != null && body.capacity !== '' && Number(v) > Number(body.capacity)) return 'Current volume must not exceed capacity';
+      if (body.dead_stock != null && body.dead_stock !== '' && Number(v) < Number(body.dead_stock)) return 'Current volume must not be below dead stock level';
+      return true;
+    },
+    diameter: (v) => v == null || v === '' || (Number(v) >= 50 && Number(v) <= 500) || 'Diameter must be between 50 and 500 cm',
   },
   operators: {
     phone: (v) => !v || /^\+?[\d\s-]{7,15}$/.test(String(v)) || 'Invalid phone number format (7-15 digits with optional +)',
@@ -144,6 +156,12 @@ const FIELD_VALIDATIONS = {
   meters: {
     opening_reading: (v) => v == null || v === '' || Number(v) >= 0 || 'Opening reading must be 0 or greater',
     current_reading: (v, body) => v == null || v === '' || body.opening_reading == null || body.opening_reading === '' || Number(v) >= Number(body.opening_reading) || 'Current reading must be >= opening reading',
+  },
+  credit_sales: {
+    sale_date: (v) => v != null && String(v).trim() !== '' || 'Sale date is required',
+    customer_name: (v) => v != null && String(v).trim() !== '' || 'Customer name is required',
+    volume: (v) => v != null && v !== '' && Number(v) > 0 || 'Volume must be greater than 0',
+    amount: (v) => v != null && v !== '' && Number(v) >= 0 || 'Amount must be 0 or greater',
   },
 };
 
@@ -171,6 +189,9 @@ const CROSS_REFERENCE_TABLES = {
     { field: 'product_name', refTable: 'products', refField: 'name', label: 'Product' },
   ],
   credit_sales: [
+    { field: 'product_name', refTable: 'products', refField: 'name', label: 'Product' },
+  ],
+  price_history: [
     { field: 'product_name', refTable: 'products', refField: 'name', label: 'Product' },
   ],
 };
@@ -239,6 +260,12 @@ export default async function handler(req, res) {
   const resource = parts[0];
 
   try {
+    if (req.method === 'POST' || req.method === 'PUT') {
+      const rawSize = Number(req.headers['content-length'] || 0);
+      if (rawSize > MAX_PAYLOAD_SIZE) {
+        return res.status(413).json({ error: `Payload too large (${rawSize} bytes). Maximum is ${MAX_PAYLOAD_SIZE / 1024 / 1024}MB.` });
+      }
+    }
     if (resource && !isAllowedResource(resource)) {
       return res.status(404).json({ error: 'Not found' });
     }
@@ -373,23 +400,79 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     }
     if (req.method === 'POST') {
-      let rows = Array.isArray(req.body) ? req.body : [req.body];
-      validateFields(dbTable, req.body, rows);
-      await checkCrossReferences(dbTable, req.body, rows, supabase);
-      if (dbTable === 'price_history') {
-        rows = await Promise.all(rows.map((row) => normalizePriceHistoryRow(row)));
-      }
-      for (const row of rows) {
-        await checkDuplicateFields(dbTable, row, supabase);
-      }
-      const { data, error } = await supabase.from(dbTable).insert(rows).select();
-      if (error) throw error;
-      if (dbTable === 'price_history') {
-        for (const row of (Array.isArray(data) ? data : [data])) {
-          await syncProductCurrentPrice(row?.product_name);
+      const rows = Array.isArray(req.body) ? req.body : [req.body];
+      const isBatch = rows.length > 1;
+      if (isBatch) {
+        const results = [];
+        let ok = 0, fail = 0;
+        for (const row of rows) {
+          const csvRow = row._csvRow || 0;
+          try {
+            const rowClean = { ...row };
+            delete rowClean._csvRow;
+            const rowErrors = [];
+            const validations = FIELD_VALIDATIONS[dbTable];
+            if (validations) {
+              for (const [field, validator] of Object.entries(validations)) {
+                const result = validator(rowClean[field], rowClean);
+                if (result !== true && typeof result === 'string') rowErrors.push(result);
+              }
+            }
+            if (rowErrors.length > 0) {
+              fail++;
+              results.push({ _csvRow: csvRow, error: rowErrors.join('; ') });
+              continue;
+            }
+            const refs = CROSS_REFERENCE_TABLES[dbTable];
+            if (refs) {
+              let refError = false;
+              for (const ref of refs) {
+                const val = String(rowClean[ref.field] ?? '').trim();
+                if (!val) continue;
+                const { data: refData, error: refErr } = await supabase.from(ref.refTable).select(ref.refField).eq(ref.refField, val).limit(1).maybeSingle();
+                if (refErr) { refError = true; fail++; results.push({ _csvRow: csvRow, error: `Reference check failed: ${refErr.message}` }); break; }
+                if (!refData) { refError = true; fail++; results.push({ _csvRow: csvRow, error: `${ref.label} not found: ${val}` }); break; }
+              }
+              if (refError) continue;
+            }
+            let normalizedRow = rowClean;
+            if (dbTable === 'price_history') {
+              normalizedRow = await normalizePriceHistoryRow(rowClean);
+            }
+            await checkDuplicateFields(dbTable, normalizedRow, supabase);
+            const { data, error: insErr } = await supabase.from(dbTable).insert(normalizedRow).select().single();
+            if (insErr) { fail++; results.push({ _csvRow: csvRow, error: insErr.message }); continue; }
+            if (dbTable === 'price_history' && data) {
+              await syncProductCurrentPrice(data?.product_name);
+            }
+            ok++;
+            results.push({ _csvRow: csvRow, ...(data || {}) });
+          } catch (e) {
+            fail++;
+            results.push({ _csvRow: csvRow, error: String(e?.message || e) });
+          }
         }
+        const status = ok === 0 && results.length > 0 ? 400 : 201;
+        return res.status(status).json({ ok, fail, results });
+      } else {
+        const singleRow = rows[0] || {};
+        const csvRow = singleRow._csvRow || 0;
+        const rowClean = { ...singleRow };
+        delete rowClean._csvRow;
+        validateFields(dbTable, rowClean, [rowClean]);
+        await checkCrossReferences(dbTable, rowClean, [rowClean], supabase);
+        let normalizedRow = rowClean;
+        if (dbTable === 'price_history') {
+          normalizedRow = await normalizePriceHistoryRow(rowClean);
+        }
+        await checkDuplicateFields(dbTable, normalizedRow, supabase);
+        const { data, error } = await supabase.from(dbTable).insert(normalizedRow).select().single();
+        if (error) throw error;
+        if (dbTable === 'price_history' && data) {
+          await syncProductCurrentPrice(data?.product_name);
+        }
+        return res.status(201).json({ ...data, _csvRow: csvRow });
       }
-      return res.status(201).json(data);
     }
     if (req.method === 'PUT') {
       const { id } = req.body || {};
@@ -512,14 +595,44 @@ async function handleSalesUpdate(req, res) {
 
 async function handleStockMovementCreate(req, res) {
   const rows = Array.isArray(req.body) ? req.body : [req.body];
-  const normalizedRows = await normalizeStockMovementRows(rows, supabase);
-  const { data, error } = await supabase.from('stock_movements').insert(normalizedRows).select();
-  if (error) throw error;
-  for (const row of data || []) {
-    const signedVolume = String(row.movement_type || '').toUpperCase() === 'IN' ? Number(row.volume || 0) : -Number(row.volume || 0);
-    await adjustTankCurrentVolumeForSalesDelta(row.tank_name, row.movement_date, signedVolume);
+  const isBatch = rows.length > 1;
+  if (!isBatch) {
+    const row = rows[0] || {};
+    const csvRow = row._csvRow || 0;
+    const cleanRow = { ...row };
+    delete cleanRow._csvRow;
+    const [normalized] = await normalizeStockMovementRows([cleanRow], supabase);
+    const { data, error } = await supabase.from('stock_movements').insert(normalized).select();
+    if (error) throw error;
+    if (data?.[0]) {
+      const signedVolume = String(data[0].movement_type || '').toUpperCase() === 'IN' ? Number(data[0].volume || 0) : -Number(data[0].volume || 0);
+      await adjustTankCurrentVolumeForSalesDelta(data[0].tank_name, data[0].movement_date, signedVolume);
+    }
+    return res.status(201).json(data);
   }
-  return res.status(201).json(data);
+  let ok = 0, fail = 0;
+  const results = [];
+  for (const row of rows) {
+    const csvRow = row._csvRow || 0;
+    const cleanRow = { ...row };
+    delete cleanRow._csvRow;
+    try {
+      const [normalized] = await normalizeStockMovementRows([cleanRow], supabase);
+      const { data, error: insErr } = await supabase.from('stock_movements').insert(normalized).select();
+      if (insErr) { fail++; results.push({ _csvRow: csvRow, error: insErr.message }); continue; }
+      if (data?.[0]) {
+        const signedVolume = String(data[0].movement_type || '').toUpperCase() === 'IN' ? Number(data[0].volume || 0) : -Number(data[0].volume || 0);
+        await adjustTankCurrentVolumeForSalesDelta(data[0].tank_name, data[0].movement_date, signedVolume);
+      }
+      ok++;
+      results.push({ _csvRow: csvRow, ...(data?.[0] || {}) });
+    } catch (e) {
+      fail++;
+      results.push({ _csvRow: csvRow, error: String(e?.message || e) });
+    }
+  }
+  const status = ok === 0 && results.length > 0 ? 400 : 201;
+  return res.status(status).json({ ok, fail, results });
 }
 
 async function handleStockMovementUpdate(req, res) {
@@ -837,6 +950,13 @@ async function loadCalibrationPointsByTankName(tankName) {
 async function normalizeTankerUnloadingCompartments(compartments) {
   const list = Array.isArray(compartments) ? compartments : [];
   if (list.length === 0) throw new Error('At least one compartment is required');
+  const allProductNames = [...new Set(list.map((c) => String(c?.product_name ?? '').trim()).filter(Boolean))];
+  const productMap = new Map();
+  if (allProductNames.length > 0) {
+    const { data: products, error: prodErr } = await supabase.from('products').select('name').in('name', allProductNames);
+    if (prodErr) throw prodErr;
+    for (const p of products || []) productMap.set(p.name, true);
+  }
   const normalizedLines = [];
   for (let i = 0; i < list.length; i++) {
     const c = list[i] || {};
@@ -846,6 +966,9 @@ async function normalizeTankerUnloadingCompartments(compartments) {
     const tankerQty = requireNonNegativeNumber(c.tanker_qty, `${label}Tanker qty`);
     const dipBefore = requireNonNegativeNumber(c.dip_before_mm, `${label}Dip before (mm)`);
     const dipAfter = requireNonNegativeNumber(c.dip_after_mm, `${label}Dip after (mm)`);
+    if (!productMap.has(productName)) {
+      throw new Error(`${label}Product not found: ${productName}`);
+    }
     const { tank, points } = await loadCalibrationPointsByTankName(tankName);
     if (tank.product_name && tank.product_name !== productName) {
       throw new Error(`${label}Selected tank does not match the chosen product`);
@@ -897,13 +1020,13 @@ async function handleTankerUnloadingCreateV2(req, res) {
   }
 
   try {
-    for (const line of normalizedLines) {
+    const tankUpdates = await Promise.all(normalizedLines.map(async (line) => {
       const { data: tankRow, error: tErr } = await supabase.from('tanks').select('id, current_volume').eq('name', line.tank_name).single();
       if (tErr) throw tErr;
       const nextVol = Number(tankRow.current_volume || 0) + Number(line.received_volume || 0);
-      const { error: updErr } = await supabase.from('tanks').update({ current_volume: nextVol }).eq('id', tankRow.id);
-      if (updErr) throw updErr;
-    }
+      return supabase.from('tanks').update({ current_volume: nextVol }).eq('id', tankRow.id);
+    }));
+    await Promise.all(tankUpdates);
   } catch (volErr) {
     await supabase.from('tanker_unloading_lines').delete().eq('header_id', header.id);
     await supabase.from('tanker_unloading_headers').delete().eq('id', header.id);
@@ -950,12 +1073,13 @@ async function handleTankerUnloadingUpdateV2(req, res) {
     .select();
   if (insErr) throw insErr;
 
-  for (const tankName of oldTankVolumes.keys()) {
+  const oldAdjustments = [...oldTankVolumes.keys()].map(async (tankName) => {
     await adjustTankCurrentVolumeForSalesDelta(tankName, existingHeader.unload_date, -Number(oldTankVolumes.get(tankName) || 0));
-  }
-  for (const tankName of newTankVolumes.keys()) {
+  });
+  const newAdjustments = [...newTankVolumes.keys()].map(async (tankName) => {
     await adjustTankCurrentVolumeForSalesDelta(tankName, unloadDate, Number(newTankVolumes.get(tankName) || 0));
-  }
+  });
+  await Promise.all([...oldAdjustments, ...newAdjustments]);
 
   return res.status(200).json({ id: headerId, lines: insertedLines || [] });
 }
@@ -978,9 +1102,10 @@ async function handleTankerUnloadingDeleteV2(req, res) {
   const { error: delHeaderErr } = await supabase.from('tanker_unloading_headers').delete().eq('id', headerId);
   if (delHeaderErr) throw delHeaderErr;
 
-  for (const [tankName, volume] of oldTankVolumes.entries()) {
+  const adjustments = [...oldTankVolumes.entries()].map(async ([tankName, volume]) => {
     await adjustTankCurrentVolumeForSalesDelta(tankName, existingHeader.unload_date, -Number(volume || 0));
-  }
+  });
+  await Promise.all(adjustments);
 
   return res.status(200).json({ ok: true });
 }
@@ -1441,7 +1566,7 @@ async function createDailySalesEntry(payload, opts = {}) {
   }
 
   try {
-    for (const r of normalizedReadings) {
+    const meterUpdates = normalizedReadings.map(async (r) => {
       const meter = meterMap.get(r.nozzle_name);
       const { error: updMeterErr } = await supabase.from('meters').update({ current_reading: r.closing_reading }).eq('id', meter.id);
       if (updMeterErr) throw updMeterErr;
@@ -1452,9 +1577,10 @@ async function createDailySalesEntry(payload, opts = {}) {
         const { error: updTankErr } = await supabase.from('tanks').update({ current_volume: nextVol }).eq('id', tankRow.id);
         if (updTankErr) throw updTankErr;
       }
-    }
+    });
+    await Promise.all(meterUpdates);
 
-    for (const t of normalizedTesting) {
+    const bufferUpdates = normalizedTesting.map(async (t) => {
       const { data: existing, error: bErr } = await supabase.from('buffer_tanks').select('id, volume').eq('product_name', t.product_name).maybeSingle();
       if (bErr) throw bErr;
       if (!existing) {
@@ -1465,7 +1591,8 @@ async function createDailySalesEntry(payload, opts = {}) {
         const { error: updErr } = await supabase.from('buffer_tanks').update({ volume: next, updated_at: new Date().toISOString() }).eq('id', existing.id);
         if (updErr) throw updErr;
       }
-    }
+    });
+    await Promise.all(bufferUpdates);
   } catch (updateErr) {
     await supabase.from('daily_sales_testing').delete().eq('sales_entry_id', entry.id);
     await supabase.from('daily_sales_nozzle_readings').delete().eq('sales_entry_id', entry.id);
@@ -1679,14 +1806,15 @@ async function updateDailySalesEntry(entryId, payload) {
     if (insTestErr) throw insTestErr;
   }
 
-  for (const tankName of new Set([...oldTankVolumes.keys(), ...newTankVolumes.keys()])) {
+  const tankAdjustments = [...new Set([...oldTankVolumes.keys(), ...newTankVolumes.keys()])].map(async (tankName) => {
     const delta = Number(oldTankVolumes.get(tankName) || 0) - Number(newTankVolumes.get(tankName) || 0);
     await adjustTankCurrentVolumeForSalesDelta(tankName, saleDate, delta);
-  }
-  for (const productName of new Set([...oldTestingByProduct.keys(), ...newTestingByProduct.keys()])) {
+  });
+  const bufferAdjustments = [...new Set([...oldTestingByProduct.keys(), ...newTestingByProduct.keys()])].map(async (productName) => {
     const delta = Number(newTestingByProduct.get(productName) || 0) - Number(oldTestingByProduct.get(productName) || 0);
     await adjustBufferVolumeByProduct(productName, delta);
-  }
+  });
+  await Promise.all([...tankAdjustments, ...bufferAdjustments]);
   await syncMetersForNozzles((existing.daily_sales_nozzle_readings || []).map((row) => row.nozzle_name));
 
   return entryId;
@@ -1713,12 +1841,13 @@ async function deleteDailySalesEntry(entryId) {
   const { error: delEntryErr } = await supabase.from('daily_sales_entries').delete().eq('id', entryId);
   if (delEntryErr) throw delEntryErr;
 
-  for (const [tankName, volume] of oldTankVolumes.entries()) {
+  const tankAdjustments = [...oldTankVolumes.entries()].map(async ([tankName, volume]) => {
     await adjustTankCurrentVolumeForSalesDelta(tankName, existing.sale_date, Number(volume || 0));
-  }
-  for (const [productName, volume] of oldTestingByProduct.entries()) {
+  });
+  const bufferAdjustments = [...oldTestingByProduct.entries()].map(async ([productName, volume]) => {
     await adjustBufferVolumeByProduct(productName, -Number(volume || 0));
-  }
+  });
+  await Promise.all([...tankAdjustments, ...bufferAdjustments]);
   await syncMetersForNozzles((existing.daily_sales_nozzle_readings || []).map((row) => row.nozzle_name));
 }
 
@@ -1726,6 +1855,7 @@ async function handleDailySalesImport(req, res) {
   const rows = Array.isArray(req.body) ? req.body : [];
   if (rows.length === 0) return res.status(400).json({ error: 'No rows provided' });
   const groups = new Map();
+  const groupCsvRows = new Map();
   for (const row of rows) {
     const saleDate = requireText(row.sale_date ?? row.date, 'Sale date');
     const shiftName = requireText(row.shift_name, 'Shift');
@@ -1734,14 +1864,15 @@ async function handleDailySalesImport(req, res) {
     const key = `${saleDate}||${shiftName}||${operatorName}||${dispenserName}`;
     if (!groups.has(key)) {
       groups.set(key, { sale_date: saleDate, shift_name: shiftName, operator_name: operatorName, dispenser_name: dispenserName, cash_amount: null, online_amount: null, credit_amount: null, nozzle_readings: [], testing_volumes: [] });
+      groupCsvRows.set(key, row._csvRow || 0);
     }
     const g = groups.get(key);
     const nozzleName = requireText(row.nozzle_name, 'Nozzle');
     const closing = requireNonNegativeNumber(row.closing_reading, 'Closing reading');
     g.nozzle_readings.push({ nozzle_name: nozzleName, closing_reading: closing });
     if (row.testing_volume != null && row.testing_volume !== '') {
-      const tv = Number(row.testing_volume);
-      if (Number.isFinite(tv) && tv > 0) {
+      const tv = requireNonNegativeNumber(row.testing_volume, 'Testing volume');
+      if (tv > 0) {
         g.testing_volumes.push({ nozzle_name: nozzleName, volume: tv, remarks: optionalText(row.testing_remarks) });
       }
     }
@@ -1753,16 +1884,17 @@ async function handleDailySalesImport(req, res) {
   let fail = 0;
   const results = [];
   for (const g of groups.values()) {
+    const csvRow = groupCsvRows.get(g.sale_date + '||' + g.shift_name + '||' + g.operator_name + '||' + g.dispenser_name) || 0;
     try {
       if (g.cash_amount == null) g.cash_amount = 0;
       if (g.online_amount == null) g.online_amount = 0;
       if (g.credit_amount == null) g.credit_amount = 0;
       const entryId = await createDailySalesEntry(g, { skipCoverageCheck: true });
       ok++;
-      results.push({ entry_id: entryId, sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
+      results.push({ _csvRow: csvRow, entry_id: entryId, sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
     } catch (e) {
       fail++;
-      results.push({ error: String(e?.message || e), sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
+      results.push({ _csvRow: csvRow, error: String(e?.message || e), sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
     }
   }
   if (ok === 0 && groups.size > 0) {
@@ -1777,13 +1909,16 @@ async function handleDipReadingCreate(req, res) {
   let fail = 0;
   const results = [];
   for (const row of rows) {
+    const csvRow = row._csvRow || 0;
     try {
-      const data = await createDipReading(row || {});
+      const cleanRow = { ...row };
+      delete cleanRow._csvRow;
+      const data = await createDipReading(cleanRow);
       ok++;
-      results.push({ id: data.id });
+      results.push({ _csvRow: csvRow, id: data.id });
     } catch (e) {
       fail++;
-      results.push({ error: String(e?.message || e) });
+      results.push({ _csvRow: csvRow, error: String(e?.message || e) });
     }
   }
   const status = ok === 0 && rows.length > 0 ? 400 : 201;
@@ -1955,11 +2090,15 @@ async function handleCalibrationImport(req, res) {
   if (rows.length === 0) return res.status(400).json({ error: 'No rows provided' });
 
   const byTank = new Map();
+  const tankCsvRows = new Map();
   for (const row of rows) {
     const tankName = requireText(row.tank_name, 'Tank');
     const dipMM = requireNonNegativeNumber(row.dip_mm, 'Dip (mm)');
     const volume = requireNonNegativeNumber(row.volume_liters, 'Volume (L)');
-    if (!byTank.has(tankName)) byTank.set(tankName, []);
+    if (!byTank.has(tankName)) {
+      byTank.set(tankName, []);
+      tankCsvRows.set(tankName, row._csvRow || 0);
+    }
     byTank.get(tankName).push({ dip_mm: dipMM, volume_liters: volume });
   }
 
@@ -1967,6 +2106,7 @@ async function handleCalibrationImport(req, res) {
   let fail = 0;
   const results = [];
   for (const [tankName, points] of byTank.entries()) {
+    const csvRow = tankCsvRows.get(tankName) || 0;
     try {
       const { data: tank, error: tErr } = await supabase.from('tanks').select('id, name, capacity').eq('name', tankName).single();
       if (tErr) throw tErr;
@@ -1976,20 +2116,24 @@ async function handleCalibrationImport(req, res) {
         .select('dip_mm, volume_liters')
         .eq('tank_id', tank.id);
       if (oldErr) throw oldErr;
-      await supabase.from('tank_calibration').delete().eq('tank_id', tank.id);
-      const toInsert = points.map((p) => ({ tank_id: tank.id, dip_mm: p.dip_mm, volume_liters: p.volume_liters }));
+      const { error: delErr } = await supabase.from('tank_calibration').delete().eq('tank_id', tank.id);
+      if (delErr) throw delErr;
+      const toInsert = points.map((p, i) => ({ tank_id: tank.id, dip_mm: p.dip_mm, volume_liters: p.volume_liters }));
       const { error: insErr } = await supabase.from('tank_calibration').insert(toInsert);
       if (insErr) {
         if (oldPoints && oldPoints.length > 0) {
-          await supabase.from('tank_calibration').insert(oldPoints.map((p) => ({ tank_id: tank.id, dip_mm: p.dip_mm, volume_liters: p.volume_liters })));
+          const restoreResult = await supabase.from('tank_calibration').insert(oldPoints.map((p) => ({ tank_id: tank.id, dip_mm: p.dip_mm, volume_liters: p.volume_liters })));
+          if (restoreResult.error) {
+            throw new Error(`Calibration replace failed and restore also failed: ${insErr.message}; restore: ${restoreResult.error.message}`);
+          }
         }
         throw insErr;
       }
       ok++;
-      results.push({ tank_name: tank.name, points: points.length });
+      results.push({ _csvRow: csvRow, tank_name: tank.name, points: points.length });
     } catch (e) {
       fail++;
-      results.push({ tank_name: tankName, error: String(e?.message || e) });
+      results.push({ _csvRow: csvRow, tank_name: tankName, error: String(e?.message || e) });
     }
   }
 
@@ -2045,6 +2189,7 @@ async function handleTankerUnloadingImport(req, res) {
   if (rows.length === 0) return res.status(400).json({ error: 'No rows provided' });
 
   const groups = new Map();
+  const rowCsvMap = new Map();
   for (const row of rows) {
     const unloadDate = requireText(row.unload_date, 'Unload date');
     const tankerNumber = requireText(row.tanker_number, 'Tanker number');
@@ -2058,9 +2203,11 @@ async function handleTankerUnloadingImport(req, res) {
         invoice_no: null,
         temperature: null,
         compartments: [],
+        _csvRows: [],
       });
     }
     const g = groups.get(key);
+    g._csvRows.push(row._csvRow || 0);
     if (g.supplier_name == null && row.supplier_name) g.supplier_name = String(row.supplier_name).trim();
     if (g.waybill_no == null && row.waybill_no) g.waybill_no = String(row.waybill_no).trim();
     if (g.invoice_no == null && row.invoice_no) g.invoice_no = String(row.invoice_no).trim();
@@ -2099,6 +2246,7 @@ async function handleTankerUnloadingImport(req, res) {
         .single();
       if (headerErr) throw headerErr;
 
+      let headerCreated = true;
       const linesToInsert = normalizedLines.map((l) => ({ header_id: header.id, ...l }));
       const { error: linesErr } = await supabase.from('tanker_unloading_lines').insert(linesToInsert);
       if (linesErr) {
@@ -2106,19 +2254,28 @@ async function handleTankerUnloadingImport(req, res) {
         throw linesErr;
       }
 
-      for (const line of normalizedLines) {
-        const { data: tankRow, error: tErr } = await supabase.from('tanks').select('id, current_volume').eq('name', line.tank_name).single();
-        if (tErr) throw tErr;
-        const nextVol = Number(tankRow.current_volume || 0) + Number(line.received_volume || 0);
-        const { error: updErr } = await supabase.from('tanks').update({ current_volume: nextVol }).eq('id', tankRow.id);
-        if (updErr) throw updErr;
+      try {
+        const tankUpdates = [];
+        for (const line of normalizedLines) {
+          const { data: tankRow, error: tErr } = await supabase.from('tanks').select('id, current_volume').eq('name', line.tank_name).single();
+          if (tErr) throw tErr;
+          const nextVol = Number(tankRow.current_volume || 0) + Number(line.received_volume || 0);
+          tankUpdates.push(supabase.from('tanks').update({ current_volume: nextVol }).eq('id', tankRow.id));
+        }
+        await Promise.all(tankUpdates);
+      } catch (volErr) {
+        await supabase.from('tanker_unloading_lines').delete().eq('header_id', header.id);
+        await supabase.from('tanker_unloading_headers').delete().eq('id', header.id);
+        throw new Error(`Tank volume update failed, entry rolled back: ${volErr.message}`);
       }
 
       ok++;
-      results.push({ tanker_number: g.tanker_number, unload_date: g.unload_date, compartments: normalizedLines.length });
+      const csvRow = g._csvRows[0] || 0;
+      results.push({ _csvRow: csvRow, tanker_number: g.tanker_number, unload_date: g.unload_date, compartments: normalizedLines.length });
     } catch (e) {
       fail++;
-      results.push({ tanker_number: g.tanker_number, unload_date: g.unload_date, error: String(e?.message || e) });
+      const csvRow = g._csvRows[0] || 0;
+      results.push({ _csvRow: csvRow, tanker_number: g.tanker_number, unload_date: g.unload_date, error: String(e?.message || e) });
     }
   }
 

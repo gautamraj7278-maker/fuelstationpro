@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Upload, FileDown, CheckCircle2, AlertTriangle, ChevronRight, Loader2 } from 'lucide-react';
 import { Card } from './ui/Card';
 import { parseCSV, toCSV, downloadCSV } from '../lib/csv';
@@ -12,6 +12,8 @@ export interface FieldSpec {
   example: string;
   options?: string[];
   unique?: boolean;
+  min?: number;
+  max?: number;
 }
 
 interface Props {
@@ -22,6 +24,10 @@ interface Props {
   templateName: string;
   customValidate?: (row: Record<string, string>, rowNumber: number) => string[];
 }
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const CHUNK_SIZE = 250;
+const MAX_VISIBLE_ERRORS = 200;
 
 function trimVal(v: any): string {
   return String(v ?? '').trim();
@@ -35,7 +41,14 @@ function toTrimmedNum(v: any): number | null {
   const s = trimVal(v);
   if (s === '') return null;
   const n = Number(s);
-  return isNaN(n) ? null : n;
+  if (isNaN(n) || !isFinite(n)) return null;
+  return n;
+}
+
+function toNonNegativeNum(v: any): number | null {
+  const n = toTrimmedNum(v);
+  if (n === null) return null;
+  return n >= 0 ? n : null;
 }
 
 export default function BulkUploadWizard({ title, description, endpoint, fields, templateName, customValidate }: Props) {
@@ -47,6 +60,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   const [progressText, setProgressText] = useState('');
   const [result, setResult] = useState<{ ok: number; fail: number; duplicates: number; validationErrors: number; errors?: string[] } | null>(null);
   const [fileName, setFileName] = useState('');
+  const abortRef = useRef<AbortController | null>(null);
 
   const downloadTemplate = () => {
     const headers = fields.map((f) => f.key);
@@ -64,6 +78,11 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB limit. Please split the file and try again.`);
+      e.target.value = '';
+      return;
+    }
     setFileName(file.name);
     const reader = new FileReader();
     reader.onload = () => {
@@ -92,6 +111,20 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
           if (f.type === 'number' && !isBlank(val) && toTrimmedNum(val) === null) {
             validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be a number, got "${trimmed}"` });
             isValid = false;
+          }
+          if (f.type === 'number' && f.min != null && !isBlank(val)) {
+            const n = toTrimmedNum(val);
+            if (n !== null && n < f.min) {
+              validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be ${f.min} or greater, got ${n}` });
+              isValid = false;
+            }
+          }
+          if (f.type === 'number' && f.max != null && !isBlank(val)) {
+            const n = toTrimmedNum(val);
+            if (n !== null && n > f.max) {
+              validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be ${f.max} or less, got ${n}` });
+              isValid = false;
+            }
           }
           if (f.options && !isBlank(val) && !f.options.includes(trimmed)) {
             validationErrors.push({ row: rowNumber, msg: `"${f.label}" must be one of: ${f.options.join(', ')}` });
@@ -137,12 +170,17 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   };
 
   const safeApiPost = async (url: string, body: any): Promise<any> => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const timeout = setTimeout(() => controller.abort(), 60000);
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const text = await res.text();
       let json: any;
       try { json = JSON.parse(text); } catch { json = null; }
@@ -152,8 +190,11 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       }
       return json;
     } catch (e: any) {
+      clearTimeout(timeout);
       if (e.name === 'AbortError') throw new Error('Request timed out');
       throw e;
+    } finally {
+      abortRef.current = null;
     }
   };
 
@@ -166,35 +207,55 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
 
     let ok = 0, fail = 0;
     const errors: { row: number; msg: string }[] = [];
-    const CHUNK = 250;
-    const payload = parsed
-      .filter((_, index) => !skipRows.has(index + 2))
-      .map((r, batchIdx) => {
-        const o: Record<string, any> = {};
-        fields.forEach((f) => {
-          o[f.key] = f.type === 'number' ? toTrimmedNum(r[f.key]) : trimVal(r[f.key]) || null;
-        });
-        return { _batchRow: batchIdx + 2, ...o };
+    const payload = [];
+    for (const [index, r] of parsed.entries()) {
+      const originalRowNum = index + 2;
+      if (skipRows.has(originalRowNum)) continue;
+      const o: Record<string, any> = {};
+      fields.forEach((f) => {
+        if (f.type === 'number') {
+          o[f.key] = f.min != null ? toNonNegativeNum(r[f.key]) : toTrimmedNum(r[f.key]);
+        } else {
+          o[f.key] = trimVal(r[f.key]) || null;
+        }
       });
+      o._csvRow = originalRowNum;
+      payload.push(o);
+    }
 
     const total = payload.length;
-    for (let i = 0; i < total; i += CHUNK) {
-      const chunk = payload.slice(i, i + CHUNK);
-      const chunkIdx = Math.floor(i / CHUNK) + 1;
-      const totalChunks = Math.ceil(total / CHUNK);
+    for (let i = 0; i < total; i += CHUNK_SIZE) {
+      const chunk = payload.slice(i, i + CHUNK_SIZE);
+      const chunkIdx = Math.floor(i / CHUNK_SIZE) + 1;
+      const totalChunks = Math.ceil(total / CHUNK_SIZE);
       setProgressText(totalChunks > 1 ? `Uploading chunk ${chunkIdx}/${totalChunks} (${chunk.length} records)...` : `Uploading ${total} records...`);
       try {
-        const cleanChunk = chunk.map(({ _batchRow, ...rest }) => rest);
-        const res = await safeApiPost(endpoint, cleanChunk);
-        if (res && Array.isArray(res)) {
-          ok += res.length;
-        } else if (res && typeof res.ok === 'number') {
-          ok += res.ok;
-          fail += typeof res.fail === 'number' ? res.fail : 0;
-          if (Array.isArray(res.results)) {
-            res.results.forEach((r: any) => {
-              if (r.error) errors.push({ row: 0, msg: String(r.error) });
-            });
+        const res = await safeApiPost(endpoint, chunk);
+        if (res && typeof res === 'object') {
+          if (Array.isArray(res)) {
+            if (res.length > 0 && res[0] && typeof res[0] === 'object' && '_csvRow' in res[0]) {
+              const succeeded = new Set(res.map((r: any) => Number(r._csvRow)));
+              for (const row of chunk) {
+                if (succeeded.has(Number(row._csvRow))) ok++;
+                else { fail++; errors.push({ row: Number(row._csvRow), msg: 'Server did not return this record' }); }
+              }
+            } else {
+              ok += chunk.length;
+            }
+          } else if (typeof res.ok === 'number' && Array.isArray(res.results)) {
+            ok += typeof res.ok === 'number' ? res.ok : 0;
+            fail += typeof res.fail === 'number' ? res.fail : 0;
+            let resultIdx = 0;
+            for (const r of res.results) {
+              const csvRow = r._csvRow || (chunk[resultIdx]?._csvRow) || 0;
+              if (r.error) errors.push({ row: Number(csvRow), msg: String(r.error) });
+              resultIdx++;
+            }
+          } else if (typeof res.ok === 'number' && typeof res.fail === 'number') {
+            ok += res.ok;
+            fail += res.fail;
+          } else {
+            ok += chunk.length;
           }
         } else {
           ok += chunk.length;
@@ -202,7 +263,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
       } catch (e: any) {
         const msg = e?.message || e?.error || `Chunk ${chunkIdx} failed`;
         fail += chunk.length;
-        chunk.forEach((r) => errors.push({ row: r._batchRow, msg }));
+        for (const r of chunk) errors.push({ row: Number(r._csvRow), msg });
       }
     }
     setProgressText('');
@@ -220,6 +281,7 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
   };
 
   const reset = () => {
+    if (step !== 1 && parsed.length > 0 && !window.confirm('Discard current data and start over? All parsed records and validation results will be lost.')) return;
     setStep(1);
     setParsed([]);
     setValidationErrors([]);
@@ -296,10 +358,10 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
                 <button onClick={downloadErrors} className="inline-flex items-center gap-1 text-xs font-normal text-amber-600 hover:text-amber-800 underline"><FileDown className="w-3 h-3" /> Download errors</button>
               </div>
               <ul className="text-xs text-amber-700 space-y-0.5 max-h-32 overflow-y-auto">
-                {allIssues.slice(0, 30).map((e, i) => (
+                {allIssues.slice(0, MAX_VISIBLE_ERRORS).map((e, i) => (
                   <li key={i}>Row {e.row}: {e.msg}</li>
                 ))}
-                {allIssues.length > 30 && <li className="text-slate-400">...and {allIssues.length - 30} more</li>}
+                {allIssues.length > MAX_VISIBLE_ERRORS && <li className="text-slate-400">...and {allIssues.length - MAX_VISIBLE_ERRORS} more</li>}
               </ul>
             </div>
           )}
@@ -344,8 +406,8 @@ export default function BulkUploadWizard({ title, description, endpoint, fields,
             <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-left max-h-48 overflow-y-auto">
               <p className="text-xs font-medium text-amber-700 mb-1">Errors:</p>
               <ul className="text-xs text-amber-700 space-y-0.5">
-                {result.errors.slice(0, 20).map((err, i) => <li key={i}>{err}</li>)}
-                {result.errors.length > 20 && <li className="text-slate-400">...and {result.errors.length - 20} more</li>}
+                {result.errors.slice(0, MAX_VISIBLE_ERRORS).map((err, i) => <li key={i}>{err}</li>)}
+                {result.errors.length > MAX_VISIBLE_ERRORS && <li className="text-slate-400">...and {result.errors.length - MAX_VISIBLE_ERRORS} more</li>}
               </ul>
             </div>
           )}
