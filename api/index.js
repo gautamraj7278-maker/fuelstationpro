@@ -2064,76 +2064,80 @@ async function handleDailySalesImport(req, res) {
   const allDispensers = [...new Set([...groups.values()].map((g) => g.dispenser_name))];
   const allOperators = [...new Set([...groups.values()].map((g) => g.operator_name))];
   const allShifts = [...new Set([...groups.values()].map((g) => g.shift_name))];
+  const allDates = [...new Set([...groups.values()].map((g) => g.sale_date))];
 
-  const [dispRes, opRes, shiftRes] = await Promise.all([
+  // Batch query all necessary data
+  const [dispRes, opRes, shiftRes, existingRaw, nozzleRows] = await Promise.all([
     allDispensers.length ? supabase.from('dispensers').select('name, status').in('name', allDispensers) : { data: [], error: null },
     allOperators.length ? supabase.from('operators').select('name, active').in('name', allOperators) : { data: [], error: null },
     allShifts.length ? supabase.from('shifts').select('name').in('name', allShifts) : { data: [], error: null },
+    (allDates.length && allDispensers.length) ? 
+      supabase.from('daily_sales_entries').select('sale_date, shift_name, dispenser_name, operator_name').in('sale_date', allDates).in('dispenser_name', allDispensers) 
+      : { data: [], error: null },
+    allDispensers.length ? supabase.from('nozzles').select('name, dispenser_name, product_name, tank_name, status').in('dispenser_name', allDispensers) : { data: [], error: null },
   ]);
   if (dispRes.error) throw dispRes.error;
   if (opRes.error) throw opRes.error;
   if (shiftRes.error) throw shiftRes.error;
+  if (existingRaw.error) throw existingRaw.error;
+  if (nozzleRows.error) throw nozzleRows.error;
 
   const dispenserMap = new Map((dispRes.data || []).map((d) => [d.name, d]));
   const operatorMap = new Map((opRes.data || []).map((o) => [o.name, o]));
   const shiftSet = new Set((shiftRes.data || []).map((s) => s.name));
 
-  // Check existing entries — one batch query
-  const allDates = [...new Set([...groups.values()].map((g) => g.sale_date))];
-  const allDispenserNames = [...new Set([...groups.values()].map((g) => g.dispenser_name))];
-  const { data: existingRaw, error: existErr } = await supabase
-    .from('daily_sales_entries')
-    .select('sale_date, shift_name, dispenser_name, operator_name')
-    .in('sale_date', allDates)
-    .in('dispenser_name', allDispenserNames);
-  if (existErr) throw existErr;
+  // Get nozzles and meters
+  const allNozzleNames = [...new Set((nozzleRows.data || []).map((n) => n.name).filter(Boolean))];
+  const meterRes = allNozzleNames.length ? await supabase.from('meters').select('id, nozzle_name, current_reading').in('nozzle_name', allNozzleNames) : { data: [], error: null };
+  if (meterRes.error) throw meterRes.error;
+  const metersByNozzle = new Map((meterRes.data || []).map((m) => [m.nozzle_name, m]));
+  
+  // Get tanks
+  const allTankNames = [...new Set((nozzleRows.data || []).map((n) => n.tank_name).filter(Boolean))];
+  const tankRes = allTankNames.length ? await supabase.from('tanks').select('id, name, current_volume').in('name', allTankNames) : { data: [], error: null };
+  if (tankRes.error) throw tankRes.error;
+  const tanksByName = new Map((tankRes.data || []).map((t) => [t.name, t]));
+  
+  // Get price maps for all products in all groups
+  const allProductNames = [...new Set((nozzleRows.data || []).map((n) => n.product_name).filter(Boolean))];
+  const priceMap = await loadEffectivePriceMap(allProductNames, allDates.length ? allDates[0] : new Date().toISOString().split('T')[0]);
 
-  // Batch-query nozzles and meters for all dispensers in this chunk
-  const { data: nozzleRows, error: nozErr } = await supabase
-    .from('nozzles')
-    .select('name, dispenser_name, product_name, status')
-    .in('dispenser_name', allDispenserNames);
-  if (nozErr) throw nozErr;
-
-  const allNozzleNames = [...new Set((nozzleRows || []).map((n) => n.name).filter(Boolean))];
-  const { data: meterRows, error: meterErr } = await supabase
-    .from('meters')
-    .select('id, nozzle_name, current_reading')
-    .in('nozzle_name', allNozzleNames);
-  if (meterErr) throw meterErr;
-
-  const metersByNozzle = new Map((meterRows || []).map((m) => [m.nozzle_name, m]));
+  // Build caches
   const nozzlesByDispenser = new Map();
-  for (const n of nozzleRows || []) {
+  const activeNozzlesByDispenser = new Map();
+  const nozzlesByName = new Map();
+  for (const n of nozzleRows.data || []) {
+    nozzlesByName.set(n.name, n);
     if (!nozzlesByDispenser.has(n.dispenser_name)) nozzlesByDispenser.set(n.dispenser_name, []);
     nozzlesByDispenser.get(n.dispenser_name).push(n);
   }
-  const activeNozzlesByDispenser = new Map();
   for (const [disp, nozzles] of nozzlesByDispenser) {
     activeNozzlesByDispenser.set(disp, nozzles.filter((n) => n.status === 'Active' || n.status == null));
   }
 
   const existingByDispenser = new Map();
   const usedOperators = new Map();
-  for (const e of existingRaw || []) {
+  for (const e of existingRaw.data || []) {
     existingByDispenser.set(`${e.sale_date}||${e.shift_name}||${e.dispenser_name}`, e);
     const oKey = `${e.sale_date}||${e.shift_name}||${e.operator_name}`;
     if (!usedOperators.has(oKey)) usedOperators.set(oKey, e.dispenser_name);
   }
 
-  // Per-group validation against batch-fetched data
+  // Per-group validation against batch-fetched data, and precompute all normalized data for write phase
   let hasErrors = false;
   const validationResults = [];
-  const intraDispenserKeys = new Map();  // track dispenser conflicts within this chunk
-  const intraOperatorKeys = new Map();   // track operator conflicts within this chunk
+  const intraDispenserKeys = new Map();
+  const intraOperatorKeys = new Map();
+  
   for (const [key, g] of groups) {
     const csvRow = groupCsvRows.get(key) || 0;
     const errs = [];
     const disp = dispenserMap.get(g.dispenser_name);
+    const op = operatorMap.get(g.operator_name);
+    
     if (!disp) errs.push(`Dispenser not found: ${g.dispenser_name}`);
     else if (disp.status && !['Operational', 'Active'].includes(String(disp.status))) errs.push(`Dispenser is not available for sales entry: ${g.dispenser_name}`);
 
-    const op = operatorMap.get(g.operator_name);
     if (!op) errs.push(`Operator not found: ${g.operator_name}`);
     else if (op.active === false) errs.push(`Operator is inactive: ${g.operator_name}`);
 
@@ -2152,22 +2156,70 @@ async function handleDailySalesImport(req, res) {
     const nozzleNames = g.nozzle_readings.map((r) => r.nozzle_name);
     if (new Set(nozzleNames).size !== nozzleNames.length) errs.push('Each nozzle can be entered only once in a sales entry');
 
-    // Validate nozzle existence, status, and meter availability
+    // Precompute normalized readings and testings, and do full validation
+    const normalizedReadings = [];
+    const normalizedTestings = [];
+    let grossSalesAmount = 0;
+    let testingDeduction = 0;
+    
     if (errs.length === 0 && disp && op && shiftSet.has(g.shift_name)) {
       const dispNozzles = activeNozzlesByDispenser.get(g.dispenser_name) || [];
       const dispNozzleNames = dispNozzles.map((n) => n.name);
-      for (const nn of nozzleNames) {
+      
+      for (const r of g.nozzle_readings) {
+        const nn = r.nozzle_name;
+        const closing = Number(r.closing_reading || 0);
         if (!dispNozzleNames.includes(nn)) {
           errs.push(`Nozzle "${nn}" is not an active nozzle of dispenser ${g.dispenser_name}`);
         } else {
+          const nozzle = nozzlesByName.get(nn);
           const meter = metersByNozzle.get(nn);
           if (!meter) errs.push(`Meter not found for nozzle: ${nn}`);
           else {
-            const reading = g.nozzle_readings.find((r) => r.nozzle_name === nn);
-            if (reading && Number(reading.closing_reading) < Number(meter.current_reading || 0)) {
-              errs.push(`Closing reading for ${nn} (${reading.closing_reading}) must be >= current meter reading (${meter.current_reading})`);
+            if (closing < Number(meter.current_reading || 0)) {
+              errs.push(`Closing reading for ${nn} (${closing}) must be >= current meter reading (${meter.current_reading})`);
+            } else {
+              const opening = Number(meter.current_reading || 0);
+              const volume = closing - opening;
+              const unitPrice = Number(priceMap.get(nozzle.product_name) || 0);
+              const amount = Math.round(volume * unitPrice * 100) / 100;
+              grossSalesAmount += amount;
+              normalizedReadings.push({
+                nozzle_name: nn,
+                dispenser_name: g.dispenser_name,
+                tank_name: nozzle.tank_name,
+                product_name: nozzle.product_name,
+                opening_reading: opening,
+                closing_reading: closing,
+                volume,
+                unit_price: unitPrice,
+                amount,
+              });
             }
           }
+        }
+      }
+
+      // Validate testings
+      for (const t of g.testing_volumes) {
+        const nn = t.nozzle_name;
+        const nozzle = nozzlesByName.get(nn);
+        if (!nozzle || nozzle.dispenser_name !== g.dispenser_name) {
+          errs.push(`Nozzle "${nn}" does not belong to dispenser ${g.dispenser_name}`);
+        } else {
+          const productName = nozzle.product_name;
+          const unitPrice = Number(priceMap.get(productName) || 0);
+          const amount = Math.round(t.volume * unitPrice * 100) / 100;
+          testingDeduction += amount;
+          normalizedTestings.push({
+            nozzle_name: nn,
+            tank_name: nozzle.tank_name,
+            product_name: productName,
+            volume: t.volume,
+            unit_price: unitPrice,
+            amount,
+            remarks: t.remarks,
+          });
         }
       }
     }
@@ -2176,7 +2228,31 @@ async function handleDailySalesImport(req, res) {
       hasErrors = true;
       validationResults.push({ _csvRow: csvRow, error: errs.join('; '), sale_date: g.sale_date, shift_name: g.shift_name, operator_name: g.operator_name, dispenser_name: g.dispenser_name });
     } else {
-      validationResults.push({ key, g, csvRow });
+      const cashAmount = Number(g.cash_amount || 0);
+      const onlineAmount = Number(g.online_amount || 0);
+      const creditAmount = Number(g.credit_amount || 0);
+      const totalSubmitted = Math.round((cashAmount + onlineAmount + creditAmount) * 100) / 100;
+      const totalSalesAmount = Math.round((grossSalesAmount - testingDeduction) * 100) / 100;
+      const variance = Math.round((totalSubmitted - totalSalesAmount) * 100) / 100;
+
+      validationResults.push({
+        key, g, csvRow,
+        normalizedReadings,
+        normalizedTestings,
+        entryData: {
+          sale_date: g.sale_date,
+          shift_name: g.shift_name,
+          operator_name: g.operator_name,
+          dispenser_name: g.dispenser_name,
+          cash_amount: cashAmount,
+          online_amount: onlineAmount,
+          credit_amount: creditAmount,
+          total_submitted: totalSubmitted,
+          total_sales_amount: totalSalesAmount,
+          variance,
+          status: 'submitted',
+        }
+      });
     }
   }
 
@@ -2188,24 +2264,84 @@ async function handleDailySalesImport(req, res) {
     return res.status(400).json({ groups: groups.size, ok: 0, fail: groups.size, results: allResults, message: 'Validation failed. No data was saved.' });
   }
 
-  // Phase 3 — All validations passed; write ALL groups
+  // Phase 3 — Write ALL groups with atomic per-chunk rollback
   let ok = 0;
   let fail = 0;
   const finalResults = [];
-  const committed = []; // { entryId, rollback: { preMeterState, preTankState, preBufferState } }
+  const committed = []; // track what to roll back
 
   try {
     for (const r of validationResults) {
-      if (r.g.cash_amount == null) r.g.cash_amount = 0;
-      if (r.g.online_amount == null) r.g.online_amount = 0;
-      if (r.g.credit_amount == null) r.g.credit_amount = 0;
-      const { entryId, rollback } = await createDailySalesEntry(r.g, { skipCoverageCheck: true });
-      committed.push({ entryId, rollback });
+      // Capture pre-write state for rollback
+      const preMeterState = r.normalizedReadings.map((nr) => {
+        const meter = metersByNozzle.get(nr.nozzle_name);
+        return { meterId: meter.id, previousReading: Number(meter.current_reading) };
+      });
+      const preTankState = [...new Set(r.normalizedReadings.map((nr) => nr.tank_name).filter(Boolean))].map((tn) => {
+        const tank = tanksByName.get(tn);
+        return { tankId: tank.id, previousVolume: Number(tank.current_volume) };
+      });
+      const preBufferState = [...new Set(r.normalizedTestings.map((nt) => nt.product_name).filter(Boolean))].map(async (pn) => {
+        const { data: bufferRow } = await supabase.from('buffer_tanks').select('id, volume').eq('product_name', pn).maybeSingle();
+        return { productName: pn, id: bufferRow?.id || null, previousVolume: Number(bufferRow?.volume || 0) };
+      });
+      const preBufferResolved = await Promise.all(preBufferState);
+      
+      // Write entry, readings, testings
+      const { data: entry, error: entryErr } = await supabase.from('daily_sales_entries').insert(r.entryData).select().single();
+      if (entryErr) throw entryErr;
+      
+      if (r.normalizedReadings.length > 0) {
+        const { error: readingsErr } = await supabase.from('daily_sales_nozzle_readings').insert(
+          r.normalizedReadings.map((nr) => ({ sales_entry_id: entry.id, ...nr }))
+        );
+        if (readingsErr) {
+          await supabase.from('daily_sales_entries').delete().eq('id', entry.id);
+          throw readingsErr;
+        }
+      }
+      
+      if (r.normalizedTestings.length > 0) {
+        const { error: testingsErr } = await supabase.from('daily_sales_testing').insert(
+          r.normalizedTestings.map((nt) => ({ sales_entry_id: entry.id, ...nt }))
+        );
+        if (testingsErr) {
+          await supabase.from('daily_sales_nozzle_readings').delete().eq('sales_entry_id', entry.id);
+          await supabase.from('daily_sales_entries').delete().eq('id', entry.id);
+          throw testingsErr;
+        }
+      }
+
+      // Apply side effects
+      for (const nr of r.normalizedReadings) {
+        const meter = metersByNozzle.get(nr.nozzle_name);
+        await supabase.from('meters').update({ current_reading: nr.closing_reading }).eq('id', meter.id);
+        if (nr.tank_name) {
+          const tank = tanksByName.get(nr.tank_name);
+          const nextVol = Math.max(0, Number(tank.current_volume) - Number(nr.volume));
+          await supabase.from('tanks').update({ current_volume: nextVol }).eq('id', tank.id);
+        }
+      }
+      for (const nt of r.normalizedTestings) {
+        const productName = nt.product_name;
+        const { data: bufferRow } = await supabase.from('buffer_tanks').select('id, volume').eq('product_name', productName).maybeSingle();
+        if (!bufferRow) {
+          await supabase.from('buffer_tanks').insert([{ product_name: productName, volume: Number(nt.volume) }]);
+        } else {
+          const nextVol = Number(bufferRow.volume) + Number(nt.volume);
+          await supabase.from('buffer_tanks').update({ volume: nextVol }).eq('id', bufferRow.id);
+        }
+      }
+
+      committed.push({
+        entryId: entry.id,
+        rollback: { preMeterState, preTankState, preBufferState: preBufferResolved }
+      });
       ok++;
-      finalResults.push({ _csvRow: r.csvRow, entry_id: entryId, sale_date: r.g.sale_date, shift_name: r.g.shift_name, operator_name: r.g.operator_name, dispenser_name: r.g.dispenser_name });
+      finalResults.push({ _csvRow: r.csvRow, entry_id: entry.id, sale_date: r.g.sale_date, shift_name: r.g.shift_name, operator_name: r.g.operator_name, dispenser_name: r.g.dispenser_name });
     }
   } catch (writeErr) {
-    // Roll back every entry — including meter/tank/buffer side effects
+    // Roll back ALL changes
     for (const c of committed) {
       try {
         await supabase.from('daily_sales_testing').delete().eq('sales_entry_id', c.entryId);
@@ -2224,15 +2360,15 @@ async function handleDailySalesImport(req, res) {
             await supabase.from('buffer_tanks').delete().eq('product_name', bs.productName);
           }
         }
-      } catch (_) { /* best-effort cleanup */ }
+      } catch (_) { /* best-effort */ }
     }
-    const rollbackMsg = `Rolled back: ${writeErr.message}`;
+    finalResults.length = 0;
     for (const r of validationResults) {
-      finalResults.push({ _csvRow: r.csvRow, error: rollbackMsg, sale_date: r.g.sale_date, shift_name: r.g.shift_name, operator_name: r.g.operator_name, dispenser_name: r.g.dispenser_name });
+      finalResults.push({ _csvRow: r.csvRow, error: `Rolled back: ${writeErr.message}`, sale_date: r.g.sale_date, shift_name: r.g.shift_name, operator_name: r.g.operator_name, dispenser_name: r.g.dispenser_name });
     }
     ok = 0;
     fail = validationResults.length;
-    return res.status(400).json({ groups: groups.size, ok, fail, results: finalResults, message: 'Write failed. All data for this chunk rolled back.' });
+    return res.status(400).json({ groups: groups.size, ok, fail, results: finalResults, message: 'Write failed. All data rolled back.' });
   }
 
   return res.status(200).json({ groups: groups.size, ok, fail, results: finalResults });
