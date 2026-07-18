@@ -74,3 +74,5 @@ AI-AGENT-USAGE-GUIDE.md
 /node_modules
 /.pnp
 .pnp.js
+.env
+.env.local

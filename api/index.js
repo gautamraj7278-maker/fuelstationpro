@@ -506,9 +506,19 @@ export default async function handler(req, res) {
           }
 
           // All inserts succeeded — now perform any side effects (like syncing prices)
-          for (const rec of insertedRecords) {
-            if (dbTable === 'price_history' && rec.productName) {
-              await syncProductCurrentPrice(rec.productName);
+          if (dbTable === 'price_history') {
+            // Batch pre-validation couldn't see other rows in same batch, so all old_prices
+            // would be 0 or stale. Recalculate the full price chain per product.
+            const affectedProducts = [...new Set(preValidated.map(r => r.normalizedRow.product_name).filter(Boolean))];
+            for (const productName of affectedProducts) {
+              await recalcPriceHistoryChain(productName);
+              await syncProductCurrentPrice(productName);
+            }
+          } else {
+            for (const rec of insertedRecords) {
+              if (rec.productName) {
+                await syncProductCurrentPrice(rec.productName);
+              }
             }
           }
         } catch (writeErr) {
@@ -546,7 +556,9 @@ export default async function handler(req, res) {
         const { data, error } = await supabase.from(dbTable).insert(normalizedRow).select().single();
         if (error) throw error;
         if (dbTable === 'price_history' && data) {
-          await syncProductCurrentPrice(data?.product_name);
+          const productName = data?.product_name;
+          if (productName) await recalcPriceHistoryChain(productName);
+          await syncProductCurrentPrice(productName);
         }
         return res.status(201).json({ ...data, _csvRow: csvRow });
       }
@@ -567,6 +579,8 @@ export default async function handler(req, res) {
       const { data, error } = await supabase.from(dbTable).update(rest).eq('id', id).select().single();
       if (error) throw error;
       if (dbTable === 'price_history') {
+        const affectedProduct = beforeUpdate?.product_name || data?.product_name;
+        if (affectedProduct) await recalcPriceHistoryChain(affectedProduct);
         await syncProductCurrentPrice(beforeUpdate?.product_name);
         await syncProductCurrentPrice(data?.product_name);
       }
@@ -582,7 +596,9 @@ export default async function handler(req, res) {
       const { error } = await supabase.from(dbTable).delete().eq('id', id);
       if (error) throw error;
       if (dbTable === 'price_history') {
-        await syncProductCurrentPrice(beforeDelete?.product_name);
+        const productName = beforeDelete?.product_name;
+        if (productName) await recalcPriceHistoryChain(productName);
+        await syncProductCurrentPrice(productName);
       }
       return res.status(200).json({ ok: true });
     }
@@ -1170,9 +1186,35 @@ async function syncProductCurrentPrice(productName) {
     .limit(1)
     .maybeSingle();
   if (latestErr) throw latestErr;
-  if (latestActivePrice) {
-    const { error: updErr } = await supabase.from('products').update({ current_price: Number(latestActivePrice.new_price || 0) }).eq('name', productName);
-    if (updErr) throw updErr;
+  // Always update: set to latest price or 0 if no entries remain (fixes stale current_price)
+  const { error: updErr } = await supabase.from('products').update({ current_price: Number(latestActivePrice?.new_price || 0) }).eq('name', productName);
+  if (updErr) throw updErr;
+}
+
+// Recalculate old_price chain for a product's price history so each entry's old_price
+// equals the previous entry's new_price (by chronological order).
+// Fixes bug where batch-imported rows all got old_price = 0.
+async function recalcPriceHistoryChain(productName) {
+  const { data: entries, error: entriesErr } = await supabase
+    .from('price_history')
+    .select('id, old_price, new_price, effective_date')
+    .eq('product_name', productName)
+    .order('effective_date', { ascending: true })
+    .order('id', { ascending: true });
+  if (entriesErr) throw entriesErr;
+
+  let prevNewPrice = 0; // first chronological entry has no prior price
+  for (const entry of entries || []) {
+    const correctOld = prevNewPrice;
+    const currentOld = Number(entry.old_price || 0);
+    if (Math.abs(currentOld - correctOld) > 0.001) {
+      const { error: updErr } = await supabase
+        .from('price_history')
+        .update({ old_price: correctOld })
+        .eq('id', entry.id);
+      if (updErr) throw updErr;
+    }
+    prevNewPrice = Number(entry.new_price || 0);
   }
 }
 
@@ -1201,19 +1243,31 @@ async function loadEffectivePriceMap(productNames, targetDate) {
   for (const productName of uniqueNames) {
     const history = historyByProduct.get(productName) || [];
     if (history.length === 0) {
-      priceMap.set(productName, 0);
-      continue;
+      throw new Error(`No price history found for product "${productName}". Please set a price first before entering sales.`);
     }
 
-    const firstRow = history[0];
-    let resolvedPrice = Number(firstRow.old_price ?? 0);
-    if (!Number.isFinite(resolvedPrice)) resolvedPrice = 0;
+    // Normalize both dates to YYYY-MM-DD for reliable comparison
+    const target = String(targetDate || '').slice(0, 10);
 
+    // Walk through history to find the last applicable price
+    let resolvedPrice = null;
     for (const row of history) {
       const rawDate = row.effective_date;
-      const effDate = rawDate instanceof Date ? rawDate.toISOString().slice(0, 10) : String(rawDate || '');
-      if (effDate > targetDate) break;
-      resolvedPrice = Number(row.new_price || 0);
+      const effDate = rawDate instanceof Date
+        ? rawDate.toISOString().slice(0, 10)
+        : String(rawDate || '').slice(0, 10);
+      if (effDate > target) break;
+      resolvedPrice = Number(row.new_price);
+    }
+
+    // If all effective_dates are after the target date, fall back to the first record's old_price
+    if (resolvedPrice == null) {
+      const firstRow = history[0];
+      resolvedPrice = firstRow.old_price != null ? Number(firstRow.old_price) : null;
+    }
+
+    if (resolvedPrice == null || !Number.isFinite(resolvedPrice)) {
+      throw new Error(`No valid price found for product "${productName}" on or before ${targetDate}. Please update the price first before entering sales.`);
     }
 
     priceMap.set(productName, resolvedPrice);
@@ -1418,7 +1472,12 @@ async function handleTankerUnloadingDeleteV2(req, res) {
 
 async function handleDailySalesList(req, res) {
   const { filters, pagination } = getFilters(req.url);
-  const { page, pageSize, search, hasPagination } = pagination;
+  let { page, pageSize, search, hasPagination } = pagination;
+
+  // Allow higher page sizes for report endpoint (chart aggregations need broader data)
+  if (hasPagination) {
+    pageSize = Math.max(1, Math.min(5000, parseInt(String(pageSize)) || 20));
+  }
 
   const selectFields = 'id, sale_date, shift_name, operator_name, dispenser_name, cash_amount, online_amount, credit_amount, total_submitted, total_sales_amount, variance, status, created_at, daily_sales_nozzle_readings ( id, nozzle_name, dispenser_name, tank_name, product_name, opening_reading, closing_reading, volume, unit_price, amount ), daily_sales_testing ( id, nozzle_name, tank_name, product_name, volume, unit_price, amount, remarks )';
   
@@ -1774,53 +1833,28 @@ async function createDailySalesEntry(payload, opts = {}) {
   const productNames = [...new Set((nozzleRows || []).map((n) => String(n.product_name || '').trim()).filter(Boolean))];
   const priceMap = await loadEffectivePriceMap(productNames, saleDate);
 
-  const normalizedReadings = [];
-  let grossSalesAmount = 0;
-  for (let i = 0; i < nozzleReadings.length; i++) {
-    const r = nozzleReadings[i] || {};
-    const label = `Nozzle row ${i + 1}: `;
-    const nozzleName = requireText(r.nozzle_name, `${label}Nozzle`);
-    const closing = requireNonNegativeNumber(r.closing_reading, `${label}Closing reading`);
-    const nozzle = nozzleMap.get(nozzleName);
-    if (!nozzle) throw new Error(`${label}Nozzle not found: ${nozzleName}`);
-    const meter = meterMap.get(nozzleName);
-    if (!meter) throw new Error(`${label}Meter not found for nozzle: ${nozzleName}`);
-    const opening = Number(meter.current_reading || 0);
-    if (closing < opening) throw new Error(`${label}Closing reading must be >= opening reading`);
-    const volume = closing - opening;
-    const unitPrice = Number(priceMap.get(nozzle.product_name) ?? 0);
-    const amount = Math.round(volume * unitPrice * 100) / 100;
-    grossSalesAmount += amount;
-    normalizedReadings.push({
-      nozzle_name: nozzleName,
-      dispenser_name: dispenserName,
-      tank_name: nozzle.tank_name || null,
-      product_name: nozzle.product_name,
-      opening_reading: opening,
-      closing_reading: closing,
-      volume,
-      unit_price: unitPrice,
-      amount,
-    });
-  }
-
+  // Build testing entries and volume map (validated before nozzle calculation)
   const normalizedTesting = [];
-  let testingDeduction = 0;
+  const testingByNozzle = new Map();
   for (let i = 0; i < testingVolumes.length; i++) {
     const t = testingVolumes[i] || {};
     const label = `Testing row ${i + 1}: `;
     const nozzleName = requireText(t.nozzle_name, `${label}Nozzle`);
     const volume = requireNonNegativeNumber(t.volume, `${label}Volume`);
     const remarks = optionalText(t.remarks);
+    if (volume === 0) continue; // skip zero-volume testing entries
     const noz = nozzleMap.get(nozzleName);
     if (!noz || noz.dispenser_name !== dispenserName) {
       throw new Error(`${label}Nozzle does not belong to dispenser ${dispenserName}: ${nozzleName}`);
     }
+    if (!nozzleReadings.some((r) => String(r?.nozzle_name ?? '').trim() === nozzleName)) {
+      throw new Error(`${label}Testing nozzle ${nozzleName} has no matching nozzle reading in this entry`);
+    }
+    testingByNozzle.set(nozzleName, (testingByNozzle.get(nozzleName) || 0) + volume);
     const resolvedProduct = noz.product_name;
     const resolvedTank = noz.tank_name || null;
     const price = Number(priceMap.get(resolvedProduct) ?? 0);
     const amount = Math.round(volume * price * 100) / 100;
-    testingDeduction += amount;
     normalizedTesting.push({
       nozzle_name: nozzleName,
       tank_name: resolvedTank,
@@ -1832,7 +1866,44 @@ async function createDailySalesEntry(payload, opts = {}) {
     });
   }
 
-  const totalSalesAmount = Math.round((grossSalesAmount - testingDeduction) * 100) / 100;
+  // Nozzle readings loop: compute net volume by subtracting testing per nozzle
+  // This avoids intermediate-rounding discrepancies from deducting testing at the monetary level
+  const normalizedReadings = [];
+  let rawTotal = 0;
+  for (let i = 0; i < nozzleReadings.length; i++) {
+    const r = nozzleReadings[i] || {};
+    const label = `Nozzle row ${i + 1}: `;
+    const nozzleName = requireText(r.nozzle_name, `${label}Nozzle`);
+    const closing = requireNonNegativeNumber(r.closing_reading, `${label}Closing reading`);
+    const nozzle = nozzleMap.get(nozzleName);
+    if (!nozzle) throw new Error(`${label}Nozzle not found: ${nozzleName}`);
+    const meter = meterMap.get(nozzleName);
+    if (!meter) throw new Error(`${label}Meter not found for nozzle: ${nozzleName}`);
+    const opening = Number(meter.current_reading || 0);
+    if (closing < opening) throw new Error(`${label}Closing reading must be >= opening reading`);
+    const grossVolume = closing - opening;
+    const unitPrice = Number(priceMap.get(nozzle.product_name) ?? 0);
+    const testingVol = testingByNozzle.get(nozzleName) || 0;
+    if (testingVol > grossVolume) {
+      throw new Error(`${label}Testing volume (${testingVol}) cannot exceed dispensed volume (${grossVolume})`);
+    }
+    const netVolume = grossVolume - testingVol;
+    const amount = Math.round(netVolume * unitPrice * 100) / 100;
+    rawTotal += amount;
+    normalizedReadings.push({
+      nozzle_name: nozzleName,
+      dispenser_name: dispenserName,
+      tank_name: nozzle.tank_name || null,
+      product_name: nozzle.product_name,
+      opening_reading: opening,
+      closing_reading: closing,
+      volume: grossVolume,
+      unit_price: unitPrice,
+      amount,
+    });
+  }
+
+  const totalSalesAmount = Math.round(rawTotal * 100) / 100;
   const totalSubmitted = Math.round((Number(cashAmount) + Number(onlineAmount) + Number(creditAmount)) * 100) / 100;
   const variance = Math.round((totalSubmitted - totalSalesAmount) * 100) / 100;
 
@@ -2020,42 +2091,16 @@ async function updateDailySalesEntry(entryId, payload) {
   const productNames = [...new Set((nozzleRows || []).map((n) => String(n.product_name || '').trim()).filter(Boolean))];
   const priceMap = await loadEffectivePriceMap(productNames, saleDate);
 
-  const normalizedReadings = [];
-  let grossSalesAmount = 0;
-  for (let i = 0; i < nozzleReadings.length; i++) {
-    const r = nozzleReadings[i] || {};
-    const label = `Nozzle row ${i + 1}: `;
-    const nozzleName = requireText(r.nozzle_name, `${label}Nozzle`);
-    const closing = requireNonNegativeNumber(r.closing_reading, `${label}Closing reading`);
-    const nozzle = nozzleMap.get(nozzleName);
-    if (!nozzle) throw new Error(`${label}Nozzle not found: ${nozzleName}`);
-    const opening = Number(openingByNozzle.get(nozzleName) || 0);
-    if (closing < opening) throw new Error(`${label}Closing reading must be >= opening reading`);
-    const volume = closing - opening;
-    const unitPrice = Number(priceMap.get(nozzle.product_name) ?? 0);
-    const amount = Math.round(volume * unitPrice * 100) / 100;
-    grossSalesAmount += amount;
-    normalizedReadings.push({
-      nozzle_name: nozzleName,
-      dispenser_name: dispenserName,
-      tank_name: nozzle.tank_name || null,
-      product_name: nozzle.product_name,
-      opening_reading: opening,
-      closing_reading: closing,
-      volume,
-      unit_price: unitPrice,
-      amount,
-    });
-  }
-
+  // Build testing entries and volume map (validated before nozzle calculation)
   const normalizedTesting = [];
-  let testingDeduction = 0;
+  const testingByNozzle = new Map();
   for (let i = 0; i < testingVolumes.length; i++) {
     const t = testingVolumes[i] || {};
     const label = `Testing row ${i + 1}: `;
     const nozzleName = requireText(t.nozzle_name, `${label}Nozzle`);
     const volume = requireNonNegativeNumber(t.volume, `${label}Volume`);
     const remarks = optionalText(t.remarks);
+    if (volume === 0) continue; // skip zero-volume testing entries
     if (!openingByNozzle.has(nozzleName)) {
       throw new Error(`${label}Only the original entry nozzles can be corrected: ${nozzleName}`);
     }
@@ -2063,16 +2108,14 @@ async function updateDailySalesEntry(entryId, payload) {
     if (!noz || noz.dispenser_name !== dispenserName) {
       throw new Error(`${label}Nozzle does not belong to dispenser ${dispenserName}: ${nozzleName}`);
     }
-    const relatedReading = normalizedReadings.find((row) => row.nozzle_name === nozzleName);
-    if (!relatedReading) throw new Error(`${label}Matching nozzle reading is required`);
-    if (volume > Number(relatedReading.volume || 0)) {
-      throw new Error(`${label}Testing quantity cannot be greater than dispensed quantity`);
+    if (!nozzleReadings.some((r) => String(r?.nozzle_name ?? '').trim() === nozzleName)) {
+      throw new Error(`${label}Testing nozzle ${nozzleName} has no matching nozzle reading in this update`);
     }
+    testingByNozzle.set(nozzleName, (testingByNozzle.get(nozzleName) || 0) + volume);
     const resolvedProduct = noz.product_name;
     const resolvedTank = noz.tank_name || null;
     const price = Number(priceMap.get(resolvedProduct) ?? 0);
     const amount = Math.round(volume * price * 100) / 100;
-    testingDeduction += amount;
     normalizedTesting.push({
       nozzle_name: nozzleName,
       tank_name: resolvedTank,
@@ -2084,7 +2127,41 @@ async function updateDailySalesEntry(entryId, payload) {
     });
   }
 
-  const totalSalesAmount = Math.round((grossSalesAmount - testingDeduction) * 100) / 100;
+  // Nozzle readings loop: compute net amount per nozzle (testing subtracted before pricing)
+  const normalizedReadings = [];
+  let rawTotal = 0;
+  for (let i = 0; i < nozzleReadings.length; i++) {
+    const r = nozzleReadings[i] || {};
+    const label = `Nozzle row ${i + 1}: `;
+    const nozzleName = requireText(r.nozzle_name, `${label}Nozzle`);
+    const closing = requireNonNegativeNumber(r.closing_reading, `${label}Closing reading`);
+    const nozzle = nozzleMap.get(nozzleName);
+    if (!nozzle) throw new Error(`${label}Nozzle not found: ${nozzleName}`);
+    const opening = Number(openingByNozzle.get(nozzleName) || 0);
+    if (closing < opening) throw new Error(`${label}Closing reading must be >= opening reading`);
+    const grossVolume = closing - opening;
+    const unitPrice = Number(priceMap.get(nozzle.product_name) ?? 0);
+    const testingVol = testingByNozzle.get(nozzleName) || 0;
+    if (testingVol > grossVolume) {
+      throw new Error(`${label}Testing volume (${testingVol}) cannot exceed dispensed volume (${grossVolume})`);
+    }
+    const netVolume = grossVolume - testingVol;
+    const amount = Math.round(netVolume * unitPrice * 100) / 100;
+    rawTotal += amount;
+    normalizedReadings.push({
+      nozzle_name: nozzleName,
+      dispenser_name: dispenserName,
+      tank_name: nozzle.tank_name || null,
+      product_name: nozzle.product_name,
+      opening_reading: opening,
+      closing_reading: closing,
+      volume: grossVolume,
+      unit_price: unitPrice,
+      amount,
+    });
+  }
+
+  const totalSalesAmount = Math.round(rawTotal * 100) / 100;
   const totalSubmitted = Math.round((Number(cashAmount) + Number(onlineAmount) + Number(creditAmount)) * 100) / 100;
   const variance = Math.round((totalSubmitted - totalSalesAmount) * 100) / 100;
 

@@ -201,12 +201,15 @@ export default function EnterpriseUploadWizard({
   const [session, setSession] = useState<UploadSession | null>(null);
   const [progressText, setProgressText] = useState('');
   const [progressPct, setProgressPct] = useState(0);
-  const [result, setResult] = useState<{ ok: number; fail: number; duplicates: number; validationErrors: number; errors?: string[]; entryIds: number[] } | null>(null);
+  const [result, setResult] = useState<{ ok: number; fail: number; duplicates: number; validationErrors: number; cancelled?: boolean; errors?: string[]; entryIds: number[] } | null>(null);
   const [fileName, setFileName] = useState('');
   const [dragging, setDragging] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [undoing, setUndoing] = useState(false);
   const [undoResult, setUndoResult] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelledByUser, setCancelledByUser] = useState(false);
+  const cancelRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -246,8 +249,11 @@ export default function EnterpriseUploadWizard({
       if (!window.confirm('Discard current data and start over? All parsed records and results will be lost.')) return;
     }
     try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    cancelRef.current = false;
     setSession(null);
     setResult(null);
+    setCancelling(false);
+    setCancelledByUser(false);
     setStage('upload');
     setParsed([]);
     setValidationErrors([]);
@@ -482,6 +488,9 @@ export default function EnterpriseUploadWizard({
     } catch (e: any) {
       clearTimeout(timeout);
       if (e.name === 'AbortError') {
+        if (cancelRef.current) {
+          throw new Error('Cancelled by user');
+        }
         throw new Error(`Request timed out after ${Math.round(requestTimeoutMs / 1000)} seconds`);
       }
       throw e;
@@ -493,10 +502,13 @@ export default function EnterpriseUploadWizard({
   /** Wraps safeApiPost with transparent retries for transient failures */
   const safeApiPostWithRetry = async (url: string, body: any): Promise<any> => {
     for (let attempt = 0; attempt <= MAX_CHUNK_RETRIES; attempt++) {
+      // Stop retrying if user cancelled
+      if (cancelRef.current) throw new Error('Cancelled by user');
       try {
         return await safeApiPost(url, body);
       } catch (e: any) {
-        // Don't retry if server sent partial results (those are already processed) or a timeout
+        // Don't retry if cancelled, server sent partial results, or a timeout
+        if (cancelRef.current) throw e;
         if (e.results?.length > 0) throw e;
         if (e.name === 'AbortError') throw e;
         if (attempt < MAX_CHUNK_RETRIES) {
@@ -553,8 +565,21 @@ export default function EnterpriseUploadWizard({
     return { ok, fail, errors, entryIds };
   };
 
+  /** Cancel an in-progress import */
+  const cancelImport = () => {
+    if (window.confirm('Cancel the import? Records already imported will be kept, remaining will be skipped.')) {
+      cancelRef.current = true;
+      setCancelling(true);
+      setProgressText('Cancelling...');
+      abortRef.current?.abort(); // Abort any in-flight request immediately
+    }
+  };
+
   const commit = async () => {
     if (!session || committing) return;
+    cancelRef.current = false;
+    setCancelledByUser(false);
+    setCancelling(false);
     setCommitting(true);
     try {
 
@@ -670,10 +695,32 @@ export default function EnterpriseUploadWizard({
       }
 
       persistSession({ ok, fail, errors, entryIds, processedChunks: chunkIdx });
+
+      // Check if user cancelled — stop immediately
+      if (cancelRef.current) {
+        setCancelledByUser(true);
+        // Mark remaining rows in this chunk and all subsequent chunks as cancelled
+        const remainingInChunk = chunk.length - (ok + fail); // should be 0 if chunk fully processed
+        if (remainingInChunk > 0) {
+          fail += remainingInChunk;
+          for (const r of chunk.slice(-remainingInChunk)) {
+            errors.push({ row: Number(r._csvRow), msg: 'Cancelled by user' });
+          }
+        }
+        for (let j = i + chunkSize; j < total; j += chunkSize) {
+          const remainingChunk = payload.slice(j, j + chunkSize);
+          for (const r of remainingChunk) {
+            errors.push({ row: Number(r._csvRow), msg: 'Cancelled by user' });
+          }
+          fail += remainingChunk.length;
+        }
+        setProgressText(`Cancelled after ${((Date.now() - startedAt) / 1000).toFixed(1)}s — ${ok} imported, ${fail} skipped`);
+        break;
+      }
     }
 
-    setProgressPct(100);
-    if (!haltedByTimeout) {
+    setProgressPct(cancelledByUser ? Math.round((ok / total) * 100) : 100);
+    if (!haltedByTimeout && !cancelledByUser) {
       setProgressText(`Completed in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
     }
 
@@ -681,6 +728,7 @@ export default function EnterpriseUploadWizard({
     const duplicateCount = duplicateErrorRows.size;
     const finalResult = {
       ok, fail, duplicates: duplicateCount, validationErrors: validationErrorCount,
+      cancelled: cancelledByUser,
       errors: errors.length > 0 ? errors.map((e) => `Row ${e.row}: ${e.msg}`) : undefined,
       entryIds,
     };
@@ -920,8 +968,14 @@ export default function EnterpriseUploadWizard({
       {stage === 'import' && session && (
         <Card className="p-8 text-center">
           <div className="mb-4">
-            <Loader2 className="w-10 h-10 text-blue-500 mx-auto mb-3 animate-spin" />
-            <h3 className="text-lg font-semibold text-slate-800">Importing data...</h3>
+            {cancelling ? (
+              <XCircle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+            ) : (
+              <Loader2 className="w-10 h-10 text-blue-500 mx-auto mb-3 animate-spin" />
+            )}
+            <h3 className="text-lg font-semibold text-slate-800">
+              {cancelling ? 'Cancelling...' : 'Importing data...'}
+            </h3>
             <p className="text-sm text-slate-500 mt-1">{progressText}</p>
           </div>
 
@@ -942,13 +996,25 @@ export default function EnterpriseUploadWizard({
               {session.fail > 0 && <span className="flex items-center gap-1"><XCircle className="w-4 h-4 text-rose-500" /> {session.fail} failed</span>}
             </div>
           )}
+
+          {/* Cancel button */}
+          {!cancelling && (
+            <div className="mt-6">
+              <button onClick={cancelImport} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-rose-200 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors">
+                <XCircle className="w-4 h-4" /> Cancel Import
+              </button>
+              <p className="text-xs text-slate-400 mt-2">Already imported records will be kept</p>
+            </div>
+          )}
         </Card>
       )}
 
       {/* Stage: Results */}
       {stage === 'results' && result && (
         <Card className="p-8 text-center">
-          {result.fail > 0 && result.ok === 0 ? (
+          {result.cancelled ? (
+            <XCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+          ) : result.fail > 0 && result.ok === 0 ? (
             <XCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
           ) : result.fail > 0 ? (
             <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
@@ -957,8 +1023,11 @@ export default function EnterpriseUploadWizard({
           )}
 
           <h3 className="text-lg font-semibold text-slate-800">
-            {result.fail > 0 && result.ok === 0 ? 'Import failed' : 'Import complete'}
+            {result.cancelled ? 'Import cancelled' : result.fail > 0 && result.ok === 0 ? 'Import failed' : 'Import complete'}
           </h3>
+          {result.cancelled && (
+            <p className="text-sm text-slate-500 mt-1">Some records were imported before cancellation. Review the results below.</p>
+          )}
 
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 max-w-lg mx-auto">

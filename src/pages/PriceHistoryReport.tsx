@@ -140,8 +140,8 @@ export default function PriceHistoryReport() {
             <tbody className="divide-y divide-slate-50">
               {products.map((product: any) => {
                 const productHistory = sortedHistory.filter((row) => row.product_name === product.name);
-                const firstPrice = productHistory.length > 0 ? Number(productHistory[0].old_price || 0) : 0;
-                const currentPrice = currentPriceByProduct.get(product.name) ?? product.current_price ?? 0;
+                const firstPrice = productHistory.length > 0 ? Number(productHistory[0].new_price || 0) : 0;
+                const currentPrice = currentPriceByProduct.get(product.name) ?? 0;
                 const netChange = Number(currentPrice) - firstPrice;
                 const overallInflation = firstPrice > 0 ? ((Number(currentPrice) - firstPrice) / firstPrice) * 100 : null;
                 return (

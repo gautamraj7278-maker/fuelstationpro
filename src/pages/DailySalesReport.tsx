@@ -21,16 +21,34 @@ export default function DailySalesReport() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [masterProducts, setMasterProducts] = useState<string[]>([]);
+  const [masterDispensers, setMasterDispensers] = useState<string[]>([]);
+
+  // Load master data for filter dropdowns (products, dispensers)
+  useEffect(() => {
+    (async () => {
+      try {
+        const [prods, disps] = await Promise.all([
+          apiGet<any[]>('/api/products'),
+          apiGet<any[]>('/api/dispensers'),
+        ]);
+        setMasterProducts((prods || []).map((p: any) => p.name).sort());
+        setMasterDispensers((disps || []).map((d: any) => d.name).sort());
+      } catch (_) { /* non-critical — fall back to entry-derived data */ }
+    })();
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ pageSize: '5000' });
+      const params = new URLSearchParams();
       if (dateFrom) params.set('sale_date_from', dateFrom);
       if (dateTo) params.set('sale_date_to', dateTo);
-      const res = await apiGet(`/api/daily-sales?${params.toString()}`);
-      setEntries(res.data || []);
+      // No pageSize param — load all entries (unpaginated) for accurate report aggregation
+      const res = await apiGet(`/api/daily-sales${params.toString() ? `?${params.toString()}` : ''}`);
+      const data = Array.isArray(res) ? res : (res.data || []);
+      setEntries(data);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -40,16 +58,25 @@ export default function DailySalesReport() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Merge entry-derived products with master products so all master items appear in filter
   const products = useMemo(() => {
-    const set = new Set<string>();
+    const fromEntries = new Set<string>();
     (entries || []).forEach((e) => {
-      (e.daily_sales_nozzle_readings || []).forEach((r: any) => { if (r.product_name) set.add(r.product_name); });
+      (e.daily_sales_nozzle_readings || []).forEach((r: any) => { if (r.product_name) fromEntries.add(r.product_name); });
     });
-    return Array.from(set).sort();
-  }, [entries]);
+    const merged = new Set([...masterProducts, ...fromEntries]);
+    return Array.from(merged).sort();
+  }, [entries, masterProducts]);
 
   const operators = useMemo(() => Array.from(new Set((entries || []).map((e) => e.operator_name).filter(Boolean))).sort(), [entries]);
-  const dispensers = useMemo(() => Array.from(new Set((entries || []).map((e) => e.dispenser_name).filter(Boolean))).sort(), [entries]);
+
+  // Merge entry-derived dispensers with master dispensers so all master items appear
+  const dispensers = useMemo(() => {
+    const fromEntries = new Set((entries || []).map((e) => e.dispenser_name).filter(Boolean));
+    const merged = new Set([...masterDispensers, ...fromEntries]);
+    return Array.from(merged).sort();
+  }, [entries, masterDispensers]);
+
   const shifts = useMemo(() => Array.from(new Set((entries || []).map((e) => e.shift_name).filter(Boolean))).sort(), [entries]);
 
   const filteredEntries = useMemo(() => {

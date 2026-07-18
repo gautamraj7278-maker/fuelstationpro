@@ -48,10 +48,16 @@ export async function normalizeSalesRows(rows, supabase) {
   function resolvePriceFromHistory(productName, targetDate) {
     const history = historyByProduct.get(productName) || [];
     if (history.length === 0) return null;
+    // Normalize both dates to YYYY-MM-DD for reliable comparison
+    const target = String(targetDate || '').slice(0, 10);
     let price = null;
     for (const row of history) {
-      if (row.effective_date > targetDate) break;
-      price = Number(row.new_price || 0);
+      const rawDate = row.effective_date;
+      const effDate = rawDate instanceof Date
+        ? rawDate.toISOString().slice(0, 10)
+        : String(rawDate || '').slice(0, 10);
+      if (effDate > target) break;
+      price = Number(row.new_price);
     }
     return price;
   }
