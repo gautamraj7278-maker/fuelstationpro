@@ -1260,10 +1260,11 @@ async function loadEffectivePriceMap(productNames, targetDate) {
       resolvedPrice = Number(row.new_price);
     }
 
-    // If all effective_dates are after the target date, fall back to the first record's old_price
+    // If all effective_dates are after the target date, fall back to the first record's new_price
+    // (old_price would be 0 after recalcPriceHistoryChain, which is never the intended price)
     if (resolvedPrice == null) {
       const firstRow = history[0];
-      resolvedPrice = firstRow.old_price != null ? Number(firstRow.old_price) : null;
+      resolvedPrice = firstRow.new_price != null ? Number(firstRow.new_price) : null;
     }
 
     if (resolvedPrice == null || !Number.isFinite(resolvedPrice)) {
@@ -2350,9 +2351,8 @@ async function handleDailySalesImport(req, res) {
   if (tankRes.error) throw tankRes.error;
   const tanksByName = new Map((tankRes.data || []).map((t) => [t.name, t]));
   
-  // Get price maps for all products in all groups
+  // Get all product names for pricing (prices resolved per-date below)
   const allProductNames = [...new Set((nozzleRows.data || []).map((n) => n.product_name).filter(Boolean))];
-  const priceMap = await loadEffectivePriceMap(allProductNames, allDates.length ? allDates[0] : new Date().toISOString().split('T')[0]);
 
   // Build caches
   const nozzlesByDispenser = new Map();
@@ -2381,6 +2381,7 @@ async function handleDailySalesImport(req, res) {
   const intraDispenserKeys = new Map();
   const intraOperatorKeys = new Map();
   const meterReadingOverrides = new Map(); // nozzle_name -> closing from earlier group in this batch, for chaining
+  const priceMapsByDate = new Map(); // sale_date -> priceMap (resolved lazily per date)
   
   for (const [key, g] of groups) {
     const csvRow = groupCsvRows.get(key) || 0;
@@ -2416,6 +2417,11 @@ async function handleDailySalesImport(req, res) {
     let testingDeduction = 0;
     
     if (errs.length === 0 && disp && op && shiftSet.has(g.shift_name)) {
+      // Resolve price map for this entry's specific sale_date (not from first date of batch)
+      if (!priceMapsByDate.has(g.sale_date)) {
+        priceMapsByDate.set(g.sale_date, await loadEffectivePriceMap(allProductNames, g.sale_date));
+      }
+      const priceMap = priceMapsByDate.get(g.sale_date);
       const dispNozzles = activeNozzlesByDispenser.get(g.dispenser_name) || [];
       const dispNozzleNames = dispNozzles.map((n) => n.name);
       
@@ -2636,6 +2642,35 @@ async function handleDailySalesImport(req, res) {
     ok = 0;
     fail = validationResults.length;
     return res.status(400).json({ groups: groups.size, ok, fail, results: finalResults, message: 'Write failed. All data rolled back.' });
+  }
+
+  // Post-write price integrity check — verify stored unit_prices match loadEffectivePriceMap
+  try {
+    const priceIssues = [];
+    for (const r of finalResults) {
+      if (r.error) continue;
+      const { data: verifyReadings, error: vErr } = await supabase
+        .from('daily_sales_nozzle_readings')
+        .select('id, product_name, unit_price')
+        .eq('sales_entry_id', r.entry_id);
+      if (vErr) continue;
+      const verifyPriceMap = await loadEffectivePriceMap(
+        [...new Set(verifyReadings.map((vr) => vr.product_name).filter(Boolean))],
+        r.sale_date
+      );
+      for (const vr of verifyReadings || []) {
+        const expected = Number(verifyPriceMap.get(vr.product_name));
+        if (expected > 0 && Math.abs(Number(vr.unit_price) - expected) > 0.01) {
+          priceIssues.push(`entry #${r.entry_id} ${r.sale_date} ${vr.product_name}: stored ${vr.unit_price} != expected ${expected}`);
+        }
+      }
+    }
+    if (priceIssues.length > 0) {
+      console.warn('[PRICE MISMATCH] Post-write check found discrepancies:', priceIssues.join('; '));
+      finalResults.push({ warning: `Price mismatch detected for ${priceIssues.length} reading(s). Verify and re-import affected entries.`, details: priceIssues });
+    }
+  } catch (verifyErr) {
+    console.warn('[PRICE VERIFICATION] Failed:', verifyErr.message);
   }
 
   return res.status(200).json({ groups: groups.size, ok, fail, results: finalResults });
