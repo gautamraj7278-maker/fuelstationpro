@@ -164,6 +164,11 @@ const FIELD_VALIDATIONS = {
     volume: (v) => v != null && v !== '' && Number(v) > 0 || 'Volume must be greater than 0',
     amount: (v) => v != null && v !== '' && Number(v) >= 0 || 'Amount must be 0 or greater',
   },
+  finance_transactions: {
+    txn_date: (v) => v != null && String(v).trim() !== '' || 'Transaction date is required',
+    txn_type: (v) => !v || ['Income', 'Expense', 'Deposit', 'Withdrawal'].includes(v) || 'Invalid transaction type',
+    amount: (v) => v == null || v === '' || Number(v) >= 0 || 'Amount must be 0 or greater',
+  },
 };
 
 function validateFields(dbTable, body, rows) {
@@ -194,6 +199,12 @@ const CROSS_REFERENCE_TABLES = {
   ],
   price_history: [
     { field: 'product_name', refTable: 'products', refField: 'name', label: 'Product' },
+  ],
+  cash_deposits: [
+    { field: 'bank_account_id', refTable: 'bank_accounts', refField: 'id', label: 'Bank Account' },
+  ],
+  finance_transactions: [
+    { field: 'bank_account', refTable: 'bank_accounts', refField: 'bank_name', label: 'Bank Account' },
   ],
 };
 
@@ -314,6 +325,9 @@ export default async function handler(req, res) {
     }
     if (parts[0] === 'buffer-transfer' && req.method === 'POST') {
       return await handleBufferTransfer(req, res);
+    }
+    if (parts[0] === 'cash-deposits' && req.method === 'POST') {
+      return await handleCashDepositCreate(req, res);
     }
     if (parts[0] === 'admin' && parts[1] === 'bootstrap-check') {
       return await handleAdminBootstrapCheck(req, res, auth);
@@ -3105,6 +3119,53 @@ async function handleBufferTransfer(req, res) {
   if (updTankErr) throw updTankErr;
 
   return res.status(200).json({ ok: true, buffer_volume: nextBuffer, tank_volume: nextTank });
+}
+
+async function handleCashDepositCreate(req, res) {
+  const body = req.body || {};
+  const depositDate = requireText(body.deposit_date, 'Deposit date');
+  const amount = requireNonNegativeNumber(body.amount, 'Amount');
+  const bankAccountId = body.bank_account_id ? Number(body.bank_account_id) : null;
+  const reference = optionalText(body.reference);
+
+  // Look up bank account name if an ID was provided
+  let bankName = null;
+  if (bankAccountId) {
+    const { data: bank, error: bankErr } = await supabase
+      .from('bank_accounts')
+      .select('bank_name')
+      .eq('id', bankAccountId)
+      .maybeSingle();
+    if (bankErr) throw bankErr;
+    if (!bank) throw new Error(`Bank account not found (ID: ${bankAccountId})`);
+    bankName = bank.bank_name;
+  }
+
+  // Write cash_deposit record
+  const { data: deposit, error: depErr } = await supabase
+    .from('cash_deposits')
+    .insert([{ deposit_date: depositDate, bank_account_id: bankAccountId, amount, reference }])
+    .select()
+    .single();
+  if (depErr) throw depErr;
+
+  // Write corresponding finance_transaction record (with rollback on failure)
+  const { error: finErr } = await supabase
+    .from('finance_transactions')
+    .insert([{
+      txn_date: depositDate,
+      txn_type: 'Deposit',
+      category: 'Cash Deposit',
+      bank_account: bankName,
+      amount,
+      reference,
+    }]);
+  if (finErr) {
+    await supabase.from('cash_deposits').delete().eq('id', deposit.id);
+    throw finErr;
+  }
+
+  return res.status(201).json({ cash_deposit: deposit });
 }
 
 async function handleTankerUnloadingImport(req, res) {

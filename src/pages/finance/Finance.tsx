@@ -77,18 +77,9 @@ export default function Finance() {
     }
     setDepositSaving(true);
     try {
-      const bank = bankAccounts.find((b) => String(b.id) === String(depositForm.bank_account_id));
       await apiPost('/api/cash-deposits', {
         deposit_date: depositForm.deposit_date,
         bank_account_id: depositForm.bank_account_id === '' ? null : Number(depositForm.bank_account_id),
-        amount: Number(depositForm.amount || 0),
-        reference: depositForm.reference || null,
-      });
-      await apiPost('/api/finance', {
-        txn_date: depositForm.deposit_date,
-        txn_type: 'Deposit',
-        category: 'Cash Deposit',
-        bank_account: bank ? (bank.bank_name ?? bank.name ?? null) : null,
         amount: Number(depositForm.amount || 0),
         reference: depositForm.reference || null,
       });
@@ -199,7 +190,7 @@ export default function Finance() {
         { key: 'txn_date', label: 'Date', type: 'date', required: true, render: (r) => fmtDate(r.txn_date) },
         { key: 'txn_type', label: 'Type', type: 'select', required: true, options: [{ value: 'Income', label: 'Income' }, { value: 'Expense', label: 'Expense' }, { value: 'Deposit', label: 'Bank Deposit' }, { value: 'Withdrawal', label: 'Withdrawal' }], render: (r) => <Badge color={['Income', 'Deposit'].includes(r.txn_type) ? 'green' : 'red'}>{r.txn_type}</Badge> },
         { key: 'category', label: 'Category' },
-        { key: 'bank_account', label: 'Bank Account', type: 'select', optionsEndpoint: '/api/bank-accounts' },
+        { key: 'bank_account', label: 'Bank Account', type: 'select', optionsEndpoint: '/api/bank-accounts', optionsLabelKey: 'bank_name', optionsValueKey: 'bank_name' },
         { key: 'amount', label: 'Amount', type: 'number', required: true, render: (r) => fmtMoney(r.amount) },
         { key: 'reference', label: 'Reference / Note' },
       ]} />
