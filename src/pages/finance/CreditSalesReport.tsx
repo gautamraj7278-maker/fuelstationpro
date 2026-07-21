@@ -114,6 +114,7 @@ export default function CreditSalesReport() {
       'Settlement Method': c.settlement_method || '',
       'Settled Date': c.settled_date || '',
       'Remarks': c.remarks || '',
+      'Settlement Remarks': c.settlement_remarks || '',
     }));
     if (fmt === 'xlsx') exportToXLSX(rows, `credit-sales-report-${filters.date_from || 'all'}-${filters.date_to || 'all'}`, 'Credit Sales');
     else exportToCSV(rows, `credit-sales-report-${filters.date_from || 'all'}-${filters.date_to || 'all'}`);
@@ -197,6 +198,7 @@ export default function CreditSalesReport() {
                       <th className="px-3 py-2 text-center">Status</th>
                       <th className="px-3 py-2 text-left">Method</th>
                       <th className="px-3 py-2 text-left">Remarks</th>
+                      <th className="px-3 py-2 text-left">Settlement Remarks</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -212,9 +214,10 @@ export default function CreditSalesReport() {
                         <td className="px-3 py-2 text-center"><Badge color={statusColor(c.status)}>{c.status}</Badge></td>
                         <td className="px-3 py-2 text-slate-600">{c.settlement_method || '—'}</td>
                         <td className="px-3 py-2 text-slate-500 text-xs max-w-[150px] truncate">{c.remarks || '—'}</td>
+                        <td className="px-3 py-2 text-slate-500 text-xs max-w-[150px] truncate">{c.settlement_remarks || '—'}</td>
                       </tr>
                     ))}
-                    {credits.length === 0 && <tr><td colSpan={10} className="px-3 py-8 text-center text-slate-400">No records found</td></tr>}
+                    {credits.length === 0 && <tr><td colSpan={11} className="px-3 py-8 text-center text-slate-400">No records found</td></tr>}
                   </tbody>
                 </table>
               </div>

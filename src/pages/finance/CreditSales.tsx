@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { CreditCard, CheckCircle2, Clock, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Field, Input, Select } from '../../components/ui/Field';
 import { Badge } from '../../components/ui/Badge';
-import { apiGet, apiPost, fmtMoney, fmtDate } from '../../lib/api';
+import { ConfirmModal } from '../../components/ui/Modal';
+import { apiGet, apiPost, apiPut, apiDelete, fmtMoney, fmtDate } from '../../lib/api';
 
 type PendingRow = {
   daily_sales_entry_id: number;
@@ -24,6 +25,8 @@ type ExistingCredit = {
   amount: number;
   status: string;
   settled_amount: number;
+  settlement_remarks?: string;
+  remarks?: string;
 };
 
 type SettleForm = {
@@ -31,6 +34,7 @@ type SettleForm = {
   settle_amount: string;
   settle_method: string;
   settle_date: string;
+  remarks: string;
 };
 
 export default function CreditSales() {
@@ -52,6 +56,23 @@ export default function CreditSales() {
   const [createErr, setCreateErr] = useState('');
   const [createSaving, setCreateSaving] = useState(false);
 
+  // Edit form
+  const [showEdit, setShowEdit] = useState(false);
+  const [editForm, setEditForm] = useState({
+    id: 0,
+    sale_date: '',
+    customer_name: '',
+    vehicle_no: '',
+    product_name: '',
+    amount: '',
+    remarks: '',
+  });
+  const [editErr, setEditErr] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Delete
+  const [deleteTarget, setDeleteTarget] = useState<ExistingCredit | null>(null);
+
   // Settle form
   const [showSettle, setShowSettle] = useState(false);
   const [settleForm, setSettleForm] = useState<SettleForm>({
@@ -59,6 +80,7 @@ export default function CreditSales() {
     settle_amount: '',
     settle_method: 'Cash',
     settle_date: new Date().toISOString().slice(0, 10),
+    remarks: '',
   });
   const [settleErr, setSettleErr] = useState('');
   const [settleSaving, setSettleSaving] = useState(false);
@@ -132,6 +154,55 @@ export default function CreditSales() {
     }
   };
 
+  // Edit
+  const openEdit = (credit: ExistingCredit) => {
+    setEditForm({
+      id: credit.id,
+      sale_date: credit.sale_date || '',
+      customer_name: credit.customer_name || '',
+      vehicle_no: '',
+      product_name: '',
+      amount: String(credit.amount || ''),
+      remarks: credit.remarks || '',
+    });
+    setEditErr('');
+    setShowEdit(true);
+  };
+
+  const saveEdit = async () => {
+    setEditErr('');
+    if (!editForm.customer_name.trim()) { setEditErr('Customer name is required'); return; }
+    if (!editForm.amount || Number(editForm.amount) <= 0) { setEditErr('Amount must be > 0'); return; }
+    setEditSaving(true);
+    try {
+      await apiPut('/api/credit-sales', {
+        id: editForm.id,
+        sale_date: editForm.sale_date,
+        customer_name: editForm.customer_name.trim(),
+        amount: Number(editForm.amount),
+        remarks: editForm.remarks.trim(),
+      });
+      setShowEdit(false);
+      await loadPending();
+    } catch (e: any) {
+      setEditErr(e.message || 'Failed to save');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // Delete
+  const deleteCredit = async () => {
+    if (!deleteTarget) return;
+    try {
+      await apiDelete('/api/credit-sales', { id: deleteTarget.id });
+      setDeleteTarget(null);
+      await loadPending();
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete');
+    }
+  };
+
   // Settle
   const openSettle = (credit: ExistingCredit) => {
     const remaining = Number(credit.amount || 0) - Number(credit.settled_amount || 0);
@@ -140,6 +211,7 @@ export default function CreditSales() {
       settle_amount: String(Math.round(remaining * 100) / 100),
       settle_method: 'Cash',
       settle_date: new Date().toISOString().slice(0, 10),
+      remarks: '',
     });
     setSettleErr('');
     setShowSettle(true);
@@ -156,6 +228,7 @@ export default function CreditSales() {
         settled_amount: amt,
         settlement_method: settleForm.settle_method,
         settled_date: settleForm.settle_date,
+        remarks: settleForm.remarks.trim(),
       });
       setShowSettle(false);
       await loadPending();
@@ -258,7 +331,6 @@ export default function CreditSales() {
                 <tr>
                   <th className="px-3 py-2 text-left">Date</th>
                   <th className="px-3 py-2 text-left">Customer</th>
-                  <th className="px-3 py-2 text-left">Vehicle</th>
                   <th className="px-3 py-2 text-right">Amount</th>
                   <th className="px-3 py-2 text-right">Settled</th>
                   <th className="px-3 py-2 text-center">Status</th>
@@ -270,14 +342,19 @@ export default function CreditSales() {
                   <tr key={c.id} className="hover:bg-slate-50">
                     <td className="px-3 py-2 text-slate-700">{fmtDate(c.sale_date)}</td>
                     <td className="px-3 py-2 text-slate-700 font-medium">{c.customer_name}</td>
-                    <td className="px-3 py-2 text-slate-600">—</td>
                     <td className="px-3 py-2 text-right">{fmtMoney(c.amount)}</td>
                     <td className="px-3 py-2 text-right">{fmtMoney(c.settled_amount || 0)}</td>
                     <td className="px-3 py-2 text-center"><Badge color={statusColor(c.status)}>{c.status}</Badge></td>
                     <td className="px-3 py-2 text-center">
-                      {c.status !== 'Settled' && (
-                        <button onClick={() => openSettle(c)} className="text-xs text-emerald-600 hover:underline font-medium">Settle</button>
-                      )}
+                      <div className="inline-flex items-center gap-1">
+                        {c.status !== 'Settled' && (
+                          <>
+                            <button onClick={() => openSettle(c)} className="text-xs text-emerald-600 hover:underline font-medium">Settle</button>
+                            <button onClick={() => openEdit(c)} className="p-1 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setDeleteTarget(c)} className="p-1 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -316,6 +393,29 @@ export default function CreditSales() {
         </div>
       )}
 
+      {/* Edit modal */}
+      {showEdit && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowEdit(false)}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-slate-800">Edit Credit Sale</h3>
+            <Field label="Customer Name" required>
+              <Input value={editForm.customer_name} onChange={(e) => setEditForm({ ...editForm, customer_name: e.target.value })} placeholder="Customer name" />
+            </Field>
+            <Field label="Amount" required>
+              <Input type="number" step="0.01" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} />
+            </Field>
+            <Field label="Remarks">
+              <Input value={editForm.remarks} onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })} placeholder="Remarks" />
+            </Field>
+            {editErr && <p className="text-sm text-rose-600">{editErr}</p>}
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowEdit(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60">{editSaving ? 'Saving...' : 'Save Changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Settle modal */}
       {showSettle && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowSettle(false)}>
@@ -333,6 +433,9 @@ export default function CreditSales() {
                 <option value="Online">Online</option>
               </Select>
             </Field>
+            <Field label="Remarks">
+              <Input value={settleForm.remarks} onChange={(e) => setSettleForm({ ...settleForm, remarks: e.target.value })} placeholder="e.g. Payment received via UPI" />
+            </Field>
             <p className="text-xs text-slate-500">Settlement is for record tracking only and does not affect Finance Management.</p>
             {settleErr && <p className="text-sm text-rose-600">{settleErr}</p>}
             <div className="flex justify-end gap-2">
@@ -342,6 +445,15 @@ export default function CreditSales() {
           </div>
         </div>
       )}
+
+      {/* Delete confirmation */}
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={deleteCredit}
+        title="Delete Credit Sale"
+        message={deleteTarget ? `Are you sure you want to delete the credit sale record for ${deleteTarget.customer_name} (${fmtMoney(deleteTarget.amount)})? This action cannot be undone.` : ''}
+      />
     </div>
   );
 }

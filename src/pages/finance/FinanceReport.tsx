@@ -240,7 +240,7 @@ export default function FinanceReport() {
               <div className={`text-xl font-bold mt-1 ${totals.shortage < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                 {fmtMoney(totals.shortage)}
               </div>
-              <p className="text-[10px] text-slate-400 mt-1">Deposits - Inflow</p>
+              <p className="text-[10px] text-slate-400 mt-1">Inflow − (Deposits + Expenses)</p>
             </Card>
           </div>
 

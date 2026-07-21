@@ -62,9 +62,7 @@ const REFERENCE_MAP = {
     { table: 'tanker_unloading', column: 'supplier_name', label: 'tanker unloading records' },
     { table: 'tanker_unloading_headers', column: 'supplier_name', label: 'tanker unloading headers' },
   ],
-  bank_accounts: [
-    { table: 'finance_transactions', column: 'bank_account', label: 'finance transactions' },
-  ],
+  bank_accounts: [],
 };
 
 async function beforeDeleteCheck(dbTable, id, supabase) {
@@ -201,9 +199,6 @@ const CROSS_REFERENCE_TABLES = {
   ],
   cash_deposits: [
     { field: 'bank_account_id', refTable: 'bank_accounts', refField: 'id', label: 'Bank Account' },
-  ],
-  finance_transactions: [
-    { field: 'bank_account', refTable: 'bank_accounts', refField: 'bank_name', label: 'Bank Account' },
   ],
 };
 
@@ -3425,7 +3420,7 @@ async function handleCreditSalesPending(req, res) {
  */
 async function handleCreditSalesSettle(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  const { id, settled_amount, settlement_method, settled_date } = req.body || {};
+  const { id, settled_amount, settlement_method, settled_date, remarks } = req.body || {};
   if (!id) return res.status(400).json({ error: 'Credit sale ID is required' });
   if (!settled_amount || Number(settled_amount) <= 0) return res.status(400).json({ error: 'Settled amount must be greater than 0' });
   if (!settlement_method || !['Cash', 'Online'].includes(settlement_method)) {
@@ -3462,6 +3457,7 @@ async function handleCreditSalesSettle(req, res) {
       settled_date: settled_date || new Date().toISOString().slice(0, 10),
       settlement_method,
       status: newStatus,
+      ...(remarks ? { settlement_remarks: String(remarks).trim() } : {}),
     })
     .eq('id', id);
   if (updateErr) throw updateErr;
@@ -3527,10 +3523,12 @@ async function handleFinanceSummary(req, res) {
     }
   }
 
-  // Compute shortage per date
+  // Compute shortage per date: Inflow - (Deposits + Expenses)
+  // The client receives sales inflow, then makes expenses and deposits from it.
+  // If deposits + expenses equals inflow → balanced. Difference is shortage/surplus.
   for (const [, bucket] of dateMap) {
     const totalInflow = bucket.cash_sales + bucket.online_sales;
-    bucket.shortage = Math.round((bucket.deposits - totalInflow) * 100) / 100;
+    bucket.shortage = Math.round((totalInflow - (bucket.deposits + bucket.expenses)) * 100) / 100;
   }
 
   const summary = [...dateMap.values()].sort((a, b) => a.date > b.date ? -1 : 1);

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Wallet, ArrowUpRight, ArrowDownRight, BookOpen, Plus } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownRight, BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
-import { Field, Input } from '../../components/ui/Field';
-import { apiGet, apiPost, fmtMoney, fmtDate } from '../../lib/api';
+import { Field, Input, Select } from '../../components/ui/Field';
+import { ConfirmModal } from '../../components/ui/Modal';
+import { apiGet, apiPost, apiPut, apiDelete, fmtMoney, fmtDate } from '../../lib/api';
 
 const DEPOSIT_ROWS = [
   { category: 'Online', sub_category: 'Paytm' },
@@ -29,6 +30,7 @@ const EXPENSE_ROWS = [
 export default function Finance() {
   const [summary, setSummary] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -46,16 +48,35 @@ export default function Finance() {
   const [txErr, setTxErr] = useState('');
   const [txSaving, setTxSaving] = useState(false);
 
+  // Edit transaction
+  const [showEdit, setShowEdit] = useState(false);
+  const [editForm, setEditForm] = useState({
+    id: 0,
+    txn_date: '',
+    txn_type: 'Deposit',
+    category: '',
+    sub_category: '',
+    amount: '',
+    remarks: '',
+  });
+  const [editErr, setEditErr] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Delete transaction
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+
   const load = async () => {
     setLoading(true);
     setError('');
     try {
-      const [s, l] = await Promise.all([
+      const [s, l, t] = await Promise.all([
         apiGet(`/api/finance/summary?date_from=${filterDate}&date_to=${filterDate}`),
         apiGet(`/api/finance/ledger?date_from=${filterDate}&date_to=${filterDate}`),
+        apiGet(`/api/finance?txn_date=${filterDate}`),
       ]);
       setSummary(Array.isArray(s) ? s : []);
       setLedger(l?.ledger || []);
+      setTransactions(Array.isArray(t) ? t : []);
     } catch (e: any) {
       setError(e.message || 'Failed to load');
     } finally {
@@ -135,6 +156,57 @@ export default function Finance() {
     }
   };
 
+  // Edit transaction
+  const openEdit = (txn: any) => {
+    setEditForm({
+      id: txn.id,
+      txn_date: txn.txn_date || filterDate,
+      txn_type: txn.txn_type || 'Deposit',
+      category: txn.category || '',
+      sub_category: txn.sub_category || '',
+      amount: String(txn.amount || ''),
+      remarks: txn.remarks || '',
+    });
+    setEditErr('');
+    setShowEdit(true);
+  };
+
+  const saveEdit = async () => {
+    setEditErr('');
+    if (!editForm.amount || Number(editForm.amount) <= 0) { setEditErr('Amount must be > 0'); return; }
+    if (!editForm.remarks.trim()) { setEditErr('Remarks are required'); return; }
+    setEditSaving(true);
+    try {
+      await apiPut('/api/finance', {
+        id: editForm.id,
+        txn_date: editForm.txn_date,
+        txn_type: editForm.txn_type,
+        category: editForm.category,
+        sub_category: editForm.sub_category,
+        amount: Number(editForm.amount),
+        remarks: editForm.remarks.trim(),
+      });
+      setShowEdit(false);
+      await load();
+    } catch (e: any) {
+      setEditErr(e.message || 'Failed to save');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // Delete transaction
+  const deleteTxn = async () => {
+    if (!deleteTarget) return;
+    try {
+      await apiDelete('/api/finance', { id: deleteTarget.id });
+      setDeleteTarget(null);
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete');
+    }
+  };
+
   const depositTotal = DEPOSIT_ROWS.reduce((s, r) => s + (Number(depositRows[r.sub_category]) || 0), 0);
   const expenseTotal = EXPENSE_ROWS.reduce((s, r) => s + (Number(expenseRows[r.sub_category]) || 0), 0);
 
@@ -195,9 +267,54 @@ export default function Finance() {
               <div className={`text-xl font-bold mt-1 ${todayData.shortage < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                 {todayData.shortage > 0 ? '+' : ''}{fmtMoney(todayData.shortage)}
               </div>
-              <p className="text-[10px] text-slate-400 mt-1">Deposits - Inflow</p>
+              <p className="text-[10px] text-slate-400 mt-1">Inflow − (Deposits + Expenses)</p>
             </Card>
           </div>
+
+          {/* Transactions for this date */}
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2"><BookOpen className="w-4 h-4" /> Transactions for {fmtDate(filterDate)}</h3>
+            {transactions.length === 0 ? (
+              <p className="text-sm text-slate-400 py-4 text-center">No transactions recorded for this date</p>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-slate-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-slate-500 text-xs">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Type</th>
+                      <th className="px-3 py-2 text-left">Category</th>
+                      <th className="px-3 py-2 text-left">Sub-Category</th>
+                      <th className="px-3 py-2 text-right">Amount</th>
+                      <th className="px-3 py-2 text-left">Remarks</th>
+                      <th className="px-3 py-2 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {transactions.map((txn) => (
+                      <tr key={txn.id} className="hover:bg-slate-50">
+                        <td className="px-3 py-2">
+                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${txn.txn_type === 'Deposit' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                            {txn.txn_type === 'Deposit' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                            {txn.txn_type}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-slate-700">{txn.category || '—'}</td>
+                        <td className="px-3 py-2 text-slate-600">{txn.sub_category || '—'}</td>
+                        <td className={`px-3 py-2 text-right font-medium ${txn.txn_type === 'Deposit' ? 'text-emerald-600' : 'text-rose-600'}`}>{fmtMoney(txn.amount)}</td>
+                        <td className="px-3 py-2 text-slate-500 text-xs max-w-[200px] truncate">{txn.remarks || '—'}</td>
+                        <td className="px-3 py-2 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <button onClick={() => openEdit(txn)} className="p-1.5 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setDeleteTarget(txn)} className="p-1.5 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
 
           {/* Ledger */}
           <Card className="p-5">
@@ -332,6 +449,47 @@ export default function Finance() {
           </div>
         </div>
       )}
+
+      {/* ── Edit Transaction Modal ── */}
+      {showEdit && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowEdit(false)}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-slate-800">Edit Transaction</h3>
+            <Field label="Date" required>
+              <Input type="date" value={editForm.txn_date} onChange={(e) => setEditForm({ ...editForm, txn_date: e.target.value })} />
+            </Field>
+            <Field label="Type">
+              <Input value={editForm.txn_type} disabled />
+            </Field>
+            <Field label="Category">
+              <Input value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} />
+            </Field>
+            <Field label="Sub-Category">
+              <Input value={editForm.sub_category} onChange={(e) => setEditForm({ ...editForm, sub_category: e.target.value })} />
+            </Field>
+            <Field label="Amount" required>
+              <Input type="number" step="0.01" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} />
+            </Field>
+            <Field label="Remarks" required>
+              <Input value={editForm.remarks} onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })} />
+            </Field>
+            {editErr && <p className="text-sm text-rose-600">{editErr}</p>}
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowEdit(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60">{editSaving ? 'Saving...' : 'Save Changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation ── */}
+      <ConfirmModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={deleteTxn}
+        title="Delete Transaction"
+        message={deleteTarget ? `Are you sure you want to delete this ${deleteTarget.txn_type} of ${fmtMoney(deleteTarget.amount)} (${deleteTarget.sub_category || deleteTarget.category})? This action cannot be undone.` : ''}
+      />
     </div>
   );
 }
