@@ -3530,7 +3530,7 @@ async function handleFinanceSummary(req, res) {
   // Compute shortage per date
   for (const [, bucket] of dateMap) {
     const totalInflow = bucket.cash_sales + bucket.online_sales;
-    bucket.shortage = Math.round((totalInflow - bucket.deposits) * 100) / 100;
+    bucket.shortage = Math.round((bucket.deposits - totalInflow) * 100) / 100;
   }
 
   const summary = [...dateMap.values()].sort((a, b) => a.date > b.date ? -1 : 1);

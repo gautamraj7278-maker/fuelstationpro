@@ -195,7 +195,7 @@ export default function Finance() {
               <div className={`text-xl font-bold mt-1 ${todayData.shortage > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                 {todayData.shortage > 0 ? '+' : ''}{fmtMoney(todayData.shortage)}
               </div>
-              <p className="text-[10px] text-slate-400 mt-1">Inflow - Deposits</p>
+              <p className="text-[10px] text-slate-400 mt-1">Deposits - Inflow</p>
             </Card>
           </div>
 
