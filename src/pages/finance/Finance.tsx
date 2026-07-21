@@ -190,9 +190,9 @@ export default function Finance() {
                 </div>
               )}
             </Card>
-            <Card className={`p-4 border-2 ${todayData.shortage > 0 ? 'border-rose-300 bg-rose-50' : 'border-emerald-300 bg-emerald-50'}`}>
+            <Card className={`p-4 border-2 ${todayData.shortage < 0 ? 'border-rose-300 bg-rose-50' : 'border-emerald-300 bg-emerald-50'}`}>
               <div className="text-xs text-slate-400">Shortage / Surplus</div>
-              <div className={`text-xl font-bold mt-1 ${todayData.shortage > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+              <div className={`text-xl font-bold mt-1 ${todayData.shortage < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                 {todayData.shortage > 0 ? '+' : ''}{fmtMoney(todayData.shortage)}
               </div>
               <p className="text-[10px] text-slate-400 mt-1">Deposits - Inflow</p>
