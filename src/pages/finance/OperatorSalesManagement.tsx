@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { ClipboardList, Filter, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
+import { ClipboardList, Filter, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Field, Input, Select } from '../../components/ui/Field';
 import { ConfirmModal } from '../../components/ui/Modal';
@@ -45,9 +45,6 @@ export default function OperatorSalesManagement() {
 
   // Delete
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
-
-  // Seed from daily sales
-  const [seeding, setSeeding] = useState(false);
 
   const loadMasters = useCallback(async () => {
     try {
@@ -195,24 +192,6 @@ export default function OperatorSalesManagement() {
     }
   };
 
-  // Seed from daily_sales_entries
-  const handleSeed = async () => {
-    setSeeding(true);
-    setError('');
-    try {
-      const params: Record<string, string> = {};
-      if (dateFrom) params.date_from = dateFrom;
-      if (dateTo) params.date_to = dateTo;
-      const res = await apiPost('/api/operator-sales/seed', params);
-      setSuccess(`Seeded ${res.inserted} new settlements (${res.skipped} skipped)`);
-      await load();
-    } catch (e: any) {
-      setError(e.message || 'Failed to seed');
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   // Quick settle/unsettle toggle
   const toggleStatus = async (s: any) => {
     try {
@@ -236,9 +215,6 @@ export default function OperatorSalesManagement() {
           <p className="text-sm text-slate-500 mt-0.5">Manage operator sales, submitted amounts, variance, deductions, and close-out</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={handleSeed} disabled={seeding} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60">
-            <RefreshCw className={`w-4 h-4 ${seeding ? 'animate-spin' : ''}`} /> {seeding ? 'Seeding...' : 'Seed from Sales'}
-          </button>
           <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
             <Plus className="w-4 h-4" /> Add Settlement
           </button>
@@ -316,7 +292,7 @@ export default function OperatorSalesManagement() {
         ) : settlements.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-sm text-slate-400">No settlement records found</p>
-            <p className="text-xs text-slate-400 mt-1">Use <strong>Seed from Sales</strong> to pull data from daily sales entries, or <strong>Add Settlement</strong> to create one manually</p>
+            <p className="text-xs text-slate-400 mt-1">Settlements are auto-created when daily sales entries are made with an operator assigned. Use <strong>Add Settlement</strong> to create one manually.</p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-slate-200">
