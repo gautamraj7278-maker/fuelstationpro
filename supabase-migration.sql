@@ -399,6 +399,8 @@ CREATE TABLE IF NOT EXISTS cash_deposits (
 create index if not exists idx_cash_deposits_date on cash_deposits (deposit_date desc);
 
 -- 25. operator_sales_settlements — Operator sales management & close-out
+-- Fields: total_sales_amount (meter sales), submitted_amount, variance, exemptions (user-set),
+-- total_deductible = ABS(variance) - ABS(exemptions) — amount deducted from operator.
 CREATE TABLE IF NOT EXISTS operator_sales_settlements (
   id bigint primary key generated always as identity,
   sale_date date not null,
@@ -409,8 +411,8 @@ CREATE TABLE IF NOT EXISTS operator_sales_settlements (
   total_sales_amount numeric(14,2) default 0,
   submitted_amount numeric(14,2) default 0,
   variance numeric(14,2) default 0,
-  deduction_amount numeric(14,2) default 0,
-  net_payable numeric(14,2) default 0,
+  exemptions numeric(14,2) default 0,
+  total_deductible numeric(14,2) default 0,
   status text default 'open' check (status in ('open', 'settled')),
   remarks text,
   settled_at timestamptz,
@@ -422,6 +424,12 @@ create index if not exists idx_operator_settlements_operator on operator_sales_s
 create index if not exists idx_operator_settlements_status on operator_sales_settlements (status);
 create index if not exists idx_operator_settlements_shift on operator_sales_settlements (shift_name);
 create unique index if not exists uq_operator_settlement on operator_sales_settlements (sale_date, shift_name, operator_name, dispenser_name);
+
+-- Migrate old columns if previously created with deduction_amount / net_payable
+ALTER TABLE operator_sales_settlements ADD COLUMN IF NOT EXISTS exemptions numeric(14,2) default 0;
+ALTER TABLE operator_sales_settlements ADD COLUMN IF NOT EXISTS total_deductible numeric(14,2) default 0;
+ALTER TABLE operator_sales_settlements DROP COLUMN IF EXISTS deduction_amount;
+ALTER TABLE operator_sales_settlements DROP COLUMN IF EXISTS net_payable;
 
 -- ===== UNIQUE CONSTRAINTS (DO block for idempotent add) =====
 DO $$BEGIN

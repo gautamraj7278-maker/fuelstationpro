@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { ClipboardList, Filter, Plus, Pencil, Trash2 } from 'lucide-react';
+import { ClipboardList, Filter, Plus, Pencil, Trash2, CheckSquare, Square, CheckCheck } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Field, Input, Select } from '../../components/ui/Field';
 import { ConfirmModal } from '../../components/ui/Modal';
@@ -25,6 +25,10 @@ export default function OperatorSalesManagement() {
   const [masterOperators, setMasterOperators] = useState<string[]>([]);
   const [masterShifts, setMasterShifts] = useState<string[]>([]);
 
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkSettling, setBulkSettling] = useState(false);
+
   // Create/Edit modal
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -36,8 +40,7 @@ export default function OperatorSalesManagement() {
     dispenser_name: '',
     total_sales_amount: '0',
     submitted_amount: '0',
-    deduction_amount: '0',
-    net_payable: '0',
+    exemptions: '0',
     status: 'open' as SettlementStatus,
     remarks: '',
   });
@@ -79,6 +82,7 @@ export default function OperatorSalesManagement() {
       const qs = buildQueryString();
       const res = await apiGet(`/api/operator-sales${qs ? `?${qs}` : ''}`);
       setSettlements(Array.isArray(res) ? res : res.data || []);
+      setSelectedIds(new Set());
     } catch (e: any) {
       setError(e.message || 'Failed to load');
     } finally {
@@ -96,15 +100,15 @@ export default function OperatorSalesManagement() {
 
   // Derived totals (from all loaded data)
   const totals = useMemo(() => {
-    let totalSales = 0, totalSubmitted = 0, totalVariance = 0, totalDeduction = 0, totalNet = 0;
+    let totalSales = 0, totalSubmitted = 0, totalVariance = 0, totalExemptions = 0, totalDeductible = 0;
     for (const s of settlements) {
       totalSales += Number(s.total_sales_amount || 0);
       totalSubmitted += Number(s.submitted_amount || 0);
       totalVariance += Number(s.variance || 0);
-      totalDeduction += Number(s.deduction_amount || 0);
-      totalNet += Number(s.net_payable || 0);
+      totalExemptions += Number(s.exemptions || 0);
+      totalDeductible += Number(s.total_deductible || 0);
     }
-    return { totalSales, totalSubmitted, totalVariance, totalDeduction, totalNet };
+    return { totalSales, totalSubmitted, totalVariance, totalExemptions, totalDeductible };
   }, [settlements]);
 
   // Paginated slice for display
@@ -119,14 +123,58 @@ export default function OperatorSalesManagement() {
   const handlePageChange = (page: number) => setCurrentPage(page);
   const handlePageSizeChange = (size: number) => { setPageSize(size); setCurrentPage(1); };
 
+  // ── Bulk Selection ──
+  const allPageSelected = paginatedSettlements.length > 0 && paginatedSettlements.every((s) => selectedIds.has(s.id));
+  const somePageSelected = paginatedSettlements.some((s) => selectedIds.has(s.id)) && !allPageSelected;
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allPageSelected) {
+      // Deselect all on current page
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        paginatedSettlements.forEach((s) => next.delete(s.id));
+        return next;
+      });
+    } else {
+      // Select all on current page
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        paginatedSettlements.forEach((s) => next.add(s.id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkSettle = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkSettling(true);
+    try {
+      await apiPost('/api/operator-sales/bulk-settle', { ids: [...selectedIds] });
+      setSuccess(`${selectedIds.size} settlement(s) marked as settled`);
+      setSelectedIds(new Set());
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Bulk settle failed');
+    } finally {
+      setBulkSettling(false);
+    }
+  };
+
   // Open create form
   const openCreate = () => {
     setFormData({
       id: 0, sale_date: new Date().toISOString().slice(0, 10),
       shift_name: '', operator_name: '', dispenser_name: '',
       total_sales_amount: '0', submitted_amount: '0',
-      deduction_amount: '0', net_payable: '0',
-      status: 'open', remarks: '',
+      exemptions: '0', status: 'open', remarks: '',
     });
     setFormMode('create');
     setFormErr('');
@@ -143,8 +191,7 @@ export default function OperatorSalesManagement() {
       dispenser_name: s.dispenser_name || '',
       total_sales_amount: String(s.total_sales_amount || '0'),
       submitted_amount: String(s.submitted_amount || '0'),
-      deduction_amount: String(s.deduction_amount || '0'),
-      net_payable: String(s.net_payable || '0'),
+      exemptions: String(s.exemptions || '0'),
       status: s.status || 'open',
       remarks: s.remarks || '',
     });
@@ -153,16 +200,12 @@ export default function OperatorSalesManagement() {
     setShowForm(true);
   };
 
-  // Recompute net_payable whenever submitted_amount or deduction_amount changes
-  const updateFormField = (field: string, value: string) => {
-    const updated = { ...formData, [field]: value };
-    if (field === 'submitted_amount' || field === 'deduction_amount') {
-      const submitted = Number(updated.submitted_amount) || 0;
-      const deduction = Number(updated.deduction_amount) || 0;
-      updated.net_payable = String(Math.round((submitted - deduction) * 100) / 100);
-    }
-    setFormData(updated);
-  };
+  // Computed total deductible for the form: ABS(variance) - ABS(exemptions)
+  const formTotalDeductible = useMemo(() => {
+    const variance = Math.abs(Number(formData.submitted_amount) - Number(formData.total_sales_amount));
+    const exemptions = Math.abs(Number(formData.exemptions) || 0);
+    return Math.max(0, variance - exemptions);
+  }, [formData.total_sales_amount, formData.submitted_amount, formData.exemptions]);
 
   // Save (create or update)
   const handleSave = async () => {
@@ -182,16 +225,14 @@ export default function OperatorSalesManagement() {
           dispenser_name: formData.dispenser_name,
           total_sales_amount: Number(formData.total_sales_amount),
           submitted_amount: Number(formData.submitted_amount),
-          deduction_amount: Number(formData.deduction_amount),
+          exemptions: Number(formData.exemptions),
           status: formData.status,
           remarks: formData.remarks,
         });
       } else {
         await apiPut('/api/operator-sales', {
           id: formData.id,
-          total_sales_amount: Number(formData.total_sales_amount),
-          submitted_amount: Number(formData.submitted_amount),
-          deduction_amount: Number(formData.deduction_amount),
+          exemptions: Number(formData.exemptions),
           status: formData.status,
           remarks: formData.remarks,
         });
@@ -239,7 +280,7 @@ export default function OperatorSalesManagement() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-indigo-600" /> Operator Sales Management</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Manage operator sales, submitted amounts, variance, deductions, and close-out</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage operator sales, exemptions, and close-out</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
@@ -300,14 +341,28 @@ export default function OperatorSalesManagement() {
           </div>
         </Card>
         <Card className="p-3">
-          <div className="text-[10px] text-slate-400 uppercase tracking-wider">Total Deduction</div>
-          <div className="text-lg font-bold text-rose-600 mt-0.5">{fmtMoney(totals.totalDeduction)}</div>
+          <div className="text-[10px] text-slate-400 uppercase tracking-wider">Total Exemptions</div>
+          <div className="text-lg font-bold text-amber-600 mt-0.5">{fmtMoney(totals.totalExemptions)}</div>
         </Card>
-        <Card className="p-3 border-2 border-indigo-200 bg-indigo-50">
-          <div className="text-[10px] text-indigo-500 uppercase tracking-wider">Net Payable</div>
-          <div className="text-lg font-bold text-indigo-700 mt-0.5">{fmtMoney(totals.totalNet)}</div>
+        <Card className="p-3 border-2 border-rose-200 bg-rose-50">
+          <div className="text-[10px] text-rose-500 uppercase tracking-wider">Total Deductible</div>
+          <div className="text-lg font-bold text-rose-700 mt-0.5">{fmtMoney(totals.totalDeductible)}</div>
         </Card>
       </div>
+
+      {/* ── Bulk Settle Bar ── */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between px-4 py-2 rounded-lg bg-indigo-50 border border-indigo-200">
+          <span className="text-sm text-indigo-700 font-medium">{selectedIds.size} record(s) selected</span>
+          <button
+            onClick={handleBulkSettle}
+            disabled={bulkSettling}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
+          >
+            <CheckCheck className="w-4 h-4" /> {bulkSettling ? 'Settling...' : 'Mark Selected as Settled'}
+          </button>
+        </div>
+      )}
 
       {/* ── Settlements Table ── */}
       <Card className="p-5">
@@ -327,53 +382,66 @@ export default function OperatorSalesManagement() {
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 text-slate-500 text-xs">
                   <tr>
+                    <th className="px-3 py-2 text-center w-10">
+                      <button onClick={toggleSelectAll} className="p-0.5 rounded hover:bg-slate-200" title="Select all on page">
+                        {allPageSelected ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : somePageSelected ? <Square className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4 text-slate-400" />}
+                      </button>
+                    </th>
                     <th className="px-3 py-2 text-left">Date</th>
                     <th className="px-3 py-2 text-left">Shift</th>
                     <th className="px-3 py-2 text-left">Operator</th>
-                    <th className="px-3 py-2 text-left">Dispenser</th>
                     <th className="px-3 py-2 text-right">Meter Sales</th>
-                    <th className="px-3 py-2 text-right">Submitted</th>
+                    <th className="px-3 py-2 text-right">Amount Submitted</th>
                     <th className="px-3 py-2 text-right">Variance</th>
-                    <th className="px-3 py-2 text-right">Deduction</th>
-                    <th className="px-3 py-2 text-right">Net Payable</th>
+                    <th className="px-3 py-2 text-right">Exemptions</th>
+                    <th className="px-3 py-2 text-right">Total Deductible</th>
                     <th className="px-3 py-2 text-center">Status</th>
                     <th className="px-3 py-2 text-left">Remarks</th>
                     <th className="px-3 py-2 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {paginatedSettlements.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="px-3 py-2 font-medium text-slate-700 whitespace-nowrap">{fmtDate(s.sale_date)}</td>
-                      <td className="px-3 py-2 text-slate-600">{s.shift_name}</td>
-                      <td className="px-3 py-2 text-slate-700 font-medium">{s.operator_name}</td>
-                      <td className="px-3 py-2 text-slate-600">{s.dispenser_name}</td>
-                      <td className="px-3 py-2 text-right text-slate-700">{fmtMoney(s.total_sales_amount)}</td>
-                      <td className="px-3 py-2 text-right text-slate-700">{fmtMoney(s.submitted_amount)}</td>
-                      <td className={`px-3 py-2 text-right font-medium ${Number(s.variance || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {Number(s.variance || 0) >= 0 ? '+' : ''}{fmtMoney(s.variance)}
-                      </td>
-                      <td className="px-3 py-2 text-right text-rose-600">{fmtMoney(s.deduction_amount)}</td>
-                      <td className="px-3 py-2 text-right font-semibold text-indigo-700">{fmtMoney(s.net_payable)}</td>
-                      <td className="px-3 py-2 text-center">
-                        <button
-                          onClick={() => toggleStatus(s)}
-                          className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-                            s.status === 'settled' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                          }`}
-                        >
-                          {s.status === 'settled' ? 'Settled' : 'Open'}
-                        </button>
-                      </td>
-                      <td className="px-3 py-2 text-slate-500 text-xs max-w-[140px] truncate">{s.remarks || '—'}</td>
-                      <td className="px-3 py-2 text-center">
-                        <div className="inline-flex items-center gap-1">
-                          <button onClick={() => openEdit(s)} className="p-1.5 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => setDeleteTarget(s)} className="p-1.5 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {paginatedSettlements.map((s) => {
+                    const absVariance = Math.abs(Number(s.variance || 0));
+                    const absExemptions = Math.abs(Number(s.exemptions || 0));
+                    const totalDeductible = Math.max(0, absVariance - absExemptions);
+                    return (
+                      <tr key={s.id} className={`hover:bg-slate-50 ${selectedIds.has(s.id) ? 'bg-indigo-50/50' : ''}`}>
+                        <td className="px-3 py-2 text-center">
+                          <button onClick={() => toggleSelect(s.id)} className="p-0.5 rounded hover:bg-slate-200">
+                            {selectedIds.has(s.id) ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : <Square className="w-4 h-4 text-slate-400" />}
+                          </button>
+                        </td>
+                        <td className="px-3 py-2 font-medium text-slate-700 whitespace-nowrap">{fmtDate(s.sale_date)}</td>
+                        <td className="px-3 py-2 text-slate-600">{s.shift_name}</td>
+                        <td className="px-3 py-2 text-slate-700 font-medium">{s.operator_name}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{fmtMoney(s.total_sales_amount)}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{fmtMoney(s.submitted_amount)}</td>
+                        <td className={`px-3 py-2 text-right font-medium ${Number(s.variance || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {Number(s.variance || 0) >= 0 ? '+' : ''}{fmtMoney(s.variance)}
+                        </td>
+                        <td className="px-3 py-2 text-right text-amber-600">{fmtMoney(s.exemptions || 0)}</td>
+                        <td className="px-3 py-2 text-right font-semibold text-rose-700">{fmtMoney(totalDeductible)}</td>
+                        <td className="px-3 py-2 text-center">
+                          <button
+                            onClick={() => toggleStatus(s)}
+                            className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                              s.status === 'settled' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                            }`}
+                          >
+                            {s.status === 'settled' ? 'Settled' : 'Open'}
+                          </button>
+                        </td>
+                        <td className="px-3 py-2 text-slate-500 text-xs max-w-[140px] truncate">{s.remarks || '—'}</td>
+                        <td className="px-3 py-2 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <button onClick={() => openEdit(s)} className="p-1.5 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setDeleteTarget(s)} className="p-1.5 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -427,20 +495,21 @@ export default function OperatorSalesManagement() {
 
             <div className="grid grid-cols-3 gap-3">
               <Field label="Meter Sales">
-                <Input type="number" step="0.01" value={formData.total_sales_amount} onChange={(e) => updateFormField('total_sales_amount', e.target.value)} disabled={formMode === 'edit'} />
+                <Input type="number" step="0.01" value={formData.total_sales_amount} onChange={(e) => setFormData({ ...formData, total_sales_amount: e.target.value })} disabled={formMode === 'edit'} />
               </Field>
-              <Field label="Submitted Amount" required>
-                <Input type="number" step="0.01" value={formData.submitted_amount} onChange={(e) => updateFormField('submitted_amount', e.target.value)} />
+              <Field label="Amount Submitted" required>
+                <Input type="number" step="0.01" value={formData.submitted_amount} onChange={(e) => setFormData({ ...formData, submitted_amount: e.target.value })} />
               </Field>
-              <Field label="Deduction">
-                <Input type="number" step="0.01" value={formData.deduction_amount} onChange={(e) => updateFormField('deduction_amount', e.target.value)} />
+              <Field label="Exemptions">
+                <Input type="number" step="0.01" value={formData.exemptions} onChange={(e) => setFormData({ ...formData, exemptions: e.target.value })} />
               </Field>
             </div>
 
-            <div className="flex items-center justify-between bg-slate-50 rounded-lg px-4 py-2">
-              <span className="text-sm font-semibold text-slate-700">Net Payable:</span>
-              <span className="text-lg font-bold text-indigo-700">{fmtMoney(Number(formData.net_payable) || 0)}</span>
+            <div className="flex items-center justify-between bg-rose-50 rounded-lg px-4 py-2">
+              <span className="text-sm font-semibold text-slate-700">Total Deductible:</span>
+              <span className="text-lg font-bold text-rose-700">{fmtMoney(formTotalDeductible)}</span>
             </div>
+            <p className="text-[10px] text-slate-400">Total Deductible = |Variance| − |Exemptions|</p>
 
             <Field label="Remarks">
               <Input value={formData.remarks} onChange={(e) => setFormData({ ...formData, remarks: e.target.value })} placeholder="Optional remarks" />

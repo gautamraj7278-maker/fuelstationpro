@@ -382,6 +382,9 @@ export default async function handler(req, res) {
     if (parts[0] === 'finance' && parts[1] === 'bulk' && req.method === 'POST') {
       return await handleFinanceBulk(req, res);
     }
+    if (parts[0] === 'operator-sales' && parts[1] === 'bulk-settle' && req.method === 'POST') {
+      return await handleOperatorSalesBulkSettle(req, res);
+    }
     if (parts[0] === 'operator-sales' && req.method === 'GET') {
       return await handleOperatorSalesList(req, res);
     }
@@ -1530,11 +1533,12 @@ async function syncOperatorSalesSettlementFromEntry(entryId) {
   const submittedAmount = Math.round((Number(entry.cash_amount || 0) + Number(entry.online_amount || 0)) * 100) / 100;
   const totalSales = Number(entry.total_sales_amount || 0);
   const variance = Math.round((submittedAmount - totalSales) * 100) / 100;
+  const absVariance = Math.abs(variance);
 
   // Check if a settlement record already exists
   const { data: existing } = await supabase
     .from('operator_sales_settlements')
-    .select('id, deduction_amount, net_payable, status')
+    .select('id, exemptions, status')
     .eq('sale_date', entry.sale_date)
     .eq('shift_name', entry.shift_name)
     .eq('operator_name', entry.operator_name)
@@ -1542,9 +1546,9 @@ async function syncOperatorSalesSettlementFromEntry(entryId) {
     .maybeSingle();
 
   if (existing) {
-    // Update only the sales-derived fields, preserve deduction/status
-    const deduction = Number(existing.deduction_amount || 0);
-    const netPayable = Math.round((submittedAmount - deduction) * 100) / 100;
+    // Update sales-derived fields, preserve exemptions & status
+    const exemptions = Number(existing.exemptions || 0);
+    const totalDeductible = Math.round((absVariance - Math.abs(exemptions)) * 100) / 100;
     await supabase
       .from('operator_sales_settlements')
       .update({
@@ -1552,7 +1556,7 @@ async function syncOperatorSalesSettlementFromEntry(entryId) {
         total_sales_amount: totalSales,
         submitted_amount: submittedAmount,
         variance,
-        net_payable,
+        total_deductible: Math.max(0, totalDeductible),
         updated_at: new Date().toISOString(),
       })
       .eq('id', existing.id);
@@ -1569,8 +1573,8 @@ async function syncOperatorSalesSettlementFromEntry(entryId) {
         total_sales_amount: totalSales,
         submitted_amount: submittedAmount,
         variance,
-        deduction_amount: 0,
-        net_payable: submittedAmount,
+        exemptions: 0,
+        total_deductible: absVariance,
         status: 'open',
       }]);
   }
@@ -3858,8 +3862,10 @@ async function handleOperatorSalesCreate(req, res) {
     const totalSales = requireNonNegativeNumber(row.total_sales_amount, 'Total sales amount');
     const submitted = requireNonNegativeNumber(row.submitted_amount, 'Submitted amount');
     const variance = Math.round((submitted - totalSales) * 100) / 100;
-    const deduction = requireNonNegativeNumber(row.deduction_amount ?? 0, 'Deduction amount');
-    const netPayable = Math.round((submitted - deduction) * 100) / 100;
+    const exemptions = requireNonNegativeNumber(row.exemptions ?? 0, 'Exemptions');
+    const absVariance = Math.abs(variance);
+    const absExemptions = Math.abs(exemptions);
+    const totalDeductible = Math.round((absVariance - absExemptions) * 100) / 100;
 
     // Check for duplicate
     const { data: existing, error: existErr } = await supabase
@@ -3884,8 +3890,8 @@ async function handleOperatorSalesCreate(req, res) {
         total_sales_amount: totalSales,
         submitted_amount: submitted,
         variance,
-        deduction_amount: deduction,
-        net_payable: netPayable,
+        exemptions,
+        total_deductible: Math.max(0, totalDeductible),
         status: row.status || 'open',
         remarks: row.remarks || null,
       }])
@@ -3914,9 +3920,7 @@ async function handleOperatorSalesUpdate(req, res) {
   if (fetchErr) throw fetchErr;
 
   const updates = {};
-  if (body.total_sales_amount != null) updates.total_sales_amount = Number(body.total_sales_amount);
-  if (body.submitted_amount != null) updates.submitted_amount = Number(body.submitted_amount);
-  if (body.deduction_amount != null) updates.deduction_amount = Number(body.deduction_amount);
+  if (body.exemptions != null) updates.exemptions = Number(body.exemptions);
   if (body.remarks !== undefined) updates.remarks = String(body.remarks).trim() || null;
   if (body.status) {
     if (!['open', 'settled'].includes(body.status)) throw new Error('Status must be open or settled');
@@ -3924,12 +3928,11 @@ async function handleOperatorSalesUpdate(req, res) {
     if (body.status === 'settled') updates.settled_at = new Date().toISOString();
   }
 
-  // Recompute derived fields
-  const totalSales = updates.total_sales_amount ?? Number(existing.total_sales_amount || 0);
-  const submitted = updates.submitted_amount ?? Number(existing.submitted_amount || 0);
-  const deduction = updates.deduction_amount ?? Number(existing.deduction_amount || 0);
-  updates.variance = Math.round((submitted - totalSales) * 100) / 100;
-  updates.net_payable = Math.round((submitted - deduction) * 100) / 100;
+  // Recompute total_deductible: ABS(variance) - ABS(exemptions)
+  const variance = Number(existing.variance || 0);
+  const exemptions = updates.exemptions ?? Number(existing.exemptions || 0);
+  updates.total_deductible = Math.round((Math.abs(variance) - Math.abs(exemptions)) * 100) / 100;
+  updates.total_deductible = Math.max(0, updates.total_deductible);
 
   const { data, error } = await supabase
     .from('operator_sales_settlements')
@@ -3951,4 +3954,22 @@ async function handleOperatorSalesDelete(req, res) {
   const { error } = await supabase.from('operator_sales_settlements').delete().eq('id', id);
   if (error) throw error;
   return res.status(200).json({ ok: true });
+}
+
+/**
+ * POST /api/operator-sales/bulk-settle
+ * Body: { ids: number[] }
+ * Marks multiple settlements as settled in one operation.
+ */
+async function handleOperatorSalesBulkSettle(req, res) {
+  const { ids } = req.body || {};
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids array is required' });
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('operator_sales_settlements')
+    .update({ status: 'settled', settled_at: now, updated_at: now })
+    .in('id', ids)
+    .select();
+  if (error) throw error;
+  return res.status(200).json({ ok: true, count: data?.length || 0 });
 }
